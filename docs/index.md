@@ -5,98 +5,12 @@ title: Overview
 description: Apache Spark SPARK_VERSION_SHORT documentation homepage
 ---
 
-Apache Spark is a fast and general-purpose cluster computing system.
-It provides high-level APIs in Java, Scala, Python and R,
-and an optimized engine that supports general execution graphs.
-It also supports a rich set of higher-level tools including [Spark SQL](sql-programming-guide.html) for SQL and structured data processing, [MLlib](ml-guide.html) for machine learning, [GraphX](graphx-programming-guide.html) for graph processing, and [Spark Streaming](streaming-programming-guide.html).
-
-# Security
-
-Security in Spark is OFF by default. This could mean you are vulnerable to attack by default.
-Please see [Spark Security](security.html) before downloading and running Spark.
-
-# Downloading
-
-Get Spark from the [downloads page](https://spark.apache.org/downloads.html) of the project website. This documentation is for Spark version {{site.SPARK_VERSION}}. Spark uses Hadoop's client libraries for HDFS and YARN. Downloads are pre-packaged for a handful of popular Hadoop versions.
-Users can also download a "Hadoop free" binary and run Spark with any Hadoop version
-[by augmenting Spark's classpath](hadoop-provided.html).
-Scala and Java users can include Spark in their projects using its Maven coordinates and in the future Python users can also install Spark from PyPI.
-
-
-If you'd like to build Spark from 
-source, visit [Building Spark](building-spark.html).
-
-
-Spark runs on both Windows and UNIX-like systems (e.g. Linux, Mac OS). It's easy to run
-locally on one machine --- all you need is to have `java` installed on your system `PATH`,
-or the `JAVA_HOME` environment variable pointing to a Java installation.
-
-Spark runs on Java 8+, Python 2.7+/3.4+ and R 3.1+. For the Scala API, Spark {{site.SPARK_VERSION}}
-uses Scala {{site.SCALA_BINARY_VERSION}}. You will need to use a compatible Scala version
-({{site.SCALA_BINARY_VERSION}}.x).
-
-Note that support for Java 7, Python 2.6 and old Hadoop versions before 2.6.5 were removed as of Spark 2.2.0.
-Support for Scala 2.10 was removed as of 2.3.0. Support for Scala 2.11 is deprecated as of Spark 2.4.1
-and will be removed in Spark 3.0.
-
-# Running the Examples and Shell
-
-Spark comes with several sample programs.  Scala, Java, Python and R examples are in the
-`examples/src/main` directory. To run one of the Java or Scala sample programs, use
-`bin/run-example <class> [params]` in the top-level Spark directory. (Behind the scenes, this
-invokes the more general
-[`spark-submit` script](submitting-applications.html) for
-launching applications). For example,
-
-    ./bin/run-example SparkPi 10
-
-You can also run Spark interactively through a modified version of the Scala shell. This is a
-great way to learn the framework.
-
-    ./bin/spark-shell --master local[2]
-
-The `--master` option specifies the
-[master URL for a distributed cluster](submitting-applications.html#master-urls), or `local` to run
-locally with one thread, or `local[N]` to run locally with N threads. You should start by using
-`local` for testing. For a full list of options, run Spark shell with the `--help` option.
-
-Spark also provides a Python API. To run Spark interactively in a Python interpreter, use
-`bin/pyspark`:
-
-    ./bin/pyspark --master local[2]
-
-Example applications are also provided in Python. For example,
-
-    ./bin/spark-submit examples/src/main/python/pi.py 10
-
-Spark also provides an experimental [R API](sparkr.html) since 1.4 (only DataFrames APIs included).
-To run Spark interactively in a R interpreter, use `bin/sparkR`:
-
-    ./bin/sparkR --master local[2]
-
-Example applications are also provided in R. For example,
-
-    ./bin/spark-submit examples/src/main/r/dataframe.R
-
-# Launching on a Cluster
-
-The Spark [cluster mode overview](cluster-overview.html) explains the key concepts in running on a cluster.
-Spark can run both by itself, or over several existing cluster managers. It currently provides several
-options for deployment:
-
-* [Standalone Deploy Mode](spark-standalone.html): simplest way to deploy Spark on a private cluster
-* [Apache Mesos](running-on-mesos.html)
-* [Hadoop YARN](running-on-yarn.html)
-* [Kubernetes](running-on-kubernetes.html)
-
-# Where to Go from Here
-
 **Programming Guides:**
 
-* [Quick Start](quick-start.html): a quick introduction to the Spark API; start here!
-* [RDD Programming Guide](rdd-programming-guide.html): overview of Spark basics - RDDs (core but old API), accumulators, and broadcast variables  
-* [Spark SQL, Datasets, and DataFrames](sql-programming-guide.html): processing structured data with relational queries (newer API than RDDs)
-* [Structured Streaming](structured-streaming-programming-guide.html): processing structured data streams with relation queries (using Datasets and DataFrames, newer API than DStreams)
+* [빠른 시작](quick-start.html): a quick introduction to the Spark API; start here!
+* [RDD Programming Guide](rdd-programming-guide.html): overview of Spark basics - RDDs (core but old API), accumulators, and broadcast variables
+* [스파크 SQL, DataFrame, Dataset 가이드](sql-programming-guide.html): processing structured data with relational queries (newer API than RDDs)
+* [구조화된 스트리밍](structured-streaming-programming-guide.html): processing structured data streams with relation queries (using Datasets and DataFrames, newer API than DStreams)
 * [Spark Streaming](streaming-programming-guide.html): processing data streams using DStreams (old API)
 * [MLlib](ml-guide.html): applying machine learning algorithms
 * [GraphX](graphx-programming-guide.html): processing graphs 
