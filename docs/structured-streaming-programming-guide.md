@@ -4,25 +4,24 @@ displayTitle: Structured Streaming Programming Guide
 title: Structured Streaming Programming Guide
 ---
 
-* This will become a table of contents (this text will be scraped).
-{:toc}
+# **개요**
 
-# Overview
-Structured Streaming is a scalable and fault-tolerant stream processing engine built on the Spark SQL engine. You can express your streaming computation the same way you would express a batch computation on static data. The Spark SQL engine will take care of running it incrementally and continuously and updating the final result as streaming data continues to arrive. You can use the [Dataset/DataFrame API](sql-programming-guide.html) in Scala, Java, Python or R to express streaming aggregations, event-time windows, stream-to-batch joins, etc. The computation is executed on the same optimized Spark SQL engine. Finally, the system ensures end-to-end exactly-once fault-tolerance guarantees through checkpointing and Write-Ahead Logs. In short, *Structured Streaming provides fast, scalable, fault-tolerant, end-to-end exactly-once stream processing without the user having to reason about streaming.*
+구조적 스트리밍은 스파크 SQL 엔진을 기반으로 개발된 확장성 있고 장애를 허용(fault-tolerant)하는 스트림 처리 엔진입니다. 정적 데이터에 대한 배치(batch) 연산을 정의하는 것과 같은 방법으로 스트리밍 연산을 정의할 수 있습니다. 스파크 SQL 엔진은 스트리밍 데이터가 계속 도달하는 동안 구조적 스트리밍의 실행 상태를 지속적으로 체크하여 점진적으로 최종 결과를 업데이트합니다. Scala, Java, Python이나 R에서 [Dataset/DataFrame API](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 사용하여 스트리밍 집계, 이벤트-시간 윈도우, 스트림-배치 조인 등을 표현 할 수 있으며, 이렇게 주어진 연산은 배치 방식 연산과 마찬가지로 최적화된 스파크 SQL 엔진에서 실행됩니다. 마지막으로, 시스템은 체크포인트와 로그 선행 기입(Wrtie-Ahead Log)을 통해 장애 발생시에도 종단간 정확히 한 번(exactly-once) 데이터 처리를 보장합니다. 요약하자면,_ 구조적 스트리밍은 빠르고, 확장 가능하고, 장애를 허용하며, 유저가 스트리밍에 대해 신경쓰지 않더라도 종단 간에 정확히 한 번만 데이터를 처리하는 스트림 프로세싱입니다. _
 
-Internally, by default, Structured Streaming queries are processed using a *micro-batch processing* engine, which processes data streams as a series of small batch jobs thereby achieving end-to-end latencies as low as 100 milliseconds and exactly-once fault-tolerance guarantees. However, since Spark 2.3, we have introduced a new low-latency processing mode called **Continuous Processing**, which can achieve end-to-end latencies as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset/DataFrame operations in your queries, you will be able to choose the mode based on your application requirements. 
+내부적으로, 구조적 스트리밍 쿼리는 마이크로 배치(batch) 프로세싱 엔진을 이용해 처리되는 것이 기본 설정입니다. 이 엔진은 주어지는 입력 스트림을 작은 배치 작업의 연속으로 처리함으로써 100밀리초 가량의 종단간 지연 속도와 함께 장애 발생시에도 정확히 한 번(exactly once) 데이터 처리를 보장합니다. 그러나 스파크 2.3 버전부터, 장애 발생시 데이터 처리 보장 수준을 최소 한 번(at-least-once)으로 낮춘 대신 1밀리초 수준의 지연 속도를 가지는 모드인 **연속 처리 (Continuous Processing) 모드**가 추가되었습니다. 쿼리의 Dataset/DataFrame 연산을 바꾸지 않고도 애플리케이션 요구 사항에 맞게 모드를 선택할 수 있습니다. 
 
-In this guide, we are going to walk you through the programming model and the APIs. We are going to explain the concepts mostly using the default micro-batch processing model, and then [later](#continuous-processing-experimental) discuss Continuous Processing model. First, let's start with a simple example of a Structured Streaming query - a streaming word count.
+이 가이드에서는 여러분에게 구조적 스트리밍의 프로그래밍 모델과 API를 소개할 것입니다. 기본적으로 사용되는 마이크로 배치 처리 모델을 이용하여 대부분의 개념을 설명할 것이며, 그 다음에 (실험적인 기능인) 연속 처리 모델을 설명할 것입니다. 먼저 구조적 스트리밍 쿼리의 간단한 예제인 스트리밍 단어 개수 세기로 시작해봅시다. 
 
-# Quick Example
-Let’s say you want to maintain a running word count of text data received from a data server listening on a TCP socket. Let’s see how you can express this using Structured Streaming. You can see the full code in
-[Scala]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredNetworkWordCount.scala)/[Java]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredNetworkWordCount.java)/[Python]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/python/sql/streaming/structured_network_wordcount.py)/[R]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/r/streaming/structured_network_wordcount.R).
-And if you [download Spark](https://spark.apache.org/downloads.html), you can directly [run the example](index.html#running-the-examples-and-shell). In any case, let’s walk through the example step-by-step and understand how it works. First, we have to import the necessary classes and create a local SparkSession, the starting point of all functionalities related to Spark.
+# **빠른 예제**
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+TCP 소켓을 통해 데이터 서버로부터 받은 텍스트 데이터에 포함된 단어의 수를 세는 연산을 계속해서 실행하고 싶다고 해보겠습니다. 구조적 스트리밍을 이용하여 이를 표현하는 방법을 살펴보겠습니다.  [Scala](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredNetworkWordCount.scala)/[Java](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredNetworkWordCount.java)/[Python](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/python/sql/streaming/structured_network_wordcount.py)/[R](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/r/streaming/structured_network_wordcount.R)에서 전체 코드를 볼 수 있습니다. [스파크를 다운로드](https://spark.apache.org/downloads.html)하면 직접 [예제를 실행](https://spark.apache.org/docs/latest/index.html#running-the-examples-and-shell)해볼 수 있습니다. 어떤 경우에서든, 예제를 한 단계씩 잘 살펴보고 어떻게 동작하는지를 이해해봅시다. 먼저 필수 클래스를 임포트해서 모든 스파크 관련 기능의 시작점인 로컬 SparkSession을 만들어야 합니다.
 
-{% highlight scala %}
+
+
+*   **Scala**
+
+
+```
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.SparkSession
 
@@ -32,29 +31,17 @@ val spark = SparkSession
   .getOrCreate()
   
 import spark.implicits._
-{% endhighlight %}
+```
 
-</div>
-<div data-lang="java"  markdown="1">
 
-{% highlight java %}
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.streaming.StreamingQuery;
+다음으로, localhost:9999 서버에서 받은 텍스트 데이터를 표현하는 스트리밍 DataFrame을 만들고 DataFrame을 변환하여 단어 수를 계산합니다.
 
-import java.util.Arrays;
-import java.util.Iterator;
 
-SparkSession spark = SparkSession
-  .builder()
-  .appName("JavaStructuredNetworkWordCount")
-  .getOrCreate();
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
+*   **Python**
 
-{% highlight python %}
+
+```
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import explode
 from pyspark.sql.functions import split
@@ -63,68 +50,43 @@ spark = SparkSession \
     .builder \
     .appName("StructuredNetworkWordCount") \
     .getOrCreate()
-{% endhighlight %}
+```
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-sparkR.session(appName = "StructuredNetworkWordCount")
-{% endhighlight %}
+다음으로, localhost:9999 서버에서 받은 텍스트 데이터를 나타내는 스트리밍 DataFrame을 만들고 DataFrame을 변환하여 단어 수를 계산합니다.
 
-</div>
-</div>
 
-Next, let’s create a streaming DataFrame that represents text data received from a server listening on localhost:9999, and transform the DataFrame to calculate word counts.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+*   **Scala**
 
-{% highlight scala %}
-// Create DataFrame representing the stream of input lines from connection to localhost:9999
+
+```
+// localhost:9999 연결에서 주어지는 입력 라인의 스트림을 나타내는 DataFrame을 생성
 val lines = spark.readStream
   .format("socket")
   .option("host", "localhost")
   .option("port", 9999)
   .load()
 
-// Split the lines into words
+// 라인을 단어로 분할
 val words = lines.as[String].flatMap(_.split(" "))
 
-// Generate running word count
+// 단어별 개수
 val wordCounts = words.groupBy("value").count()
-{% endhighlight %}
+```
 
-This `lines` DataFrame represents an unbounded table containing the streaming text data. This table contains one column of strings named "value", and each line in the streaming text data becomes a row in the table. Note, that this is not currently receiving any data as we are just setting up the transformation, and have not yet started it. Next, we have converted the DataFrame to a  Dataset of String using `.as[String]`, so that we can apply the `flatMap` operation to split each line into multiple words. The resultant `words` Dataset contains all the words. Finally, we have defined the `wordCounts` DataFrame by grouping by the unique values in the Dataset and counting them. Note that this is a streaming DataFrame which represents the running word counts of the stream.
 
-</div>
-<div data-lang="java"  markdown="1">
+이 `lines` DataFrame은 스트리밍 텍스트 데이터를 포함하는 무한한 테이블(unbounded table)을 나타냅니다. 이 테이블은 "value"라는 문자열 컬럼 하나를 포함하고 있으며, 스트리밍 텍스트 데이터의 각 라인은 테이블의 로우가 됩니다. 아직 변환 연산을 정의했을 뿐, 시작하지는 않았으므로 어떠한 데이터도 실제로는 수신하지 않습니다. 다음으로 `.as[String]`을 사용하여 DataFrame을 문자열 Dataset으로 변환해서 각 라인을 여러 단어로 분할하는 `flatMap` 연산을 적용할 수 있습니다. 결과 `words` Dataset에는 모든 단어가 포함됩니다. 마지막으로 Dataset의 고유한 값을 기준으로 그룹화하고 그 개수를 셈으로써 `wordCounts` DataFrame을 정의합니다. 이 DataFrame은 실시간으로 업데이트되는 스트림에 포함된 단어의 수를 나타냅니다.
 
-{% highlight java %}
-// Create DataFrame representing the stream of input lines from connection to localhost:9999
-Dataset<Row> lines = spark
-  .readStream()
-  .format("socket")
-  .option("host", "localhost")
-  .option("port", 9999)
-  .load();
+지금까지 스트리밍 데이터에 대한 쿼리를 설정했습니다. 남은 것은 실제로 데이터를 받고 단어 수 계산을 시작하는 것입니다. 이를 위해, 업데이트될 때마다 ( `outputMode("complete")로 명시된`) 전체 단어 수를 콘솔에 출력하도록 설정합니다. 그리고 난 후 `start()`를 사용하여 스트리밍 연산을 시작합니다.
 
-// Split the lines into words
-Dataset<String> words = lines
-  .as(Encoders.STRING())
-  .flatMap((FlatMapFunction<String, String>) x -> Arrays.asList(x.split(" ")).iterator(), Encoders.STRING());
 
-// Generate running word count
-Dataset<Row> wordCounts = words.groupBy("value").count();
-{% endhighlight %}
 
-This `lines` DataFrame represents an unbounded table containing the streaming text data. This table contains one column of strings named "value", and each line in the streaming text data becomes a row in the table. Note, that this is not currently receiving any data as we are just setting up the transformation, and have not yet started it. Next, we have converted the DataFrame to a  Dataset of String using `.as(Encoders.STRING())`, so that we can apply the `flatMap` operation to split each line into multiple words. The resultant `words` Dataset contains all the words. Finally, we have defined the `wordCounts` DataFrame by grouping by the unique values in the Dataset and counting them. Note that this is a streaming DataFrame which represents the running word counts of the stream.
+*   **Python**
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
-# Create DataFrame representing the stream of input lines from connection to localhost:9999
+```
+# localhost:9999 연결에서 주어지는 입력 라인의 스트림을 나타내는 DataFrame을 생성
 lines = spark \
     .readStream \
     .format("socket") \
@@ -132,71 +94,57 @@ lines = spark \
     .option("port", 9999) \
     .load()
 
-# Split the lines into words
+# 라인을 단어로 나누기
 words = lines.select(
    explode(
        split(lines.value, " ")
    ).alias("word")
 )
 
-# Generate running word count
+# 단어별 개수
 wordCounts = words.groupBy("word").count()
-{% endhighlight %}
+```
 
-This `lines` DataFrame represents an unbounded table containing the streaming text data. This table contains one column of strings named "value", and each line in the streaming text data becomes a row in the table. Note, that this is not currently receiving any data as we are just setting up the transformation, and have not yet started it. Next, we have used two built-in SQL functions - split and explode, to split each line into multiple rows with a word each. In addition, we use the function `alias` to name the new column as "word". Finally, we have defined the `wordCounts` DataFrame by grouping by the unique values in the Dataset and counting them. Note that this is a streaming DataFrame which represents the running word counts of the stream.
 
-</div>
-<div data-lang="r"  markdown="1">
+이 `lines` DataFrame은 스트리밍 텍스트 데이터를 포함하는 무한한 테이블(unbounded table)을 나타냅니다. 이 테이블은 "value"라는 문자열 컬럼 하나를 포함하고 있으며, 스트리밍 텍스트 데이터의 각 라인은 테이블의 로우가 됩니다. 현재 변환을 설정하는 것뿐이고 아직 시작하지 않았으므로 어떠한 데이터도 수신하지 않습니다. 다음으로, 내장 SQL 함수 두 개(split과 explode)를 사용하여 각 라인을 단어를 하나씩 포함하는 로우 여러 개로 분할합니다. 또한 새로운 컬럼을 “word”로 이름 붙이기 위해 `alias`함수를 사용합니다. 마지막으로 Dataset의 고유한 값을 기준으로 그룹화하고 이를 계산하여 `wordCounts` DataFrame을 정의합니다. 이는 스트림의 실행 단어 수를 나타내는 스트리밍 DataFrame입니다.
 
-{% highlight r %}
-# Create DataFrame representing the stream of input lines from connection to localhost:9999
-lines <- read.stream("socket", host = "localhost", port = 9999)
+지금까지 스트리밍 데이터에 대한 쿼리를 설정했습니다. 남은 것은 실제로 데이터를 받고 단어 수 계산을 시작하는 것입니다. 이를 위해, 업데이트될 때마다 ( `outputMode("complete")로 명시된`) 전체 단어 수를 콘솔에 출력하도록 설정합니다. 그리고 난 후 `start()`를 사용하여 스트리밍 계산을 시작합니다.
 
-# Split the lines into words
-words <- selectExpr(lines, "explode(split(value, ' ')) as word")
 
-# Generate running word count
-wordCounts <- count(group_by(words, "word"))
-{% endhighlight %}
 
-This `lines` SparkDataFrame represents an unbounded table containing the streaming text data. This table contains one column of strings named "value", and each line in the streaming text data becomes a row in the table. Note, that this is not currently receiving any data as we are just setting up the transformation, and have not yet started it. Next, we have a SQL expression with two SQL functions - split and explode, to split each line into multiple rows with a word each. In addition, we name the new column as "word". Finally, we have defined the `wordCounts` SparkDataFrame by grouping by the unique values in the SparkDataFrame and counting them. Note that this is a streaming SparkDataFrame which represents the running word counts of the stream.
+*   **Scala**
 
-</div>
-</div>
 
-We have now set up the query on the streaming data. All that is left is to actually start receiving data and computing the counts. To do this, we set it up to print the complete set of counts (specified by `outputMode("complete")`) to the console every time they are updated. And then start the streaming computation using `start()`.
-
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-
-{% highlight scala %}
-// Start running the query that prints the running counts to the console
+```
+// 실행 단어 수를 콘솔에 출력하는 쿼리를 시작
 val query = wordCounts.writeStream
   .outputMode("complete")
   .format("console")
   .start()
 
 query.awaitTermination()
-{% endhighlight %}
+```
 
-</div>
-<div data-lang="java"  markdown="1">
 
-{% highlight java %}
-// Start running the query that prints the running counts to the console
-StreamingQuery query = wordCounts.writeStream()
-  .outputMode("complete")
-  .format("console")
-  .start();
+이 코드가 실행되고 나면, 백그라운드에서 스트리밍 계산이 시작될 것입니다. `query` 객체를 이용하여 해당 활성 스트리밍 쿼리를 제어할 수 있으며, 쿼리가 활성화되어있는 동안 프로세스가 종료되지 않도록 `awaitTermination()`을 사용하여 쿼리가 종료될 때까지 기다립니다.
 
-query.awaitTermination();
-{% endhighlight %}
+이 예제 코드를 실제로 실행하려면, 여러분의 [스파크 애플리케이션](https://spark.apache.org/docs/latest/quick-start.html#self-contained-applications)에서 코드를 컴파일하거나, 스파크를 다운로드 한 후에 [예제를 실행](https://spark.apache.org/docs/latest/index.html#running-the-examples-and-shell)하면 됩니다. 지금은 후자를 보여주고 있습니다. 먼저 다음을 이용하여 Netcat(대부분의 Unix 계열 시스템에서 발견되는 작은 유틸리티)을 데이터 서버로 실행해야 합니다. 
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
- # Start running the query that prints the running counts to the console
+```
+$ nc -lk 9999
+```
+
+
+다음으로, 다른 터미널에서 다음 명령어를 이용하여 예제를 실행할 수 있습니다.
+
+
+
+*   **Python**
+
+
+```
+# 실행 단어 수를 콘솔에 출력하는 쿼리를 시작
 query = wordCounts \
     .writeStream \
     .outputMode("complete") \
@@ -204,95 +152,44 @@ query = wordCounts \
     .start()
 
 query.awaitTermination()
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-
-{% highlight r %}
-# Start running the query that prints the running counts to the console
-query <- write.stream(wordCounts, "console", outputMode = "complete")
-
-awaitTermination(query)
-{% endhighlight %}
-
-</div>
-</div>
-
-After this code is executed, the streaming computation will have started in the background. The `query` object is a handle to that active streaming query, and we have decided to wait for the termination of the query using `awaitTermination()` to prevent the process from exiting while the query is active.
-
-To actually execute this example code, you can either compile the code in your own 
-[Spark application](quick-start.html#self-contained-applications), or simply 
-[run the example](index.html#running-the-examples-and-shell) once you have downloaded Spark. We are showing the latter. You will first need to run Netcat (a small utility found in most Unix-like systems) as a data server by using
+```
 
 
-    $ nc -lk 9999
+이 코드가 실행되고 나면, 백그라운드에서 스트리밍 계산이 시작될 것입니다. `query` 객체를 이용하여 해당 활성 스트리밍 쿼리를 제어할 수 있으며, 쿼리가 활성화되어있는 동안 프로세스가 종료되지 않도록 `awaitTermination()`을 사용하여 쿼리가 종료될 때까지 기다립니다.
 
-Then, in a different terminal, you can start the example by using
+이 예제 코드를 실제로 실행하려면, 여러분의 [스파크 애플리케이션](https://spark.apache.org/docs/latest/quick-start.html#self-contained-applications)에서 코드를 컴파일하거나, 스파크를 다운로드 한 후에 [예제를 실행](https://spark.apache.org/docs/latest/index.html#running-the-examples-and-shell)하면 됩니다. 지금은 후자를 보여주고 있습니다. 먼저 다음을 이용하여 Netcat(대부분의 Unix 계열 시스템에서 발견되는 작은 유틸리티)을 데이터 서버로 실행해야 합니다. 
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-{% highlight bash %}
-$ ./bin/run-example org.apache.spark.examples.sql.streaming.StructuredNetworkWordCount localhost 9999
-{% endhighlight %}
-</div>
-<div data-lang="java"  markdown="1">
-{% highlight bash %}
-$ ./bin/run-example org.apache.spark.examples.sql.streaming.JavaStructuredNetworkWordCount localhost 9999
-{% endhighlight %}
-</div>
-<div data-lang="python"  markdown="1">
-{% highlight bash %}
-$ ./bin/spark-submit examples/src/main/python/sql/streaming/structured_network_wordcount.py localhost 9999
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight bash %}
-$ ./bin/spark-submit examples/src/main/r/streaming/structured_network_wordcount.R localhost 9999
-{% endhighlight %}
-</div>
-</div>
 
-Then, any lines typed in the terminal running the netcat server will be counted and printed on screen every second. It will look something like the following.
-
-<table width="100%">
-    <td>
-{% highlight bash %}
-# TERMINAL 1:
-# Running Netcat
-
+```
 $ nc -lk 9999
-apache spark
-apache hadoop
+```
+
+
+다음으로, 다른 터미널에서 다음 명령어를 이용하여 예제를 실행할 수 있습니다.
 
 
 
+*   **Scala**
 
 
+```
+$ ./bin/run-example org.apache.spark.examples.sql.streaming.StructuredNetworkWordCount localhost 9999
+```
 
 
+이제, netcat 서버를 실행하는 터미널에 입력되는 모든 라인 수가 계산되어 매초 화면에 출력될 것입니다. 이는 다음과 같이 보일 것입니다.
 
+```
+# TERMINAL 1:
+# Netcat실행
 
+$ nc -lk 9999 apache spark apache hadoop
+```
 
+- Scala
 
-
-
-
-
-
-
-
-
-...
-{% endhighlight %}
-    </td>
-    <td width="2%"></td>
-    <td>
-<div class="codetabs">
-
-<div data-lang="scala" markdown="1">
-{% highlight bash %}
-# TERMINAL 2: RUNNING StructuredNetworkWordCount
+```
+# TERMINAL 2: StructuredNetworkWordCount 실행
 
 $ ./bin/run-example org.apache.spark.examples.sql.streaming.StructuredNetworkWordCount localhost 9999
 
@@ -316,42 +213,36 @@ Batch: 1
 | spark|    1|
 |hadoop|    1|
 +------+-----+
-...
-{% endhighlight %}
-</div>
+…
 
-<div data-lang="java" markdown="1">
-{% highlight bash %}
-# TERMINAL 2: RUNNING JavaStructuredNetworkWordCount
 
-$ ./bin/run-example org.apache.spark.examples.sql.streaming.JavaStructuredNetworkWordCount localhost 9999
+```
 
--------------------------------------------
-Batch: 0
--------------------------------------------
-+------+-----+
-| value|count|
-+------+-----+
-|apache|    1|
-| spark|    1|
-+------+-----+
 
--------------------------------------------
-Batch: 1
--------------------------------------------
-+------+-----+
-| value|count|
-+------+-----+
-|apache|    2|
-| spark|    1|
-|hadoop|    1|
-+------+-----+
-...
-{% endhighlight %}
-</div>
-<div data-lang="python" markdown="1">
-{% highlight bash %}
-# TERMINAL 2: RUNNING structured_network_wordcount.py
+*   **Python**
+
+
+```
+
+
+# $ ./bin/spark-submit examples/src/main/python/sql/streaming/structured_network_wordcount.py localhost 9999
+```
+
+
+
+이제, netcat 서버를 실행하는 터미널에 입력되는 모든 라인 수가 계산되어 매초 화면에 출력될 것입니다. 이는 다음과 같이 보일 것입니다.
+
+```
+# TERMINAL 1:
+# Netcat 실행
+
+$ nc -lk 9999 apache spark apache hadoop
+```
+
+- Python
+
+```
+# TERMINAL 2: structured_network_wordcount.py 실행
 
 $ ./bin/spark-submit examples/src/main/python/sql/streaming/structured_network_wordcount.py localhost 9999
 
@@ -376,218 +267,182 @@ Batch: 1
 |hadoop|    1|
 +------+-----+
 ...
-{% endhighlight %}
-</div>
-<div data-lang="r" markdown="1">
-{% highlight bash %}
-# TERMINAL 2: RUNNING structured_network_wordcount.R
+```
 
-$ ./bin/spark-submit examples/src/main/r/streaming/structured_network_wordcount.R localhost 9999
+# **프로그래밍 모델**
 
--------------------------------------------
-Batch: 0
--------------------------------------------
-+------+-----+
-| value|count|
-+------+-----+
-|apache|    1|
-| spark|    1|
-+------+-----+
-
--------------------------------------------
-Batch: 1
--------------------------------------------
-+------+-----+
-| value|count|
-+------+-----+
-|apache|    2|
-| spark|    1|
-|hadoop|    1|
-+------+-----+
-...
-{% endhighlight %}
-</div>
-</div>
-    </td>
-</table>
+구조적 스트리밍의 핵심 아이디어는 실시간으로 주어지는 데이터 스트림을 무한히 데이터가 추가되는 테이블과 같이 취급하는 것입니다. 이 아이디어는 배치 프로세싱 모델과 매우 유사한 새로운 스트림 프로세싱 모델로 이어집니다. 스트리밍 계산을 정적 테이블에서의 표준 배치 쿼리(standard batch-like query)와 같이 다룰 것이며, 스파크는 이를 무한한 크기의 입력 테이블(unbounded input table)에 점진적으로 추가하는 증분(incremental) 쿼리를 실행합니다. 이 모델을 더 자세히 알아봅시다.
 
 
-# Programming Model
+## **기본 개념**
 
-The key idea in Structured Streaming is to treat a live data stream as a 
-table that is being continuously appended. This leads to a new stream 
-processing model that is very similar to a batch processing model. You will 
-express your streaming computation as standard batch-like query as on a static 
-table, and Spark runs it as an *incremental* query on the *unbounded* input 
-table. Let’s understand this model in more detail.
-
-## Basic Concepts
-Consider the input data stream as the "Input Table". Every data item that is 
-arriving on the stream is like a new row being appended to the Input Table.
+입력 데이터 스트림을 “입력 테이블”이라고 가정해봅시다. 스트림에 도달하는 모든 데이터 아이템은 입력 테이블에 추가되는 새로운 로우와 같습니다. 
 
 ![Stream as a Table](img/structured-streaming-stream-as-a-table.png "Stream as a Table")
 
-A query on the input will generate the "Result Table". Every trigger interval (say, every 1 second), new rows get appended to the Input Table, which eventually updates the Result Table. Whenever the result table gets updated, we would want to write the changed result rows to an external sink. 
+입력에 있는 쿼리는 “결과 테이블"을 만들어 낼 것입니다. 모든 트리거 간격 (예 : 1초마다) 마다 새로운 로우가 입력 테이블에 추가되고 결과적으로 테이블을 업데이트합니다. 결과 테이블이 업데이트될 때마다 변경된 결과 로우를 외부 싱크에 기록해야 합니다.
 
 ![Model](img/structured-streaming-model.png)
 
-The "Output" is defined as what gets written out to the external storage. The output can be defined in a different mode:
 
-  - *Complete Mode* - The entire updated Result Table will be written to the external storage. It is up to the storage connector to decide how to handle writing of the entire table. 
 
-  - *Append Mode* - Only the new rows appended in the Result Table since the last trigger will be written to the external storage. This is applicable only on the queries where existing rows in the Result Table are not expected to change.
-  
-  - *Update Mode* - Only the rows that were updated in the Result Table since the last trigger will be written to the external storage (available since Spark 2.1.1). Note that this is different from the Complete Mode in that this mode only outputs the rows that have changed since the last trigger. If the query doesn't contain aggregations, it will be equivalent to Append mode.
+“출력"은 외부 저장소에 쓰여지는 것이라고 정의할 수 있습니다. 구체적인 출력 방법은 출력 모드에 따라 달라집니다:
 
-Note that each mode is applicable on certain types of queries. This is discussed in detail [later](#output-modes).
 
-To illustrate the use of this model, let’s understand the model in context of 
-the [Quick Example](#quick-example) above. The first `lines` DataFrame is the input table, and 
-the final `wordCounts` DataFrame is the result table. Note that the query on 
-streaming `lines` DataFrame to generate `wordCounts` is *exactly the same* as 
-it would be a static DataFrame. However, when this query is started, Spark 
-will continuously check for new data from the socket connection. If there is 
-new data, Spark will run an "incremental" query that combines the previous 
-running counts with the new data to compute updated counts, as shown below.
+
+*   _완료 모드 (Complete Mode)_ - 업데이트된 결과 테이블 전체가 외부 저장소에 쓰여집니다. 저장소 커넥터에 따라 전체 테이블의 쓰기를 처리하는 방법이 결정됩니다.
+*   _추가 모드 (Append Mode)_ - 마지막 트리거가 외부 저장소에 기록된 이후에 추가된 새 로우만 결과 테이블에 추가됩니다. 이는 결과 테이블의 기존 로우를 변경하지 않는 쿼리에만 적용 가능합니다.
+*   _업데이트 모드 (Update Mode)_ - 마지막 트리거 이후, 결과 테이블에서 업데이트된 로우만이 외부 저장소에 기록됩니다 (Spark 2.1.1부터 사용 가능). 이 모드는 마지막 트리거 이후 변경된 로우만 출력한다는 점에서 완료 모드와 다릅니다. 쿼리에 집계가 포함되어 있지 않는 경우에는 추가 모드와 동일합니다.
+
+각 모드가 사용될 수 있는 쿼리 종류에는 제한이 있습니다. 이에 대해, [나중에](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#output-modes) 자세히 설명하겠습니다.
+
+이 모델의 사용법을 설명하기 위해, 위 [예제](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#quick-example)의 맥락에서 이 모델을 설명해 보겠습니다. 첫 번째 `lines `DataFrame은 (무한한 크기의) 입력 테이블에, 마지막 `wordCounts` DataFrame은 결과 테이블에 해당합니다. 여기서 눈여겨 보아야 할 부분은 스트리밍 DataFrame인 `lines `에서  `wordCounts`를 생성하기 위해 적용되는 쿼리가 같은 작업을 정적 DataFrame에 수행할 때와 완전히 동일하다는 점입니다. 다만 정적 Dataframe의 경우와는 달리, 이 쿼리가 시작되면 스파크는 소켓 연결로부터 새로운 데이터가 주어지는지 계속해서 확인합니다. 그리고 새로운 데이터가 주어지는 경우 스파크는 이전까지 계산된 단어별 개수와 새 데이터를 결합하여 업데이트된 개수를 계산하는 "증분(incremental)" 쿼리를 실행합니다. (아래 그림 참조).
+
 
 ![Model](img/structured-streaming-example-model.png)
 
-**Note that Structured Streaming does not materialize the entire table**. It reads the latest
-available data from the streaming data source, processes it incrementally to update the result,
-and then discards the source data. It only keeps around the minimal intermediate *state* data as
-required to update the result (e.g. intermediate counts in the earlier example).
 
-This model is significantly different from many other stream processing
-engines. Many streaming systems require the user to maintain running 
-aggregations themselves, thus having to reason about fault-tolerance, and 
-data consistency (at-least-once, or at-most-once, or exactly-once). In this 
-model, Spark is responsible for updating the Result Table when there is new 
-data, thus relieving the users from reasoning about it. As an example, let’s 
-see how this model handles event-time based processing and late arriving data.
+**구조적 스트리밍은 전체 테이블의 상태를 계속해서 유지(혹은 보유)하지 않는다는 점을 명심하시기 바랍니다.** 스파크 스트리밍은 스트리밍 데이터 소스에서 사용 가능한 최신 데이터를 읽어와서 이를 처리하고, 결과를 점진적으로 업데이트(incrementally update)한 뒤 소스에서 읽어 온 데이터를 파기하는 식으로 동작합니다. 즉, 결과를 업데이트하는 데 필요한 최소한의 중간 상태 데이터(intermediate data)만 유지합니다. (예 : 이전 예제의 중간 카운트).
 
-## Handling Event-time and Late Data
-Event-time is the time embedded in the data itself. For many applications, you may want to operate on this event-time. For example, if you want to get the number of events generated by IoT devices every minute, then you probably want to use the time when the data was generated (that is, event-time in the data), rather than the time Spark receives them. This event-time is very naturally expressed in this model -- each event from the devices is a row in the table, and event-time is a column value in the row. This allows window-based aggregations (e.g. number of events every minute) to be just a special type of grouping and aggregation on the event-time column -- each time window is a group and each row can belong to multiple windows/groups. Therefore, such event-time-window-based aggregation queries can be defined consistently on both a static dataset (e.g. from collected device events logs) as well as on a data stream, making the life of the user much easier.
+이 모델은 다른 스트림 프로세싱 엔진들과 확연하게 다릅니다. 많은 스트리밍 시스템에서 사용자는 장애 허용(fault-tolerance) 및 데이터 일관성(최소 한 번(at-least-once), 최대 한 번(at-most-once), 정확히 한 번(exactly-once)) 등을 고려하며 집계 실행을 유지해야 합니다. 이 모델의 경우 스파크가 새로운 데이터가 있을 때 결과 테이블을 업데이트하므로 사용자가 이 부분에 대해 신경쓸 필요가 없습니다. 그 예로써, 이 모델이 이벤트 시각 기반 프로세싱을 수행하는 방법 그리고 지연된 데이터를 다루는 방법을 살펴보겠습니다.
 
-Furthermore, this model naturally handles data that has arrived later than 
-expected based on its event-time. Since Spark is updating the Result Table, 
-it has full control over updating old aggregates when there is late data, 
-as well as cleaning up old aggregates to limit the size of intermediate
-state data. Since Spark 2.1, we have support for watermarking which 
-allows the user to specify the threshold of late data, and allows the engine
-to accordingly clean up old state. These are explained later in more 
-detail in the [Window Operations](#window-operations-on-event-time) section.
 
-## Fault Tolerance Semantics
-Delivering end-to-end exactly-once semantics was one of key goals behind the design of Structured Streaming. To achieve that, we have designed the Structured Streaming sources, the sinks and the execution engine to reliably track the exact progress of the processing so that it can handle any kind of failure by restarting and/or reprocessing. Every streaming source is assumed to have offsets (similar to Kafka offsets, or Kinesis sequence numbers)
-to track the read position in the stream. The engine uses checkpointing and write-ahead logs to record the offset range of the data being processed in each trigger. The streaming sinks are designed to be idempotent for handling reprocessing. Together, using replayable sources and idempotent sinks, Structured Streaming can ensure **end-to-end exactly-once semantics** under any failure.
+## **이벤트 시각과 지연 데이터 처리**
 
-# API using Datasets and DataFrames
-Since Spark 2.0, DataFrames and Datasets can represent static, bounded data, as well as streaming, unbounded data. Similar to static Datasets/DataFrames, you can use the common entry point `SparkSession`
-([Scala](api/scala/index.html#org.apache.spark.sql.SparkSession)/[Java](api/java/org/apache/spark/sql/SparkSession.html)/[Python](api/python/pyspark.sql.html#pyspark.sql.SparkSession)/[R](api/R/sparkR.session.html) docs)
-to create streaming DataFrames/Datasets from streaming sources, and apply the same operations on them as static DataFrames/Datasets. If you are not familiar with Datasets/DataFrames, you are strongly advised to familiarize yourself with them using the
-[DataFrame/Dataset Programming Guide](sql-programming-guide.html).
+이벤트 시각은 데이터 자체에 포함된 시간입니다. 많은 애플리케이션에서, 이벤트 시각에서 작업하고 싶은 경우가 있을 것입니다. 예를 들어, 1분마다 IoT 장치에서 생성되는 이벤트의 수를 구하려면, 스파크에서 수신하는 시각이 아닌 데이터가 생성된 시각(즉, 데이터의 이벤트 시각)을 사용하게 될 것입니다. 이러한 이벤트 시각은 이 모델에서 매우 자연스럽게 표현됩니다. 장치의 각 이벤트는 테이블의 로우이며 이벤트 시각은 그 로우의 컬럼 값입니다. 이러한 접근 방법은 윈도우 기준 집계(window-based aggregation)를 이벤트 시각 컬럼에 대한 그룹화 혹은 집계 연산의 특별한 형태로 취급할 수 있게 합니다 - 각 시간 윈도우는 그룹이 되고, 각각의 로우는 1개 이상의 윈도우(혹은 그룹)에 속할 수 있는 식입니다. 바로 이러한 이유 때문에, 이벤트 시간 윈도우 기준 집계를 수행하는 쿼리는 정적 Dataset과 스트리밍 Dataset 모두에서 동일하게 정의될 수 있는 것입니다 - 사용자 입장에서는 훨씬 쉽게 사용할 수 있습니다.  
 
-## Creating streaming DataFrames and streaming Datasets
-Streaming DataFrames can be created through the `DataStreamReader` interface
-([Scala](api/scala/index.html#org.apache.spark.sql.streaming.DataStreamReader)/[Java](api/java/org/apache/spark/sql/streaming/DataStreamReader.html)/[Python](api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamReader) docs)
-returned by `SparkSession.readStream()`. In [R](api/R/read.stream.html), with the `read.stream()` method. Similar to the read interface for creating static DataFrame, you can specify the details of the source – data format, schema, options, etc.
+뿐만 아니라, 이 모델은 이벤트 시각을 기준으로 예상보다 늦게 도착한(=처리 시각과 이벤트 시각의 차이가 예상보다 큰, 혹은 처리 시각이 예상보다 늦어진) 데이터도 자연스럽게 다룰 수 있습니다. 스파크가 결과 테이블을 업데이트 하는 방식으로 동작하기 때문에, 유지하고 있는 중간 상태(intermedate state) 데이터가 무한히 커지지 않도록 오래된 집계 결과를 파기하는 것과 마찬가지로 늦게 도착한 데이터를 오래된 집계 결과에 업데이트 해주기만 하면 되기 때문입니다. 스파크 2.1부터는 사용자가 지연 데이터가 얼마까지 지연될 수 있는지 임계 값을 지정하고 엔진이 이에 따라 이전 상태를 정리하는 워터 마킹 기능을 지원합니다. 자세한 내용은 [윈도우 연산](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#window-operations-on-event-time) 섹션에서 설명합니다.
 
-#### Input Sources
-There are a few built-in sources.
 
-  - **File source** - Reads files written in a directory as a stream of data. Supported file formats are text, csv, json, orc, parquet. See the docs of the DataStreamReader interface for a more up-to-date list, and supported options for each file format. Note that the files must be atomically placed in the given directory, which in most file systems, can be achieved by file move operations.
+## **장애 허용의 의해**
 
-  - **Kafka source** - Reads data from Kafka. It's compatible with Kafka broker versions 0.10.0 or higher. See the [Kafka Integration Guide](structured-streaming-kafka-integration.html) for more details.
+구조적 스트리밍 디자인의 핵심 목표 중 하나는 종단간 '정확히 한 번 전달' 을 구현하는 것이었습니다. 이를 위해 프로세스의 정확한 진행 상황을 안정적으로 추적해서 장애가 발생했을 때 재시작 혹은 재처리만으로 문제를 해결할 수 있도록 구조적 스트리밍 소스, 싱크 및 실행 엔진을 설계했습니다. 모든 스트리밍 소스는 스트림의 읽기 위치를 추적하기 위해 (Kafka 오프셋 또는 Kinesis 시퀀스 숫자와 유사한) 오프셋을 갖는다고 가정합니다. 엔진은 체크포인팅(checkpointing)이나 선행 기입 로그(write-ahead logs)를 사용하여 각 트리거에서 처리되는 데이터의 오프셋 범위를 기록합니다. 스트리밍 싱크는 재처리를 위해 멱등성이 있도록(idempotent) 설계되었습니다. 구조적 스트리밍은 이렇게 원하는 지점에서부터 다시 이벤트를 받아올 수 있는 소스와 멱등성이 있는 싱크를 함께 사용함으로써 종단 간 **정확히 한 번 전달(exactly once delivery)**을 보장할 수 있습니다.
 
-  - **Socket source (for testing)** - Reads UTF8 text data from a socket connection. The listening server socket is at the driver. Note that this should be used only for testing as this does not provide end-to-end fault-tolerance guarantees. 
+# **Dataset과 DataFrame을 사용하는 API**
 
-  - **Rate source (for testing)** - Generates data at the specified number of rows per second, each output row contains a `timestamp` and `value`. Where `timestamp` is a `Timestamp` type containing the time of message dispatch, and `value` is of `Long` type containing the message count, starting from 0 as the first row. This source is intended for testing and benchmarking.
+스파크 2.0 버전부터는 DataFrame과 Dataset을 사용해서 정적(static)으로 주어지는 유한한 크기의 데이터(bounded data) 뿐만 아니라 스트리밍(streaming) 방식으로 주어지는 무한한 크기의 데이터(unbounded data) 역시 표현할 수 있습니다. `SparkSession` ([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.SparkSession)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/SparkSession.html)/[Python](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.SparkSession)/[R](https://spark.apache.org/docs/latest/api/R/sparkR.session.html) 문서)를 사용해서 스트리밍 소스에서 스트리밍 DataFrame/Dataset을 만들 수 있으며, 여기에 정적 Dataset/DataFrame과 동일한 연산을 적용할 수도 있습니다. Dataset/DataFrame에 대해 잘 모르신다면 [DataFrame/Dataset 프로그래밍 가이드](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 먼저 참고하시는 것을 권장합니다.
 
-Some sources are not fault-tolerant because they do not guarantee that data can be replayed using 
-checkpointed offsets after a failure. See the earlier section on 
-[fault-tolerance semantics](#fault-tolerance-semantics).
-Here are the details of all the sources in Spark.
 
-<table class="table">
+## **스트리밍 DataFrame과 스트리밍 Dataset 만들기**
+
+스트리밍 DataFrame은 `SparkSession.readStream()`이 반환하는 `DataStreamReader` 인터페이스([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.DataStreamReader)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/DataStreamReader.html)/[Python](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamReader) 문서)를 이용하여 만들 수 있습니다. [R](https://spark.apache.org/docs/latest/api/R/read.stream.html)에서는 `read.stream()` 메소드를 이용하여 만들 수 있습니다. 정적 Dataframe을 생성하기 위한 읽기(read) 인터페이스와 비슷한 방법으로 데이터 형식, 스키마, 옵션 등 세부 사항을 지정할 수 있습니다.
+
+
+#### **입력 소스**
+
+몇 가지의 내장 소스가 있습니다.
+
+
+
+*   **파일 소스** - 디렉토리에 있는 파일을 데이터 스트림으로 읽어 옵니다. 텍스트, csv, json, orc, parquet 파일 형식이 지원됩니다. 최신 버전에서 지원되는 파일 형식 목록과 각 파일 형식에 대해 지원되는 옵션에 대해서는 DataStreamReader 인터페이스 문서를 확인하세요. 각 파일은 해당 디렉토리에 원자적으로(automically) 이동되어야 한다는 점을 주의하시기 바랍니다. 대부분의 파일 시스템에서 이는 file move 명령으로 가능합니다.
+*   **Kafka 소스** - Kafka에서 데이터를 읽어 옵니다. Kafka 브로커 버전 0.10.0 이상에서 호환됩니다. 자세한 사항은 [Kafka 통합 가이드](https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html)를 참조하세요.
+*   **소켓 소스 (테스트용)** - 연결된 소켓으로부터 UTF-8 텍스트 데이터를 읽어 옵니다. 리스닝 서버 소켓은 드라이버에 있습니다. 소켓 소스는 테스트 용으로만 사용되어야 한다는 점에 주의하세요. 이는 종단간 장애 허용(fault-tolerant)을 보장하지 않습니다.
+*   **속도 소스 (테스트용)** - 초당 생성될 로우의 수를 지정하면 그것에 맞게 데이터를 생성합니다. 각 로우는 `timestamp와` `value `값을 포함합니다. `timestamp`는 `Timestamp` 타입으로 메시지가 생성된 시각을 의미하고, `value`는 `Long` 타입의 메시지 수이며, 첫 로우는 0부터 시작합니다. 이 소스는 테스트와 벤치마크용입니다.
+
+몇몇 소스는 장애 발생시 체크포인트된 오프셋을 이용한 데이터의 재연 가능성을 보장하지 않기 때문에 장애를 허용하지 않습니다. 앞에 나온 [장애 허용 의미 구조](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#fault-tolerance-semantics)에 대한 섹션을 참조하세요. 다음은 스파크에 내장되어 있는 소스에 대한 세부 사항입니다.
+
+
+<table>
   <tr>
-    <th>Source</th>
-    <th>Options</th>
-    <th>Fault-tolerant</th>
-    <th>Notes</th>
+   <td><strong>소스</strong>
+   </td>
+   <td><strong>옵션</strong>
+   </td>
+   <td><strong>장애 허용</strong>
+   </td>
+   <td><strong>비고</strong>
+   </td>
   </tr>
   <tr>
-    <td><b>File source</b></td>
-    <td>
-        <code>path</code>: path to the input directory, and common to all file formats.
-        <br/>
-        <code>maxFilesPerTrigger</code>: maximum number of new files to be considered in every trigger (default: no max)
-        <br/>
-        <code>latestFirst</code>: whether to process the latest new files first, useful when there is a large backlog of files (default: false)
-        <br/>
-        <code>fileNameOnly</code>: whether to check new files based on only the filename instead of on the full path (default: false). With this set to `true`, the following files would be considered as the same file, because their filenames, "dataset.txt", are the same:
-        <br/>
-        "file:///dataset.txt"<br/>
-        "s3://a/dataset.txt"<br/>
-        "s3n://a/b/dataset.txt"<br/>
-        "s3a://a/b/c/dataset.txt"<br/>
-        <br/><br/>
-        For file-format-specific options, see the related methods in <code>DataStreamReader</code>
-        (<a href="api/scala/index.html#org.apache.spark.sql.streaming.DataStreamReader">Scala</a>/<a href="api/java/org/apache/spark/sql/streaming/DataStreamReader.html">Java</a>/<a href="api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamReader">Python</a>/<a
-        href="api/R/read.stream.html">R</a>).
-        E.g. for "parquet" format options see <code>DataStreamReader.parquet()</code>.
-        <br/><br/>
-        In addition, there are session configurations that affect certain file-formats. See the <a href="sql-programming-guide.html">SQL Programming Guide</a> for more details. E.g., for "parquet", see <a href="sql-data-sources-parquet.html#configuration">Parquet configuration</a> section.
-        </td>
-    <td>Yes</td>
-    <td>Supports glob paths, but does not support multiple comma-separated paths/globs.</td>
+   <td><strong>파일 소스</strong>
+   </td>
+   <td><code>path</code>: 입력 디렉토리의 경로. 모든 파일 형식에 공통임.
+<p>
+<code>maxFilesPerTrigger</code>: 트리거가 호출될 때마다 주어지는 최대 파일 수. (기본값: no max)
+<p>
+<code>latestFirst</code>: 최신 파일을 먼저 처리할지의 여부. 큰 백로그 파일이 있을 때 유용함. (기본값: false)
+<p>
+<code>fileNameOnly</code>: 새 파일을 전체 경로가 아닌 파일 이름만으로 확인할지의 여부. (기본값: false). 이 값을 ‘true’로 설정하면, 다음 파일들은 파일 이름이 “dataset.txt”로 같으므로 같은 파일로 간주됩니다:
+<p>
+"file:///dataset.txt"
+<p>
+"s3://a/dataset.txt"
+<p>
+"s3n://a/b/dataset.txt"
+<p>
+"s3a://a/b/c/dataset.txt"
+<p>
+특정 파일 형식에 대한 옵션은 <code>DataStreamReader</code>(<a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.DataStreamReader">Scala</a>/<a href="https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/DataStreamReader.html">Java</a>/<a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamReader">Python</a>/<a href="https://spark.apache.org/docs/latest/api/R/read.stream.html">R</a>)에서 관련 메소드를 확인하세요. 예를 들어, "parquet" 형식의 옵션에 대해서는 <code>DataStreamReader.parquet()</code>을 확인하세요.  
+<p>
+추가로, 특정 파일 형식에 영향을 주는 세션 설정이 있을 수 있습니다. 자세한 내용은 <a href="https://spark.apache.org/docs/latest/sql-programming-guide.html">SQL 프로그래밍 가이드</a>를 참조하세요. 예를 들어, "parquet"은 <a href="https://spark.apache.org/docs/latest/sql-data-sources-parquet.html#configuration">Parquet 설정</a> 섹션을 확인하세요.
+   </td>
+   <td>네
+   </td>
+   <td>glob 경로를 지원합니다. 쉼표로 구분된 경로와 glob은 지원하지 않습니다.
+   </td>
   </tr>
   <tr>
-    <td><b>Socket Source</b></td>
-    <td>
-        <code>host</code>: host to connect to, must be specified<br/>
-        <code>port</code>: port to connect to, must be specified
-    </td>
-    <td>No</td>
-    <td></td>
+   <td><strong>소켓 소스</strong>
+   </td>
+   <td><code>host</code>: 연결할 호스트, 필수.
+<p>
+<code>port</code>: 연결할 포트, 필수.
+   </td>
+   <td>아니요
+   </td>
+   <td>
+   </td>
   </tr>
   <tr>
-    <td><b>Rate Source</b></td>
-    <td>
-        <code>rowsPerSecond</code> (e.g. 100, default: 1): How many rows should be generated per second.<br/><br/>
-        <code>rampUpTime</code> (e.g. 5s, default: 0s): How long to ramp up before the generating speed becomes <code>rowsPerSecond</code>. Using finer granularities than seconds will be truncated to integer seconds. <br/><br/>
-        <code>numPartitions</code> (e.g. 10, default: Spark's default parallelism): The partition number for the generated rows. <br/><br/>
-        
-        The source will try its best to reach <code>rowsPerSecond</code>, but the query may be resource constrained, and <code>numPartitions</code> can be tweaked to help reach the desired speed.
-    </td>
-    <td>Yes</td>
-    <td></td>
-  </tr>
-
-  <tr>
-    <td><b>Kafka Source</b></td>
-    <td>
-        See the <a href="structured-streaming-kafka-integration.html">Kafka Integration Guide</a>.
-    </td>
-    <td>Yes</td>
-    <td></td>
+   <td><strong>고정 속도 소스</strong>
+   </td>
+   <td><code>rowsPerSecond</code> (예시: 100, 기본값: 1): 초당 생성될 로우의 수.
+<p>
+<code>rampUpTime</code> (예시: 5s, 기본값: 0s): 생성 속도가 <code>rowsPerSecond</code>가 되기까지의 소요 시간. 초보다 더 작은 단위를 사용하면 정수 단위로 절삭됩니다.
+<p>
+<code>numPartitions</code> (예시: 10, 기본값: 스파크의 기본 병렬값): 생성될 로우의 파티션 수.
+<p>
+이 소스는 <code>rowsPerSecond</code>에 도달하기 위해 최대한 시도하지만, 쿼리에 자원의 제한이 있을 수도 있습니다. 이때 <code>numPartitions</code>를 조절하면 목표 속도에 가까워질 수 있습니다.
+   </td>
+   <td>네
+   </td>
+   <td>
+   </td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+   <td><strong>Kafka 소스</strong>
+   </td>
+   <td><a href="https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html">Kafka 통합 가이드</a>를 확인하세요.
+   </td>
+   <td>네
+   </td>
+   <td>
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
   </tr>
 </table>
 
-Here are some examples.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+몇 가지 예시입니다.
 
-{% highlight scala %}
+
+
+*   **Scala**
+
+
+```
 val spark: SparkSession = ...
 
-// Read text from socket
+// 소켓에서 텍스트를 읽어 옵니다
 val socketDF = spark
   .readStream
   .format("socket")
@@ -595,53 +450,31 @@ val socketDF = spark
   .option("port", 9999)
   .load()
 
-socketDF.isStreaming    // Returns True for DataFrames that have streaming sources
+socketDF.isStreaming    // 스트리밍 소스를 가진 DataFrame이면 True를 반환합니다
 
 socketDF.printSchema
 
-// Read all the csv files written atomically in a directory
+// 디렉토리에 원자적으로 생성된 모든 csv 파일을 읽어 옵니다
 val userSchema = new StructType().add("name", "string").add("age", "integer")
 val csvDF = spark
   .readStream
   .option("sep", ";")
-  .schema(userSchema)      // Specify schema of the csv files
-  .csv("/path/to/directory")    // Equivalent to format("csv").load("/path/to/directory")
-{% endhighlight %}
+  .schema(userSchema)      // csv 파일의 스키마를 지정합니다
+  .csv("/path/to/directory")    // format("csv").load("/path/to/directory")와 동일합니다
+```
 
-</div>
-<div data-lang="java"  markdown="1">
 
-{% highlight java %}
-SparkSession spark = ...
+이 예제들은 타입이 없는 스트리밍 DataFrame을 생성합니다. 즉, DataFrame의 스키마가 컴파일 타임에 확인되지 않고, 런타임에 쿼리가 제출된 후에 확인됩니다. `map`과 `flatMap `등과 같은 연산은 컴파일 시점에 그 타입을 알고 있어야 합니다. 이와 같은 연산을 하기 위해서는 정적 DataFrame에서 사용한 방법과 동일한 방법으로, 타입이 없는 스트리밍 DataFrame을 타입이 있는 스트리밍 Dataset으로 변환하여야 합니다. 자세한 사항은 [SQL 프로그래밍 가이드](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 참조하세요. 지원되는 스트리밍 소스에 대한 자세한 내용은 문서의 뒷부분을 참조하세요.
 
-// Read text from socket
-Dataset<Row> socketDF = spark
-  .readStream()
-  .format("socket")
-  .option("host", "localhost")
-  .option("port", 9999)
-  .load();
 
-socketDF.isStreaming();    // Returns True for DataFrames that have streaming sources
 
-socketDF.printSchema();
+*   **Python**
 
-// Read all the csv files written atomically in a directory
-StructType userSchema = new StructType().add("name", "string").add("age", "integer");
-Dataset<Row> csvDF = spark
-  .readStream()
-  .option("sep", ";")
-  .schema(userSchema)      // Specify schema of the csv files
-  .csv("/path/to/directory");    // Equivalent to format("csv").load("/path/to/directory")
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
-
-{% highlight python %}
+```
 spark = SparkSession. ...
 
-# Read text from socket
+# 소켓에서 텍스트를 읽어 옵니다
 socketDF = spark \
     .readStream \
     .format("socket") \
@@ -649,552 +482,362 @@ socketDF = spark \
     .option("port", 9999) \
     .load()
 
-socketDF.isStreaming()    # Returns True for DataFrames that have streaming sources
+socketDF.isStreaming()    # 스트리밍 소스를 가진 DataFrame이면 True를 반환합니다
 
 socketDF.printSchema()
 
-# Read all the csv files written atomically in a directory
+# 디렉토리에 원자적으로 생성된 모든 csv 파일을 읽어 옵니다
 userSchema = StructType().add("name", "string").add("age", "integer")
 csvDF = spark \
     .readStream \
     .option("sep", ";") \
     .schema(userSchema) \
-    .csv("/path/to/directory")  # Equivalent to format("csv").load("/path/to/directory")
-{% endhighlight %}
+    .csv("/path/to/directory")  # format("csv").load("/path/to/directory")와 동일합니다
+```
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-sparkR.session(...)
+이 예제들은 타입이 없는 스트리밍 DataFrame을 생성합니다. 즉, DataFrame의 스키마가 컴파일 타임에 확인되지 않고, 런타임에 쿼리가 제출된 후에 확인됩니다. `map`과 `flatMap `등과 같은 연산은 컴파일 타임에 그 타입을 알고 있어야 합니다. 이와 같은 연산을 하기 위해서는 정적 DataFrame에서 사용한 방법과 동일한 방법으로, 타입이 없는 스트리밍 DataFrame을 타입이 있는 스트리밍 Dataset으로 변환하여야 합니다. 자세한 사항은 [SQL 프로그래밍 가이드](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 참조하세요. 지원되는 스트리밍 소스에 대한 자세한 내용은 문서의 뒷부분을 참조하세요.
 
-# Read text from socket
-socketDF <- read.stream("socket", host = hostname, port = port)
 
-isStreaming(socketDF)    # Returns TRUE for SparkDataFrames that have streaming sources
+### **스트리밍 DataFrame/Dataset의 스키마 추론과 파티션**
 
-printSchema(socketDF)
+기본적으로, 파일 기반 소스에서 동작하는 구조화된 스트리밍 처리는 스키마를 지정해야 합니다. 스파크의 자동 추론에 의존하는 것은 권장하지 않습니다. 이러한 제약은 장애가 발생했을 경우에도 스트리밍 쿼리에 일관된 스키마가 사용되는 것을 보장합니다. 임시로 스키마 추론을 사용할 경우에는 `spark.sql.streaming.schemaInference`를 `true`로 설정하여 활성화할 수 있습니다.
 
-# Read all the csv files written atomically in a directory
-schema <- structType(structField("name", "string"),
-                     structField("age", "integer"))
-csvDF <- read.stream("csv", path = "/path/to/directory", schema = schema, sep = ";")
-{% endhighlight %}
+파티션 발견은 `/key=value/`라는 이름의 하위 디렉토리가 있고, 디렉토리 탐색 과정에서 해당 디렉토리를 처리할 때 수행됩니다. 사용자가 제공한 스키마에 이러한 이름의 칼럼이 포함되어 있다면, 스파크가 자동으로 읽어 들이는 파일의 경로를 이용해 해당 컬럼의 값을 채웁니다. 파티션 스키마를 이루는 디렉토리는 쿼리가 시작할 때 존재해야 하며, 정적이어야 합니다. 예를 들어, `/data/year=2015/`가 존재할 때 `/data/year=2016/`를 추가하는 것은 괜찮지만, 파티션하는 컬럼을 바꾸는 것은 허용하지 않습니다 (예: `/data/date=2016-04-17/`라는 디렉토리 생성).
 
-</div>
-</div>
 
-These examples generate streaming DataFrames that are untyped, meaning that the schema of the DataFrame is not checked at compile time, only checked at runtime when the query is submitted. Some operations like `map`, `flatMap`, etc. need the type to be known at compile time. To do those, you can convert these untyped streaming DataFrames to typed streaming Datasets using the same methods as static DataFrame. See the [SQL Programming Guide](sql-programming-guide.html) for more details. Additionally, more details on the supported streaming sources are discussed later in the document.
 
-### Schema inference and partition of streaming DataFrames/Datasets
+## **스트리밍 DataFrame/Dataset의 연산**
 
-By default, Structured Streaming from file based sources requires you to specify the schema, rather than rely on Spark to infer it automatically. This restriction ensures a consistent schema will be used for the streaming query, even in the case of failures. For ad-hoc use cases, you can reenable schema inference by setting `spark.sql.streaming.schemaInference` to `true`.
+여러 가지 연산을 DataFrame과 Dataset에 적용할 수 있습니다. 타입이 없는 SQL같은 연산에서 부터(예: `select`, `where`, `groupBy`), 타입이 있는 RDD같은 연산(예: `map`, `filter`, `flatMap`)까지 가능합니다. 자세한 내용은 [SQL 프로그래밍 가이드](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 참조하세요. 어떠한 연산이 가능한지 몇 가지 예시를 보며 함께 알아보겠습니다.
 
-Partition discovery does occur when subdirectories that are named `/key=value/` are present and listing will automatically recurse into these directories. If these columns appear in the user-provided schema, they will be filled in by Spark based on the path of the file being read. The directories that make up the partitioning scheme must be present when the query starts and must remain static. For example, it is okay to add `/data/year=2016/` when `/data/year=2015/` was present, but it is invalid to change the partitioning column (i.e. by creating the directory `/data/date=2016-04-17/`).
 
-## Operations on streaming DataFrames/Datasets
-You can apply all kinds of operations on streaming DataFrames/Datasets – ranging from untyped, SQL-like operations (e.g. `select`, `where`, `groupBy`), to typed RDD-like operations (e.g. `map`, `filter`, `flatMap`). See the [SQL programming guide](sql-programming-guide.html) for more details. Let’s take a look at a few example operations that you can use.
+### **기본 연산 - 셀렉션, 프로젝션, 집계**
 
-### Basic Operations - Selection, Projection, Aggregation
-Most of the common operations on DataFrame/Dataset are supported for streaming. The few operations that are not supported are [discussed later](#unsupported-operations) in this section.
+DataFrame/Dataset에서 자주 사용되는 대부분의 연산은 스트리밍에서도 지원합니다. 지원하지 않는 몇 가지 연산은 [이 섹션의 뒷부분](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#unsupported-operations)에서 설명합니다.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-{% highlight scala %}
+
+*   **Scala**
+
+
+```
 case class DeviceData(device: String, deviceType: String, signal: Double, time: DateTime)
 
-val df: DataFrame = ... // streaming DataFrame with IOT device data with schema { device: string, deviceType: string, signal: double, time: string }
-val ds: Dataset[DeviceData] = df.as[DeviceData]    // streaming Dataset with IOT device data
+val df: DataFrame = ... // { device: string, deviceType: string, signal: double, time: string }의 스키마를 갖는 IOT 장비의 스트리밍 DataFrame
+val ds: Dataset[DeviceData] = df.as[DeviceData]    // IOT 장비 데이터의 스트리밍 Dataset
 
-// Select the devices which have signal more than 10
-df.select("device").where("signal > 10")      // using untyped APIs   
-ds.filter(_.signal > 10).map(_.device)         // using typed APIs
+// signal이 10 이상인 장비를 선택합니다
+df.select("device").where("signal > 10")      // 타입이 없는 API 사용   
+ds.filter(_.signal > 10).map(_.device)         // 타입이 있는 API 사용
 
-// Running count of the number of updates for each device type
-df.groupBy("deviceType").count()                          // using untyped API
+// 각 장비 타입에 대해 업데이트 횟수 세기
+df.groupBy("deviceType").count()                          // 타입이 없는 API 사용
 
 // Running average signal for each device type
 import org.apache.spark.sql.expressions.scalalang.typed
-ds.groupByKey(_.deviceType).agg(typed.avg(_.signal))    // using typed API
-{% endhighlight %}
-
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-import org.apache.spark.api.java.function.*;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.expressions.javalang.typed;
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
-
-public class DeviceData {
-  private String device;
-  private String deviceType;
-  private Double signal;
-  private java.sql.Date time;
-  ...
-  // Getter and setter methods for each field
-}
-
-Dataset<Row> df = ...;    // streaming DataFrame with IOT device data with schema { device: string, type: string, signal: double, time: DateType }
-Dataset<DeviceData> ds = df.as(ExpressionEncoder.javaBean(DeviceData.class)); // streaming Dataset with IOT device data
-
-// Select the devices which have signal more than 10
-df.select("device").where("signal > 10"); // using untyped APIs
-ds.filter((FilterFunction<DeviceData>) value -> value.getSignal() > 10)
-  .map((MapFunction<DeviceData, String>) value -> value.getDevice(), Encoders.STRING());
-
-// Running count of the number of updates for each device type
-df.groupBy("deviceType").count(); // using untyped API
-
-// Running average signal for each device type
-ds.groupByKey((MapFunction<DeviceData, String>) value -> value.getDeviceType(), Encoders.STRING())
-  .agg(typed.avg((MapFunction<DeviceData, Double>) value -> value.getSignal()));
-{% endhighlight %}
+ds.groupByKey(_.deviceType).agg(typed.avg(_.signal))    // 타입이 있는 API 사용
+```
 
 
-</div>
-<div data-lang="python"  markdown="1">
+스트리밍 DataFrame/Dataset을 임시 뷰로 등록하여 SQL 명령을 실행할 수 있습니다.
 
-{% highlight python %}
-df = ...  # streaming DataFrame with IOT device data with schema { device: string, deviceType: string, signal: double, time: DateType }
 
-# Select the devices which have signal more than 10
+
+*   **Python**
+
+
+```
+df = ...  # { device: string, deviceType: string, signal: double, time: string }의 스키마를 갖는 IOT 장비의 스트리밍 DataFrame { device: string, deviceType: string, signal: double, time: string }
+
+# signal이 10 이상인 장비를 선택합니다
 df.select("device").where("signal > 10")
 
-# Running count of the number of updates for each device type
+# 각 장비 타입에 대해 업데이트 횟수 세기
 df.groupBy("deviceType").count()
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
+```
 
-{% highlight r %}
-df <- ...  # streaming DataFrame with IOT device data with schema { device: string, deviceType: string, signal: double, time: DateType }
 
-# Select the devices which have signal more than 10
-select(where(df, "signal > 10"), "device")
+스트리밍 DataFrame/Dataset을 임시 뷰로 등록하여 SQL 명령을 실행할 수 있습니다.
 
-# Running count of the number of updates for each device type
-count(groupBy(df, "deviceType"))
-{% endhighlight %}
-</div>
-</div>
 
-You can also register a streaming DataFrame/Dataset as a temporary view and then apply SQL commands on it.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-{% highlight scala %}
+*   **Scala**
+
+
+```
 df.createOrReplaceTempView("updates")
-spark.sql("select count(*) from updates")  // returns another streaming DF
-{% endhighlight %}
-</div>
-<div data-lang="java"  markdown="1">  
-{% highlight java %}
-df.createOrReplaceTempView("updates");
-spark.sql("select count(*) from updates");  // returns another streaming DF
-{% endhighlight %}
-</div>
-<div data-lang="python"  markdown="1">  
-{% highlight python %}
+spark.sql("select count(*) from updates")  // 다른 스트리밍 DataFrame을 반환합니다
+```
+
+
+DataFrame/Dataset이 스트리밍 데이터를 가지고 있는지 여부는 `df.isStreaming`를 이용하여 확인할 수 있음을 참고하시기 바랍니다.
+
+
+
+*   **Python**
+
+
+```
 df.createOrReplaceTempView("updates")
-spark.sql("select count(*) from updates")  # returns another streaming DF
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight r %}
-createOrReplaceTempView(df, "updates")
-sql("select count(*) from updates")
-{% endhighlight %}
-</div>
-</div>
+spark.sql("select count(*) from updates")  # 다른 스트리밍 DataFrame을 반환합니다
+```
 
-Note, you can identify whether a DataFrame/Dataset has streaming data or not by using `df.isStreaming`.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-{% highlight scala %}
+DataFrame/Dataset이 스트리밍 데이터를 가지고 있는지 여부는 `df.isStreaming`를 이용하여 확인할 수 있음을 참고하시기 바랍니다.
+
+
+
+*   **Scala**
+
+
+```
 df.isStreaming
-{% endhighlight %}
-</div>
-<div data-lang="java"  markdown="1">
-{% highlight java %}
+
+```
+
+
+
+*   **Python**
+
+
+```
 df.isStreaming()
-{% endhighlight %}
-</div>
-<div data-lang="python"  markdown="1">
-{% highlight python %}
-df.isStreaming()
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight r %}
-isStreaming(df)
-{% endhighlight %}
-</div>
-</div>
+```
 
-### Window Operations on Event Time
-Aggregations over a sliding event-time window are straightforward with Structured Streaming and are very similar to grouped aggregations. In a grouped aggregation, aggregate values (e.g. counts) are maintained for each unique value in the user-specified grouping column. In case of window-based aggregations, aggregate values are maintained for each window the event-time of a row falls into. Let's understand this with an illustration. 
 
-Imagine our [quick example](#quick-example) is modified and the stream now contains lines along with the time when the line was generated. Instead of running word counts, we want to count words within 10 minute windows, updating every 5 minutes. That is, word counts in words received between 10 minute windows 12:00 - 12:10, 12:05 - 12:15, 12:10 - 12:20, etc. Note that 12:00 - 12:10 means data that arrived after 12:00 but before 12:10. Now, consider a word that was received at 12:07. This word should increment the counts corresponding to two windows 12:00 - 12:10 and 12:05 - 12:15. So the counts will be indexed by both, the grouping key (i.e. the word) and the window (can be calculated from the event-time).
 
-The result tables would look something like the following.
+### **이벤트 시각에 대한 윈도우 연산**
 
-![Window Operations](img/structured-streaming-window.png)
+구조화된 스트리밍에서의 이벤트 시각에 대한 슬라이딩 윈도우별 집계 연산은 그룹별 집계 연산과 매우 비슷하게, 직관적으로 표현할 수 있습니다. 그룹별 집계에서 집계 결과(예: 카운트)는 사용자가 그룹화를 위해 지정한 컬럼마다 유일하게 유지됩니다. 윈도우별 집계에서는 집계 결과가 해당 로우가 속하는 이벤트 시간 윈도우에 대해 유일하게 유지됩니다. 이를 실제 예시를 통해 알아보겠습니다.
 
-Since this windowing is similar to grouping, in code, you can use `groupBy()` and `window()` operations to express windowed aggregations. You can see the full code for the below examples in
-[Scala]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredNetworkWordCountWindowed.scala)/[Java]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredNetworkWordCountWindowed.java)/[Python]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/python/sql/streaming/structured_network_wordcount_windowed.py).
+이전에 살펴보았던 [간단한 예제](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#quick-example)를 약간 바꿔서, 스트림이 라인과 각 라인의 생성 시간을 담고 있다고 해보겠습니다. 그냥 단어 수를 세는 것 대신 10분 윈도우까지의 단어 수를 세고, 이를 5분마다 갱신한다고 해 봅시다. 다시 말해, 여기서의 카운트는 10분 윈도우인 12:00 - 12:10, 12:05 - 12:15, 12:10 - 12:20에 도착한 단어의 수를 의미합니다. 12:00 이후, 12:10 이전에 도착한 데이터가 12:00 - 12:10 윈도우에 포함됩니다. 이제, 12:07에 도착한 단어에 대해 생각해 봅시다. 이 단어는 12:00 - 12:10과 12:05 - 12:15에 해당하는 두 윈도우의 카운트를 증가시켜야 합니다. 따라서 그룹 키(=단어 그 자체)와 (이벤트 시각에서 계산될 수 있는) 윈도우 두 곳에 인덱스되어야 합니다.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+결과 테이블은 다음과 같은 형태가 됩니다.
 
-{% highlight scala %}
+
+
+<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/Operations-on0.png). Store image on your image server and adjust path/filename if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+
+
+![alt_text](images/Operations-on0.png "image_tooltip")
+
+
+윈도윙(windowing, 혹은 윈도우화)과 그루핑(grouping, 혹은 그룹화)이 비슷한 방식이기 때문에, 코드에서 윈도우 기반의 집계를 표현하기 위해 `groupBy()`와 `window() `를 사용할 수 있습니다. [Scala](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredNetworkWordCountWindowed.scala)/[Java](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredNetworkWordCountWindowed.java)/[Python](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/python/sql/streaming/structured_network_wordcount_windowed.py)으로 작성된 아래 예시에서 전체 코드를 살펴보세요.
+
+
+
+*   **Scala**
+
+
+```
 import spark.implicits._
 
-val words = ... // streaming DataFrame of schema { timestamp: Timestamp, word: String }
+val words = ... // { timestamp: Timestamp, word: String }의 스키마를 갖는 스트리밍 DataFrame
 
-// Group the data by window and word and compute the count of each group
+// 데이터를 윈도우와 단어를 기반으로 그룹화 하고 각 그룹의 카운트를 계산한다
 val windowedCounts = words.groupBy(
   window($"timestamp", "10 minutes", "5 minutes"),
   $"word"
 ).count()
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-Dataset<Row> words = ... // streaming DataFrame of schema { timestamp: Timestamp, word: String }
 
-// Group the data by window and word and compute the count of each group
-Dataset<Row> windowedCounts = words.groupBy(
-  functions.window(words.col("timestamp"), "10 minutes", "5 minutes"),
-  words.col("word")
-).count();
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
-{% highlight python %}
-words = ...  # streaming DataFrame of schema { timestamp: Timestamp, word: String }
+*   **Python**
 
-# Group the data by window and word and compute the count of each group
+
+```
+words = ...  # { timestamp: Timestamp, word: String }의 스키마를 갖는 스트리밍 DataFrame
+
+# 데이터를 윈도우와 단어를 기반으로 그룹화 하고 각 그룹의 카운트를 계산한다
 windowedCounts = words.groupBy(
     window(words.timestamp, "10 minutes", "5 minutes"),
     words.word
 ).count()
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight r %}
-words <- ...  # streaming DataFrame of schema { timestamp: Timestamp, word: String }
-
-# Group the data by window and word and compute the count of each group
-windowedCounts <- count(
-                    groupBy(
-                      words,
-                      window(words$timestamp, "10 minutes", "5 minutes"),
-                      words$word))
-{% endhighlight %}
-
-</div>
-</div>
+```
 
 
-#### Handling Late Data and Watermarking
-Now consider what happens if one of the events arrives late to the application.
-For example, say, a word generated at 12:04 (i.e. event time) could be received by 
-the application at 12:11. The application should use the time 12:04 instead of 12:11
-to update the older counts for the window `12:00 - 12:10`. This occurs 
-naturally in our window-based grouping – Structured Streaming can maintain the intermediate state 
-for partial aggregates for a long period of time such that late data can update aggregates of 
-old windows correctly, as illustrated below.
 
-![Handling Late Data](img/structured-streaming-late-data.png)
+#### **지연된 데이터의 처리와 워터마크 지정**
 
-However, to run this query for days, it's necessary for the system to bound the amount of 
-intermediate in-memory state it accumulates. This means the system needs to know when an old 
-aggregate can be dropped from the in-memory state because the application is not going to receive 
-late data for that aggregate any more. To enable this, in Spark 2.1, we have introduced 
-**watermarking**, which lets the engine automatically track the current event time in the data
-and attempt to clean up old state accordingly. You can define the watermark of a query by 
-specifying the event time column and the threshold on how late the data is expected to be in terms of 
-event time. For a specific window ending at time `T`, the engine will maintain state and allow late
-data to update the state until `(max event time seen by the engine - late threshold > T)`. 
-In other words, late data within the threshold will be aggregated, 
-but data later than the threshold will start getting dropped
-(see [later](#semantic-guarantees-of-aggregation-with-watermarking)
-in the section for the exact guarantees). Let's understand this with an example. We can
-easily define watermarking on the previous example using `withWatermark()` as shown below.
+이벤트가 애플리케이션에 뒤늦게 도착하는 상황을 가정해 보겠습니다. 예를 들어, 12:04(이벤트 시간)에 생성된 단어가 12:11에 애플리케이션에 도착했다고 하면, 애플리케이션은 12:11이 아닌 12:04를 이벤트 시간으로 하여 예전 윈도우인 `12:00 - 12:10`의 카운트를 갱신하여야 합니다. 이는 윈도우 기반 그룹화 과정에서 자연스럽게 발생합니다. 구조적 스트리밍은 부분적으로 집계된 중간 상태를 오랜 기간 동안 유지할 수 있기 때문에, 아래 그림에서 보여지는 것과 같이 늦은 데이터를 예전 윈도우의 집계에 정확하게 반영할 수 있습니다.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-{% highlight scala %}
+
+<p id="gdcalert2" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/Operations-on1.png). Store image on your image server and adjust path/filename if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert3">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+
+
+![alt_text](images/Operations-on1.png "image_tooltip")
+
+
+하지만 이와 같은 쿼리를 수일 동안 지속적으로 실행하려면, 메모리에 누적되는 중간 상태의 양을 시스템이 제한하여야 합니다. 즉, 애플리케이션이 임의의 집계 상태에 대해 지연된 데이터를 더이상 추가할 필요가 없으므로  메모리에서 이를 제거할 수 있게 되는 시점을 시스템이 판단할 수 있어야 하는 것입니다. 가능하게 하기 위해, 스파크 2.1 버전에서는 엔진이 자동으로 데이터의 현재 이벤트 시간을 추적하고 그에 따라 오래된 상태를 정리하는 **워터마킹**이 도입되었습니다. 이벤트 시간 컬럼과 데이터가 얼마나 늦을지에 대한 (이벤트 시간) 임계 값을 설정하여 쿼리의 워터마크를 지정할 수 있습니다. 시간 `T`에 시작하는 특정 윈도우에 대해, 엔진은 `(엔진이 확인한 가장 늦은 이벤트 시간 - 지연 임계 값 > T)`를 만족할 때까지 상태를 유지하고 지연된 데이터 업데이트를 허용합니다. 다시 말해, 임계 값 내에 해당하는 늦은 데이터는 집계가 되지만, 임계 값보다 늦은 데이터는 지워집니다. (보다 정확한 동작 보장에 대해서는 [이 섹션의 후반](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#semantic-guarantees-of-aggregation-with-watermarking)을 참고하세요). 예제를 통해 알아보겠습니다. 이전 예제에서 `withWatermark()`를 이용해 아래와 같이 워터마크를 지정할 수 있습니다.
+
+
+
+*   **Scala**
+
+
+```
 import spark.implicits._
 
-val words = ... // streaming DataFrame of schema { timestamp: Timestamp, word: String }
+val words = ... // { timestamp: Timestamp, word: String }의 스키마를 가지는 스트리밍 DataFrame
 
-// Group the data by window and word and compute the count of each group
+// 데이터를 윈도우와 단어를 기준으로 그룹화 하고 각 그룹의 카운트를 계산한다
 val windowedCounts = words
     .withWatermark("timestamp", "10 minutes")
     .groupBy(
         window($"timestamp", "10 minutes", "5 minutes"),
         $"word")
     .count()
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-Dataset<Row> words = ... // streaming DataFrame of schema { timestamp: Timestamp, word: String }
 
-// Group the data by window and word and compute the count of each group
-Dataset<Row> windowedCounts = words
-    .withWatermark("timestamp", "10 minutes")
-    .groupBy(
-        functions.window(words.col("timestamp"), "10 minutes", "5 minutes"),
-        words.col("word"))
-    .count();
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
-{% highlight python %}
-words = ...  # streaming DataFrame of schema { timestamp: Timestamp, word: String }
+*   **Python**
 
-# Group the data by window and word and compute the count of each group
+
+```
+words = ...  # { timestamp: Timestamp, word: String }의 스키마를 가지는 스트리밍 DataFrame
+
+# 데이터를 윈도우와 단어를 기준으로 그룹화 하고 각 그룹의 카운트를 계산한다
 windowedCounts = words \
     .withWatermark("timestamp", "10 minutes") \
     .groupBy(
         window(words.timestamp, "10 minutes", "5 minutes"),
         words.word) \
     .count()
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight r %}
-words <- ...  # streaming DataFrame of schema { timestamp: Timestamp, word: String }
-
-# Group the data by window and word and compute the count of each group
-
-words <- withWatermark(words, "timestamp", "10 minutes")
-windowedCounts <- count(
-                    groupBy(
-                      words,
-                      window(words$timestamp, "10 minutes", "5 minutes"),
-                      words$word))
-{% endhighlight %}
-
-</div>
-</div>
-
-In this example, we are defining the watermark of the query on the value of the column "timestamp", 
-and also defining "10 minutes" as the threshold of how late is the data allowed to be. If this query 
-is run in Update output mode (discussed later in [Output Modes](#output-modes) section), 
-the engine will keep updating counts of a window in the Result Table until the window is older
-than the watermark, which lags behind the current event time in column "timestamp" by 10 minutes.
-Here is an illustration. 
-
-![Watermarking in Update Mode](img/structured-streaming-watermark-update-mode.png)
-
-As shown in the illustration, the maximum event time tracked by the engine is the 
-*blue dashed line*, and the watermark set as `(max event time - '10 mins')`
-at the beginning of every trigger is the red line. For example, when the engine observes the data 
-`(12:14, dog)`, it sets the watermark for the next trigger as `12:04`.
-This watermark lets the engine maintain intermediate state for additional 10 minutes to allow late
-data to be counted. For example, the data `(12:09, cat)` is out of order and late, and it falls in
-windows `12:00 - 12:10` and `12:05 - 12:15`. Since, it is still ahead of the watermark `12:04` in 
-the trigger, the engine still maintains the intermediate counts as state and correctly updates the 
-counts of the related windows. However, when the watermark is updated to `12:11`, the intermediate 
-state for window `(12:00 - 12:10)` is cleared, and all subsequent data (e.g. `(12:04, donkey)`) 
-is considered "too late" and therefore ignored. Note that after every trigger, 
-the updated counts (i.e. purple rows) are written to sink as the trigger output, as dictated by 
-the Update mode.
-
-Some sinks (e.g. files) may not supported fine-grained updates that Update Mode requires. To work
-with them, we have also support Append Mode, where only the *final counts* are written to sink.
-This is illustrated below.
-
-Note that using `withWatermark` on a non-streaming Dataset is no-op. As the watermark should not affect 
-any batch query in any way, we will ignore it directly.
-
-![Watermarking in Append Mode](img/structured-streaming-watermark-append-mode.png)
-
-Similar to the Update Mode earlier, the engine maintains intermediate counts for each window. 
-However, the partial counts are not updated to the Result Table and not written to sink. The engine
-waits for "10 mins" for late date to be counted, 
-then drops intermediate state of a window < watermark, and appends the final
-counts to the Result Table/sink. For example, the final counts of window `12:00 - 12:10` is 
-appended to the Result Table only after the watermark is updated to `12:11`. 
-
-##### Conditions for watermarking to clean aggregation state
-{:.no_toc}
-
-It is important to note that the following conditions must be satisfied for the watermarking to 
-clean the state in aggregation queries *(as of Spark 2.1.1, subject to change in the future)*.
-
-- **Output mode must be Append or Update.** Complete mode requires all aggregate data to be preserved, 
-and hence cannot use watermarking to drop intermediate state. See the [Output Modes](#output-modes) 
-section for detailed explanation of the semantics of each output mode.
-
-- The aggregation must have either the event-time column, or a `window` on the event-time column. 
-
-- `withWatermark` must be called on the 
-same column as the timestamp column used in the aggregate. For example, 
-`df.withWatermark("time", "1 min").groupBy("time2").count()` is invalid 
-in Append output mode, as watermark is defined on a different column
-from the aggregation column.
-
-- `withWatermark` must be called before the aggregation for the watermark details to be used. 
-For example, `df.groupBy("time").count().withWatermark("time", "1 min")` is invalid in Append 
-output mode.
-
-##### Semantic Guarantees of Aggregation with Watermarking
-{:.no_toc}
-
-- A watermark delay (set with `withWatermark`) of "2 hours" guarantees that the engine will never
-drop any data that is less than 2 hours delayed. In other words, any data less than 2 hours behind
-(in terms of event-time) the latest data processed till then is guaranteed to be aggregated.
-
-- However, the guarantee is strict only in one direction. Data delayed by more than 2 hours is
-not guaranteed to be dropped; it may or may not get aggregated. More delayed is the data, less
-likely is the engine going to process it.
-
-### Join Operations
-Structured Streaming supports joining a streaming Dataset/DataFrame with a static Dataset/DataFrame
-as well as another streaming Dataset/DataFrame. The result of the streaming join is generated
-incrementally, similar to the results of streaming aggregations in the previous section. In this
-section we will explore what type of joins (i.e. inner, outer, etc.) are supported in the above
-cases. Note that in all the supported join types, the result of the join with a streaming
-Dataset/DataFrame will be the exactly the same as if it was with a static Dataset/DataFrame
-containing the same data in the stream.
+```
 
 
-#### Stream-static Joins
+이 예제에서는 컬럼 “timestamp”에 워터마크를 지정하고, “10 minutes”를 임계 값으로 지정하여 얼마나 지연된 데이터까지 허용할지를 정의하고 있습니다. 이 쿼리가 (추후 [출력 모드](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#output-modes) 섹션에서 설명할) Update 출력 모드로 실행된다면, 윈도우가 “timestamp” 컬럼의 현재 이벤트 시간에서 10분까지의 워터마크보다 오래되기 전까지는 엔진이 결과 테이블에 있는 카운트를 계속 업데이트합니다. 아래가 이를 설명한 그림입니다.
 
-Since the introduction in Spark 2.0, Structured Streaming has supported joins (inner join and some
-type of outer joins) between a streaming and a static DataFrame/Dataset. Here is a simple example.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-{% highlight scala %}
+![Window Operations](img/structured-streaming-window.png)
+
+
+위의 그림에서 볼 수 있듯, 파란 점선이 엔진이 추적하는 최대 이벤트 시간이고, 붉은 선이 매 트리거 시작 전에 `(최대 이벤트 시간 - '10 mins')`으로 설정되는 워터마크입니다. 예를 들어, 엔진이 `(12:14, dog)`라는 데이터를 받았을 때, 다음 트리거에서의 워터마크는 `12:04`로 설정됩니다. 이 워터마크가 지정되면 다음 10분동안 추가적으로 늦은 데이터를 집계할 수 있도록 엔진이 중간 상태를 유지합니다. 예를 들어, 데이터 `(12:09, cat)`이 제 순서에 오지 않고 늦게 도달하였고, 윈도우 `12:00 - 12:10`과 `12:05 - 12:15`에 해당한다고 합시다. 그러면 `12:09`가 트리거에서의 워터마크인 `12:04`보다 아직 최신이기 때문에, 엔진이 중간 카운트를 상태로서 저장하고 있고 해당하는 윈도우를 알맞게 갱신할 것입니다. 하지만, 워터마크가 `12:11`로 갱신되었다면, 윈도우 `(12:00 - 12:10)`에 대한 중간 상태는 제거될 것이고, 모든 후속 데이터(예: `(12:04, donkey)`)는 “매우 늦음”으로 간주되어 무시될 것입니다. 매 트리거 이후 갱신된 카운트(예: 보라색 로우)가 Update 모드에 서술된 대로 트리거 출력으로서 싱크(sink)에 작성됩니다.
+
+일부 싱크(예: 파일)는 Update 모드에 필요한 세분화된 갱신을 지원하지 않을 수 있습니다. 이러한 싱크를 위해 _최종 카운트_만 싱크에 작성하는 Append 모드도 지원합니다. 이는 아래에서 설명됩니다.
+
+`withWatermark`를 스트리밍이 아닌 Dataset에 사용하면 아무런 작업도 수행하지 않는다는 점에 주의하세요. 워터마크가 배치 쿼리에 대해 영향을 미쳐서는 안 되기 때문에 이를 바로 무시합니다.
+
+
+
+<p id="gdcalert4" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/Operations-on3.png). Store image on your image server and adjust path/filename if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert5">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
+
+
+![alt_text](images/Operations-on3.png "image_tooltip")
+
+
+Append 모드에서도 이전에 언급한 Update 모드와 비슷하게 엔진이 각 윈도우에 대해 중간 카운트를 유지합니다. 하지만, 부분적인 카운트는 결과 테이블에 갱신되지 않고 싱크에도 작성되지 않습니다. 엔진은 늦은 데이터가 카운트될 때까지 10분동안 대기하고, 워터마크보다 작은 윈도우의 중간 상태를 제거합니다. 그리고 최종 카운트를 결과 테이블과 싱크에 추가합니다. 예를 들어, 윈도우 `12:00 - 12:10`에 대한 최종 카운트는 워터마크가 `12:11`으로 갱신된 후에서야 결과 테이블에 추가됩니다.
+
+
+##### **집계 상태를 비우기 위한 워터마크 지정 조건**
+
+워터마크 지정시 다음 조건들이 충족되어야 집계 쿼리에서 상태를 비울 수 있습니다 (스파크 2.1.1 버전부터, 추후 변경될 수 있음).
+
+
+
+*   **출력 모드는 Append이거나 Update이어야 합니다.** Complete 모드에서는 모든 집계 데이터가 보존되어야하므로 워터마크를 사용하여 중간 상태가 제거할 수 없습니다. 각 출력 모드가 어떠한 동작을 하는지 [출력 모드](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#output-modes) 섹션에서 자세한 설명을 참조하세요.
+*   집계는 이벤트 시간 컬럼 또는 이벤트 시간 컬럼에 대한 윈도우를 필요로 합니다.
+*   `withWatermark`는 집계에서 사용된 timestamp 컬럼과 동일한 컬럼에 대해 호출되어야 합니다. 예를 들어, `df.withWatermark("time", "1 min").groupBy("time2").count()`는 집계 컬럼과 다른 컬럼에 대해 워터마크가 지정되었기 때문에 Append 출력 모드에서 유효하지 않습니다.
+*   `withWatermark`는 워터마크가 사용될 집계의 이전에 호출되어야 합니다. 예를 들어, `df.groupBy("time").count().withWatermark("time", "1 min")`는 Append 출력 모드에서 유효하지 않습니다.
+
+
+##### **워터마크가 지정된 집계의 동작 보장성**
+
+
+
+*   2시간 딜레이의 워터마크(`withWatermark`로 설정된 워터마크)가 설정되면 2시간 내로 도착한 모든 데이터가 집계에서 누락되지 않는 것이 보장됩니다. 즉, 어떤 데이터든지 (이벤트 시간을 기준으로) 2시간을 지나지 않았다면 최신 데이터로 집계되는 것이 보장됩니다.
+*   하지만, 이 보장은 단방향으로만 성립합니다. 2시간보다 더 늦은 데이터가 집계가 되지 않음을 보장하지는 않습니다. 2시간보다 더 늦은 데이터는 집계가 될 수도, 되지 않을 수도 있습니다. 다만, 데이터가 지연되면 될 수록 엔진에서 처리할 가능성은 낮아집니다.
+
+
+### **조인 연산**
+
+구조적 스트리밍은 스트리밍 Dataset/DataFrame을 정적 Dataset/DataFrame 또는 다른 스트리밍 Dataset/DataFrame과 조인하는 것을 지원합니다. 스트리밍 조인의 결과는 이전 섹션에서 살펴본 스트리밍 집계와 유사한 형태로 점진적으로 생성됩니다. 이 섹션에서는 위의 경우에서 어떠한 조인 연산(예: 내부 조인, 외부 조인 등)이 지원되는지 살펴보겠습니다. 지원하는 모든 조인에서, 스트리밍 Dataset/DataFrame과의 조인 결과는 동일한 스트림 데이터를 가지는 정적 Dataset/DataFrame과의 조인 결과와 같습니다.
+
+
+#### **스트림-정적 간 조인**
+
+스파크 2.0이 도입된 후로부터 구조적 스트리밍은 스트리밍과 정적 DataFrame/Dataset 간의 조인(내부 조인과 몇 가지 종류의 외부 조인)을 지원했습니다. 아래는 간단한 예시입니다.
+
+
+
+*   **Scala**
+
+
+```
 val staticDf = spark.read. ...
 val streamingDf = spark.readStream. ...
 
-streamingDf.join(staticDf, "type")          // inner equi-join with a static DF
-streamingDf.join(staticDf, "type", "right_join")  // right outer join with a static DF  
+streamingDf.join(staticDf, "type")          // 정적 DataFrame과의 내부 동등 조인
+streamingDf.join(staticDf, "type", "right_join")  // 정적 DataFrame과의 오른쪽 외부 조인 
 
-{% endhighlight %}
-
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-Dataset<Row> staticDf = spark.read(). ...;
-Dataset<Row> streamingDf = spark.readStream(). ...;
-streamingDf.join(staticDf, "type");         // inner equi-join with a static DF
-streamingDf.join(staticDf, "type", "right_join");  // right outer join with a static DF
-{% endhighlight %}
+```
 
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 staticDf = spark.read. ...
 streamingDf = spark.readStream. ...
-streamingDf.join(staticDf, "type")  # inner equi-join with a static DF
-streamingDf.join(staticDf, "type", "right_join")  # right outer join with a static DF
-{% endhighlight %}
+streamingDf.join(staticDf, "type")  # 정적 DataFrame과의 내부 동등 조인
+streamingDf.join(staticDf, "type", "right_join")  # 정적 DataFrame과의 오른쪽 외부 조인
+```
 
-</div>
 
-<div data-lang="r"  markdown="1">
+스트림과 정적 사이의 조인은 상태를 가지지 않아 상태 관리가 필요없습니다. 하지만, 일부 스트림-정적 외부 조인은 아직 지원되지 않습니다. [조인 섹션의 마지막 부분](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries)을 참조하세요.
 
-{% highlight r %}
-staticDf <- read.df(...)
-streamingDf <- read.stream(...)
-joined <- merge(streamingDf, staticDf, sort = FALSE)  # inner equi-join with a static DF
-joined <- join(
-            staticDf,
-            streamingDf, 
-            streamingDf$value == staticDf$value,
-            "right_outer")  # right outer join with a static DF
-{% endhighlight %}
 
-</div>
-</div>
+#### **스트림-스트림 간 조인**
 
-Note that stream-static joins are not stateful, so no state management is necessary.
-However, a few types of stream-static outer joins are not yet supported.
-These are listed at the [end of this Join section](#support-matrix-for-joins-in-streaming-queries).
+스파크 2.3 버전에서 스트림과 스트림 사이의 조인이 가능하게 되어 두 스트리밍 Dataset/DataFrame을 조인할 수 있게 되었습니다. 두 데이터 스트림의 조인 결과를 얻을 때의 어려운 점은 항상 두 dataset의 뷰가 완전하지 않기 때문에 두 입력 간의 매치를 찾기 어렵다는 것입니다. 한 쪽의 스트림 입력에서 받은 로우가 아직 수신되기 전의 다른 쪽의 스트림의 로우와 나중에 일치할 수도 있기 때문입니다. 그러므로 두 입력 스트림 모두에 대해 과거 입력을 스트리밍 상태로 버퍼에 저장하여, 모든 이후 입력을 과거 입력과 비교하여 조인 결과에 포함할 수 있도록 합니다. 또한, 스트리밍 집계와 마찬가지로 순서에 어긋난 늦은 데이터를 자동으로 처리하고 워터마크를 이용해 저장되는 중간 상태를 제한할 수 있습니다. 어떤 타입의 스트림-스트림 간 조인이 지원되는지 그리고 어떻게 이를 사용하는지 살펴보겠습니다.
 
-#### Stream-stream Joins
-In Spark 2.3, we have added support for stream-stream joins, that is, you can join two streaming
-Datasets/DataFrames. The challenge of generating join results between two data streams is that,
-at any point of time, the view of the dataset is incomplete for both sides of the join making
-it much harder to find matches between inputs. Any row received from one input stream can match
-with any future, yet-to-be-received row from the other input stream. Hence, for both the input
-streams, we buffer past input as streaming state, so that we can match every future input with
-past input and accordingly generate joined results. Furthermore, similar to streaming aggregations,
-we automatically handle late, out-of-order data and can limit the state using watermarks.
-Let’s discuss the different types of supported stream-stream joins and how to use them.
 
-##### Inner Joins with optional Watermarking
-Inner joins on any kind of columns along with any kind of join conditions are supported.
-However, as the stream runs, the size of streaming state will keep growing indefinitely as
-*all* past input must be saved as any new input can match with any input from the past.
-To avoid unbounded state, you have to define additional join conditions such that indefinitely
-old inputs cannot match with future inputs and therefore can be cleared from the state.
-In other words, you will have to do the following additional steps in the join.
+##### **선택적으로 워터마크가 지정된 내부 조인**
 
-1. Define watermark delays on both inputs such that the engine knows how delayed the input can be
-(similar to streaming aggregations)
+모든 종류의 컬럼과 모든 조인 조건에 대해 내부 조인을 지원합니다. 그러나 스트림이 실행되면서, 새로 주어진 입력값이 이전의 입력값과 매치될 수도 있기 때문에, 잠재적으로 매치될 가능성이 있는 모든 이전 입력을 저장할 경우 스트리밍 상태의 크기는 계속해서 무한정 증가할 수밖에 없습니다. 이를 막기 위해, 무한히 오래된 입력은 나중에 들어올 입력과 매치되지 않게 스트리밍 상태에서 지워지도록 추가적으로 조인 조건을 지정해야합니다. 다시 말하면 조인에서 다음과 같은 추가 단계를 수행하여야 합니다.
 
-1. Define a constraint on event-time across the two inputs such that the engine can figure out when
-old rows of one input is not going to be required (i.e. will not satisfy the time constraint) for
-matches with the other input. This constraint can be defined in one of the two ways.
 
-    1. Time range join conditions (e.g. `...JOIN ON leftTime BETWEEN rightTime AND rightTime + INTERVAL 1 HOUR`),
 
-    1. Join on event-time windows (e.g. `...JOIN ON leftTimeWindow = rightTimeWindow`).
+1. (스트리밍 집계와 유사한 방법으로) 입력이 얼마나 지연될 수 있는지 엔진이 알 수 있도록 두 입력에 워터마크를 정의합니다. 
+2. 한 입력의 오래된 로우가 다른 입력과의 매치에 필요하지 않게 되는 시점(즉, 시간 제약을 만족하지 않을 때)을 엔진이 알 수 있도록, 두 입력 모두에 해당하는 이벤트 시각에 대한 제약을 정의합니다. 이러한 제약은 다음 두 방법 중 하나로 정의할 수 있습니다.
+    1. 시간 범위 조인 조건 (예: `...JOIN ON leftTime BETWEEN rightTime AND rightTime + INTERVAL 1 HOUR`),
+    2. 이벤트 시간 윈도우를 기준으로 조인 (예: `...JOIN ON leftTimeWindow = rightTimeWindow`).
 
-Let’s understand this with an example.
+예제를 통해 살펴보도록 하겠습니다.
 
-Let’s say we want to join a stream of advertisement impressions (when an ad was shown) with
-another stream of user clicks on advertisements to correlate when impressions led to
-monetizable clicks. To allow the state cleanup in this stream-stream join, you will have to
-specify the watermarking delays and the time constraints as follows.
+광고 노출이 수익 창출이 가능한 클릭을 발생시키는지 알아보기 위해, 광고 노출(광고가 사용자에게 보여졌을 때)에 대한 스트림과 사용자의 광고 클릭에 대한 스트림을 조인한다고 가정합시다. 이 스트림과 스트림 사이의 조인에서, 상태를 비우는 것을 허용하려면 다음과 같이 워터마킹 딜레이와 시간 제약을 설정해야 할 것입니다.
 
-1. Watermark delays: Say, the impressions and the corresponding clicks can be late/out-of-order
-in event-time by at most 2 and 3 hours, respectively.
 
-1. Event-time range condition: Say, a click can occur within a time range of 0 seconds to 1 hour
-after the corresponding impression.
 
-The code would look like this.
+1. 워터마크: 광고의 노출과 해당 광고 클릭의 이벤트 시간은 최대 각각 2시간과 3시간까지 지연되거나 순서에 맞지 않게 올 수 있다.
+2. 이벤트 시각: 광고의 노출 후, 해당 광고 클릭은 0초에서 1시간 사이에 발생한다.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+코드는 다음과 같이 짜여질 것입니다.
 
-{% highlight scala %}
+
+
+*   **Scala**
+
+
+```
 import org.apache.spark.sql.functions.expr
 
 val impressions = spark.readStream. ...
 val clicks = spark.readStream. ...
 
-// Apply watermarks on event-time columns
+// 이벤트 시간 컬럼에 워터마크를 적용합니다
 val impressionsWithWatermark = impressions.withWatermark("impressionTime", "2 hours")
 val clicksWithWatermark = clicks.withWatermark("clickTime", "3 hours")
 
-// Join with event-time constraints
+// 이벤트 시각 제약을 설정하여 조인합니다
 impressionsWithWatermark.join(
   clicksWithWatermark,
   expr("""
@@ -1204,47 +847,24 @@ impressionsWithWatermark.join(
     """)
 )
 
-{% endhighlight %}
-
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-import static org.apache.spark.sql.functions.expr
-
-Dataset<Row> impressions = spark.readStream(). ...
-Dataset<Row> clicks = spark.readStream(). ...
-
-// Apply watermarks on event-time columns
-Dataset<Row> impressionsWithWatermark = impressions.withWatermark("impressionTime", "2 hours");
-Dataset<Row> clicksWithWatermark = clicks.withWatermark("clickTime", "3 hours");
-
-// Join with event-time constraints
-impressionsWithWatermark.join(
-  clicksWithWatermark,
-  expr(
-    "clickAdId = impressionAdId AND " +
-    "clickTime >= impressionTime AND " +
-    "clickTime <= impressionTime + interval 1 hour ")
-);
-
-{% endhighlight %}
+```
 
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 from pyspark.sql.functions import expr
 
 impressions = spark.readStream. ...
 clicks = spark.readStream. ...
 
-# Apply watermarks on event-time columns
+# 이벤트 시간 컬럼에 워터마크를 적용합니다
 impressionsWithWatermark = impressions.withWatermark("impressionTime", "2 hours")
 clicksWithWatermark = clicks.withWatermark("clickTime", "3 hours")
 
-# Join with event-time constraints
+# 이벤트 시각 제약을 설정하여 조인합니다
 impressionsWithWatermark.join(
   clicksWithWatermark,
   expr("""
@@ -1253,55 +873,25 @@ impressionsWithWatermark.join(
     clickTime <= impressionTime + interval 1 hour
     """)
 )
+```
 
-{% endhighlight %}
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-impressions <- read.stream(...)
-clicks <- read.stream(...)
+###### **워터마크가 지정된 스트림-스트림 간 내부 조인의 동작 보장성**
 
-# Apply watermarks on event-time columns
-impressionsWithWatermark <- withWatermark(impressions, "impressionTime", "2 hours")
-clicksWithWatermark <- withWatermark(clicks, "clickTime", "3 hours")
+이는 [워터마크가 지정된 집계의 동작 보장성](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#semantic-guarantees-of-aggregation-with-watermarking)과 유사합니다. “2시간”의 워터마크 딜레이는 2시간 내에 도착한 데이터를 엔진이 절대로 누락하지 않는다는 것을 보장합니다. 하지만 2시간 이상 지연된 데이터에 대해서는 처리가 될 수도, 되지 않을 수도 있습니다.
 
-# Join with event-time constraints
-joined <- join(
-  impressionsWithWatermark,
-  clicksWithWatermark,
-  expr(
-    paste(
-      "clickAdId = impressionAdId AND",
-      "clickTime >= impressionTime AND",
-      "clickTime <= impressionTime + interval 1 hour"
-)))
 
-{% endhighlight %}
+##### **워터마크가 지정된 외부 조인**
 
-</div>
-</div>
+워터마크와 이벤트 시간 제약이 내부 조인에서는 선택 사항이지만, 왼쪽 및 오른쪽 외부 조인에서는 반드시 지정되어야 합니다. 왜냐하면 외부 조인의 경우 결과로 NULL을 생성하려면 엔진이 입력 로우가 앞으로 어떤 것과도 매치되지 않을 것임을 확신할 수 있어야 하기 때문입니다. 그러므로 올바른 결과를 얻기 위해서는 워터마크와 이벤트 시간 제약 조건이 지정되어야 합니다. 그러므로, 외부 조인이 포함된 쿼리는 외부 조인을 명시하는 추가 파라미터를 제외하면 이전에 살펴본 광고 수익화 예제와 매우 비슷하게 보일 것입니다.
 
-###### Semantic Guarantees of Stream-stream Inner Joins with Watermarking
-{:.no_toc}
-This is similar to the [guarantees provided by watermarking on aggregations](#semantic-guarantees-of-aggregation-with-watermarking).
-A watermark delay of "2 hours" guarantees that the engine will never drop any data that is less than
- 2 hours delayed. But data delayed by more than 2 hours may or may not get processed.
 
-##### Outer Joins with Watermarking
-While the watermark + event-time constraints is optional for inner joins, for left and right outer
-joins they must be specified. This is because for generating the NULL results in outer join, the
-engine must know when an input row is not going to match with anything in future. Hence, the
-watermark + event-time constraints must be specified for generating correct results. Therefore,
-a query with outer-join will look quite like the ad-monetization example earlier, except that
-there will be an additional parameter specifying it to be an outer-join.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+*   **Scala**
 
-{% highlight scala %}
 
+```
 impressionsWithWatermark.join(
   clicksWithWatermark,
   expr("""
@@ -1309,31 +899,17 @@ impressionsWithWatermark.join(
     clickTime >= impressionTime AND
     clickTime <= impressionTime + interval 1 hour
     """),
-  joinType = "leftOuter"      // can be "inner", "leftOuter", "rightOuter"
+  joinType = "leftOuter"      // 가능한 값: "inner", "leftOuter", "rightOuter"
  )
 
-{% endhighlight %}
-
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-impressionsWithWatermark.join(
-  clicksWithWatermark,
-  expr(
-    "clickAdId = impressionAdId AND " +
-    "clickTime >= impressionTime AND " +
-    "clickTime <= impressionTime + interval 1 hour "),
-  "leftOuter"                 // can be "inner", "leftOuter", "rightOuter"
-);
-
-{% endhighlight %}
+```
 
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 impressionsWithWatermark.join(
   clicksWithWatermark,
   expr("""
@@ -1341,547 +917,551 @@ impressionsWithWatermark.join(
     clickTime >= impressionTime AND
     clickTime <= impressionTime + interval 1 hour
     """),
-  "leftOuter"                 # can be "inner", "leftOuter", "rightOuter"
+  "leftOuter"                 # 가능한 값: "inner", "leftOuter", "rightOuter"
 )
-
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-
-{% highlight r %}
-joined <- join(
-  impressionsWithWatermark,
-  clicksWithWatermark,
-  expr(
-    paste(
-      "clickAdId = impressionAdId AND",
-      "clickTime >= impressionTime AND",
-      "clickTime <= impressionTime + interval 1 hour"),
-  "left_outer"                 # can be "inner", "left_outer", "right_outer"
-))
-
-{% endhighlight %}
-
-</div>
-</div>
+```
 
 
-###### Semantic Guarantees of Stream-stream Outer Joins with Watermarking
-{:.no_toc}
-Outer joins have the same guarantees as [inner joins](#semantic-guarantees-of-stream-stream-inner-joins-with-watermarking)
-regarding watermark delays and whether data will be dropped or not.
 
-###### Caveats
-{:.no_toc}
-There are a few important characteristics to note regarding how the outer results are generated.
+###### **워터마크가 지정된 스트림-스트림 간 외부 조인의 동작 보증성**
 
-- *The outer NULL results will be generated with a delay that depends on the specified watermark
-delay and the time range condition.* This is because the engine has to wait for that long to ensure
-there were no matches and there will be no more matches in future.
+워터마크 딜레이와 데이터가 누락될지 아닐지에 대해 외부 조인은 [내부 조인](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#semantic-guarantees-of-stream-stream-inner-joins-with-watermarking)과 동일하게 보장됩니다.
 
-- In the current implementation in the micro-batch engine, watermarks are advanced at the end of a
-micro-batch, and the next micro-batch uses the updated watermark to clean up state and output
-outer results. Since we trigger a micro-batch only when there is new data to be processed, the
-generation of the outer result may get delayed if there no new data being received in the stream.
-*In short, if any of the two input streams being joined does not receive data for a while, the
-outer (both cases, left or right) output may get delayed.*
 
-##### Support matrix for joins in streaming queries
+###### **주의 사항**
 
-<table class ="table">
+외부 조인의 결과 생성 방법과 관련하여 알아야 할 중요한 특징이 있습니다.
+
+
+
+*   _외부 조인 결과에서 NULL의 생성이 지연되는 정도는 지정된 워터마크 딜레이와 시간 범위 조건에 달려있습니다._ 이는 엔진이 더 이상 일치하는 조건이 없을 때까지 해당 시간만큼 기다려야 하기 때문입니다.
+*   마이크로 배치 엔진의 현재 구현에서, 워터마크는 마이크로 배치의 끝에서 시작되고, 다음 마이크로 배치에서 갱신된 워터마크를 이용해 상태를 정리하여 외부 조인의 결과를 출력합니다. 처리할 새 데이터가 있을 때에만 마이크로 배치를 사용하기 때문에, 스트림으로부터 아무런 데이터도 받지 못한다면 외부 조인의 결과 생성이 지연될 수 있습니다. _간단히 말해, 조인되고 있는 두 입력 스트림에서 한동안 아무런 데이터를 받지 못한다면, 외부 조인(왼쪽 및 오른쪽 조인 모두)의 결과 출력이 늦을 수 있습니다._
+
+
+##### **스트리밍 쿼리에서의 조인 지원 여부**
+
+
+<table>
   <tr>
-    <th>Left Input</th>
-    <th>Right Input</th>
-    <th>Join Type</th>
-    <th></th>
+   <td><strong>왼쪽 입력</strong>
+   </td>
+   <td><strong>오른쪽 입력</strong>
+   </td>
+   <td><strong>조인 종류</strong>
+   </td>
+   <td>
+   </td>
   </tr>
   <tr>
-      <td style="vertical-align: middle;">Static</td>
-      <td style="vertical-align: middle;">Static</td>
-      <td style="vertical-align: middle;">All types</td>
-      <td style="vertical-align: middle;">
-        Supported, since its not on streaming data even though it
-        can be present in a streaming query
-      </td>
+   <td>정적
+   </td>
+   <td>정적
+   </td>
+   <td>모든 종류
+   </td>
+   <td>지원함, 스트리밍 쿼리 내에 존재할 수 있지만 스트리밍 데이터는 아니기 때문
+   </td>
   </tr>
   <tr>
-    <td rowspan="4" style="vertical-align: middle;">Stream</td>
-    <td rowspan="4" style="vertical-align: middle;">Static</td>
-    <td style="vertical-align: middle;">Inner</td>
-    <td style="vertical-align: middle;">Supported, not stateful</td>
+   <td rowspan="4" >스트림
+   </td>
+   <td rowspan="4" >정적
+   </td>
+   <td>내부
+   </td>
+   <td>지원함, 상태를 가지지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Left Outer</td>
-    <td style="vertical-align: middle;">Supported, not stateful</td>
+   <td>왼쪽 외부
+   </td>
+   <td>지원함, 상태를 가지지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Right Outer</td>
-    <td style="vertical-align: middle;">Not supported</td>
+   <td>오른쪽 외부
+   </td>
+   <td>지원하지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Full Outer</td>
-    <td style="vertical-align: middle;">Not supported</td>
+   <td>전체 외부
+   </td>
+   <td>지원하지 않음
+   </td>
   </tr>
   <tr>
-    <td rowspan="4" style="vertical-align: middle;">Static</td>
-    <td rowspan="4" style="vertical-align: middle;">Stream</td>
-    <td style="vertical-align: middle;">Inner</td>
-    <td style="vertical-align: middle;">Supported, not stateful</td>
+   <td rowspan="4" >정적
+   </td>
+   <td rowspan="4" >스트림
+   </td>
+   <td>내부
+   </td>
+   <td>지원함, 상태를 가지지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Left Outer</td>
-    <td style="vertical-align: middle;">Not supported</td>
+   <td>왼쪽 외부
+   </td>
+   <td>지원하지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Right Outer</td>
-    <td style="vertical-align: middle;">Supported, not stateful</td>
+   <td>오른쪽 외부
+   </td>
+   <td>지원함, 상태를 가지지 않음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Full Outer</td>
-    <td style="vertical-align: middle;">Not supported</td>
+   <td>전체 외부
+   </td>
+   <td>지원하지 않음
+   </td>
   </tr>
   <tr>
-    <td rowspan="4" style="vertical-align: middle;">Stream</td>
-    <td rowspan="4" style="vertical-align: middle;">Stream</td>
-    <td style="vertical-align: middle;">Inner</td>
-    <td style="vertical-align: middle;">
-      Supported, optionally specify watermark on both sides +
-      time constraints for state cleanup
-    </td>
+   <td rowspan="4" >스트림
+   </td>
+   <td rowspan="4" >스트림
+   </td>
+   <td>내부
+   </td>
+   <td>지원함, 선택적으로 워터마크를 양쪽에 지정하고 시간 제약을 둠으로써 중간 상태의 정리가 가능
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Left Outer</td>
-    <td style="vertical-align: middle;">
-      Conditionally supported, must specify watermark on right + time constraints for correct
-      results, optionally specify watermark on left for all state cleanup
-    </td>
+   <td>왼쪽 외부
+   </td>
+   <td>조건부로 지원함, 올바른 결과를 얻기 위해서는 반드시 워터마크를 오른쪽에 지정하고 시간 제약을 두어야 함, 모든 상태를 정리하기 위해 왼쪽에 워터마크를 선택적으로 지정할 수 있음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Right Outer</td>
-    <td style="vertical-align: middle;">
-      Conditionally supported, must specify watermark on left + time constraints for correct
-      results, optionally specify watermark on right for all state cleanup
-    </td>
+   <td>오른쪽 외부
+   </td>
+   <td>조건부로 지원함, 올바른 결과를 얻기 위해서는 반드시 워터마크를 왼쪽에 지정하고 시간 제약을 두어야 함, 모든 상태를 정리하기 위해 오른쪽에 워터마크를 선택적으로 지정할 수 있음
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Full Outer</td>
-    <td style="vertical-align: middle;">Not supported</td>
+   <td>전체 외부
+   </td>
+   <td>지원하지 않음
+   </td>
   </tr>
- <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
   </tr>
 </table>
 
-Additional details on supported joins:
 
-- Joins can be cascaded, that is, you can do `df1.join(df2, ...).join(df3, ...).join(df4, ....)`.
-
-- As of Spark 2.3, you can use joins only when the query is in Append output mode. Other output modes are not yet supported.
-
-- As of Spark 2.3, you cannot use other non-map-like operations before joins. Here are a few examples of
-  what cannot be used.
-
-  - Cannot use streaming aggregations before joins.
-
-  - Cannot use mapGroupsWithState and flatMapGroupsWithState in Update mode before joins.
+지원되는 조인에 대한 추가 정보:
 
 
-### Streaming Deduplication
-You can deduplicate records in data streams using a unique identifier in the events. This is exactly same as deduplication on static using a unique identifier column. The query will store the necessary amount of data from previous records such that it can filter duplicate records. Similar to aggregations, you can use deduplication with or without watermarking.
 
-- *With watermark* - If there is a upper bound on how late a duplicate record may arrive, then you can define a watermark on a event time column and deduplicate using both the guid and the event time columns. The query will use the watermark to remove old state data from past records that are not expected to get any duplicates any more. This bounds the amount of the state the query has to maintain.
+*   조인을 체인 형식으로 연결할 수 있습니다. 즉, `df1.join(df2, ...).join(df3, ...).join(df4, ....)`와 같은 형태로 사용할 수 있습니다.
+*   스파크 2.3에서는 쿼리가 Append 출력 모드일 때만 조인을 사용할 수 있습니다. 다른 출력 모드는 아직 지원하지 않습니다.
+*   스파크 2.3에서는 조인 전에 map 종류의 연산 이외의 것을 사용할 수 없습니다. 다음은 사용할 수 없는 몇 가지 예시입니다.
+    *   조인 전에 스트리밍 집계를 사용할 수 없습니다.
+    *   조인 전 Update 모드에서 mapGroupsWithState와 flatMapGroupsWithState를 사용할 수 없습니다.
 
-- *Without watermark* - Since there are no bounds on when a duplicate record may arrive, the query stores the data from all the past records as state.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+### **스트리밍 중복 제거**
 
-{% highlight scala %}
-val streamingDf = spark.readStream. ...  // columns: guid, eventTime, ...
+이벤트의 고유 식별자를 사용하여 데이터 스트림의 중복 레코드를 제거할 수 있습니다. 이는 정적인 경우에서 고유 식별자 컬럼을 사용하여 중복을 제거하는 것과 동일합니다. 쿼리는 중복 레코드를 필터링할 수 있도록 이전 레코드 중 필요한 만큼의 데이터를 저장합니다. 집계와 마찬가지로, 워터마크의 유무와 관계없이 중복을 제거할 수 있습니다.
 
-// Without watermark using guid column
+
+
+*   _워터마크가 지정된 경우_ - 중복 레코드가 얼마나 늦게 도착할지에 대한 상한선이 있는 경우, 이벤트 시각 컬럼에 워터마크를 지정하고, 해당 전역 고유 식별자(guid)와 이벤트 시간 컬럼을 이용하여 중복을 제거할 수 있습니다. 쿼리는 워터마크를 이용하여 더 이상 중복이 오지 않을 것이라고 생각되는 과거 레코드의 오래된 상태를 제거합니다. 이는 쿼리가 유지해야 하는 상태의 양을 제한합니다.
+*   _워터마크가 지정되지 않은 경우_ - 중복 레코드가 언제 도착할지에 대한 범위가 없으므로, 쿼리는 모든 과거 레코드의 데이터를 상태로 저장합니다.
+*   **Scala**
+
+
+```
+val streamingDf = spark.readStream. ...  // 컬럼: guid, eventTime, ...
+
+// 워터마크 없이 guid 컬럼을 이용
 streamingDf.dropDuplicates("guid")
 
-// With watermark using guid and eventTime columns
+// 워터마크와 guid, eventTime 컬럼을 이용
 streamingDf
   .withWatermark("eventTime", "10 seconds")
   .dropDuplicates("guid", "eventTime")
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-Dataset<Row> streamingDf = spark.readStream(). ...;  // columns: guid, eventTime, ...
-
-// Without watermark using guid column
-streamingDf.dropDuplicates("guid");
-
-// With watermark using guid and eventTime columns
-streamingDf
-  .withWatermark("eventTime", "10 seconds")
-  .dropDuplicates("guid", "eventTime");
-{% endhighlight %}
+```
 
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 streamingDf = spark.readStream. ...
 
-# Without watermark using guid column
+# 워터마크 없이 guid 컬럼을 이용
 streamingDf.dropDuplicates("guid")
 
-# With watermark using guid and eventTime columns
+# 워터마크와 guid, eventTime 컬럼을 이용
 streamingDf \
   .withWatermark("eventTime", "10 seconds") \
   .dropDuplicates("guid", "eventTime")
-{% endhighlight %}
+```
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-streamingDf <- read.stream(...)
 
-# Without watermark using guid column
-streamingDf <- dropDuplicates(streamingDf, "guid")
+### **다중 워터마크 운용 정책**
 
-# With watermark using guid and eventTime columns
-streamingDf <- withWatermark(streamingDf, "eventTime", "10 seconds")
-streamingDf <- dropDuplicates(streamingDf, "guid", "eventTime")
-{% endhighlight %}
+스트리밍 쿼리는 유니온(Union)되거나 조인된 여러 입력 스트림을 가질 수 있습니다. 상태 유지 연산을 위해 허용할 늦은 데이터에 대해 각 입력 스트림은 서로 다른 임계 값을 가질 수 있습니다. `withWatermarks("eventTime", delay)`를 이용하여 각 입력 스트림에 임계 값을 지정할 수 있습니다. 예를 들어, `inputStream1`과 `inputStream2`의 스트림-스트림 간 조인 생각해봅시다.
 
-</div>
-</div>
+inputStream1.withWatermark(“eventTime1”, “1 hour”) .join( inputStream2.withWatermark(“eventTime2”, “2 hours”), joinCondition)
 
-### Policy for handling multiple watermarks
-A streaming query can have multiple input streams that are unioned or joined together.
-Each of the input streams can have a different threshold of late data that needs to
-be tolerated for stateful operations. You specify these thresholds using
-``withWatermarks("eventTime", delay)`` on each of the input streams. For example, consider
-a query with stream-stream joins between `inputStream1` and `inputStream2`.
-    
-  inputStream1.withWatermark("eventTime1", "1 hour")
-    .join(
-      inputStream2.withWatermark("eventTime2", "2 hours"),
-      joinCondition)
+쿼리를 실행하는 동안, 구조적 스트리밍은 각 입력 스트림에서 확인된 가장 큰 이벤트 시간을 개별적으로 추적하고, 해당 지연을 기준으로 워터마크를 계산하고, 상태 유지 연산에 사용될 하나의 전역 워터마크를 선택합니다. 최솟값을 전역 워터마크로 정하게 되면 특정 스트림이 다른 스트림보다 뒤쳐지더라도 데이터가 누락되지 않는다는 것을 보장할 수 있기 때문에 (예: upstream 오류로 특정 스트림이 데이터 수신을 멈추는 경우), 기본값으로 최솟값이 전역 워터마크로 선택됩니다. 즉, 전역 워터마크는 가장 느린 스트림의 속도에 맞춰지고, 그만큼 쿼리의 결과가 지연되어 출력됩니다.
 
-While executing the query, Structured Streaming individually tracks the maximum
-event time seen in each input stream, calculates watermarks based on the corresponding delay,
-and chooses a single global watermark with them to be used for stateful operations. By default,
-the minimum is chosen as the global watermark because it ensures that no data is
-accidentally dropped as too late if one of the streams falls behind the others
-(for example, one of the streams stop receiving data due to upstream failures). In other words,
-the global watermark will safely move at the pace of the slowest stream and the query output will
-be delayed accordingly.
+하지만 가장 느린 스트림의 데이터가 누락되더라도 빠른 결과를 얻고 싶을 수 있습니다. 스파크 2.4 버전부터 최댓값을 전역 워터마크로 선택하도록 복수 워터마크 처리 정책을 설정할 수 있습니다. SQL 환경 설정에서 `spark.sql.streaming.multipleWatermarkPolicy`를 `max`로 설정하세요 (기본값은 `min`입니다). 이를 설정하면 전역 워터마크가 가장 빠른 스트림의 속도로 맞춰집니다. 그러나 부작용으로 느린 스트림의 데이터가 적극적으로 누락됩니다. 그렇기 때문에 이 설정은 신중하게 사용되어야 합니다.
 
-However, in some cases, you may want to get faster results even if it means dropping data from the
-slowest stream. Since Spark 2.4, you can set the multiple watermark policy to choose
-the maximum value as the global watermark by setting the SQL configuration
-``spark.sql.streaming.multipleWatermarkPolicy`` to ``max`` (default is ``min``). 
-This lets the global watermark move at the pace of the fastest stream.
-However, as a side effect, data from the slower streams will be aggressively dropped. Hence, use
-this configuration judiciously.
 
-### Arbitrary Stateful Operations
-Many usecases require more advanced stateful operations than aggregations. For example, in many usecases, you have to track sessions from data streams of events. For doing such sessionization, you will have to save arbitrary types of data as state, and perform arbitrary operations on the state using the data stream events in every trigger. Since Spark 2.2, this can be done using the operation `mapGroupsWithState` and the more powerful operation `flatMapGroupsWithState`. Both operations allow you to apply user-defined code on grouped Datasets to update user-defined state. For more concrete details, take a look at the API documentation ([Scala](api/scala/index.html#org.apache.spark.sql.streaming.GroupState)/[Java](api/java/org/apache/spark/sql/streaming/GroupState.html)) and the examples ([Scala]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredSessionization.scala)/[Java]({{site.SPARK_GITHUB_URL}}/blob/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredSessionization.java)).
+### **임의의 상태 유지 연산**
 
-### Unsupported Operations
-There are a few DataFrame/Dataset operations that are not supported with streaming DataFrames/Datasets. 
-Some of them are as follows.
- 
-- Multiple streaming aggregations (i.e. a chain of aggregations on a streaming DF) are not yet supported on streaming Datasets.
+많은 실제 사용 사례에서는 집계보다 더 고도의 상태 유지 연산이 요구되기도 합니다. 예를 들어, 이벤트의 데이터 스트림에서 세션을 추적하는 경우가 있습니다. 이런 세션화를 위해서는 임의 타입의 데이터를 상태로 저장하고, 매 트리거에서 데이터 스트림 이벤트를 사용해 상태에 임의의 연산을 수행해야 합니다. 스파크 2.2 버전부터는 `mapGroupsWithState` 연산과 더 강력한 연산인 `flatMapGroupsWithState`를 이용하면 됩니다. 두 연산은 그룹화된 Dataset에 사용자 정의 코드를 적용하여 사용자 정의 상태를 업데이트할 수 있도록 해 줍니다. 더 자세한 내용은 API 문서([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.GroupState)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/GroupState.html))와 예제([Scala](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/scala/org/apache/spark/examples/sql/streaming/StructuredSessionization.scala)/[Java](https://github.com/apache/spark/blob/v2.4.0/examples/src/main/java/org/apache/spark/examples/sql/streaming/JavaStructuredSessionization.java))를 참조하세요.
 
-- Limit and take first N rows are not supported on streaming Datasets.
 
-- Distinct operations on streaming Datasets are not supported.
+### **지원하지 않는 연산**
 
-- Sorting operations are supported on streaming Datasets only after an aggregation and in Complete Output Mode.
+스트리밍 DataFrame/Dataset에서 지원되지 않는 DataFrame/Dataset 연산이 있습니다. 그 중 몇가지는 다음과 같습니다.
 
-- Few types of outer joins on streaming Datasets are not supported. See the
-  <a href="#support-matrix-for-joins-in-streaming-queries">support matrix in the Join Operations section</a>
-  for more details.
 
-In addition, there are some Dataset methods that will not work on streaming Datasets. They are actions that will immediately run queries and return results, which does not make sense on a streaming Dataset. Rather, those functionalities can be done by explicitly starting a streaming query (see the next section regarding that).
 
-- `count()` - Cannot return a single count from a streaming Dataset. Instead, use `ds.groupBy().count()` which returns a streaming Dataset containing a running count. 
+*   스트리밍 Dataset에서 다중 스트리밍 집계(예: 스트리밍 DataFrame의 연쇄적인 집계)는 아직 지원하지 않습니다.
+*   스트리밍 Dataset에서 LIMIT 연산과 처음 N개의 로우를 가져오는 연산은 지원하지 않습니다.
+*   스트리밍 Dataset에서 DISTINCT 연산은 지원하지 않습니다.
+*   스트리밍 Dataset에서 정렬 연산은 집계 후에만, Complete 출력 모드에서 지원합니다.
+*   스트리밍 Dataset에서 외부 조인은 거의 지원되지 않습니다. 자세한 내용은 [조인 연산 지원 여부 섹션](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries)를 참조하세요.
 
-- `foreach()` - Instead use `ds.writeStream.foreach(...)` (see next section).
+이 외에도, 스트리밍 Dataset에 적용할 수 없는 Dataset 메소드가 있습니다. 이 액션 메소드들은 호출되는 즉시 쿼리를 실행하고 그 결과를 반환하기 때문에, 스트리밍 Dataset에서는 의미가 없는 메소드들입니다. 대신 이런 기능은 명시적으로 스트리밍 쿼리를 시작하여 수행할 수 있습니다 (이에 대해서는 다음 섹션을 참조하세요).
 
-- `show()` - Instead use the console sink (see next section).
 
-If you try any of these operations, you will see an `AnalysisException` like "operation XYZ is not supported with streaming DataFrames/Datasets".
-While some of them may be supported in future releases of Spark, 
-there are others which are fundamentally hard to implement on streaming data efficiently. 
-For example, sorting on the input stream is not supported, as it requires keeping 
-track of all the data received in the stream. This is therefore fundamentally hard to execute 
-efficiently.
 
-## Starting Streaming Queries
-Once you have defined the final result DataFrame/Dataset, all that is left is for you to start the streaming computation. To do that, you have to use the `DataStreamWriter`
-([Scala](api/scala/index.html#org.apache.spark.sql.streaming.DataStreamWriter)/[Java](api/java/org/apache/spark/sql/streaming/DataStreamWriter.html)/[Python](api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamWriter) docs)
-returned through `Dataset.writeStream()`. You will have to specify one or more of the following in this interface.
+*   `count()` - 스트리밍 Dataset에서 하나의 카운트를 반환하는 것은 불가능합니다. 실행 카운트를 포함한 스트리밍 Dataset을 반환하는 `ds.groupBy().count()`를 사용하세요.
+*   `foreach()` - `ds.writeStream.foreach(...)`를 사용하세요 (다음 섹션 참조).
+*   `show()` - 콘솔 싱크를 사용하세요 (다음 섹션 참조).
 
-- *Details of the output sink:* Data format, location, etc.
+이러한 연산을 실행하면, "operation XYZ is not supported with streaming DataFrames/Datasets (연산 XYZ는 스트리밍 DataFrame/Dataset에 적용할 수 없습니다.)"라는 `AnalysisException`을 보게 될 겁니다. 이 중 일부는 후에 릴리즈될 스파크 버전에서 지원할 수도 있지만, 근본적으로 스트리밍 데이터에 대해 효율적으로 구현하는 것 자체가 어려운 연산도 있습니다. 예를 들어, 입력 스트림을 정렬하는 것은 지원하지 않는데, 스트림에 수신된 모든 데이터의 값을 확인해야 하기 때문입니다. 이는 효율적으로 실행하기가 근본적으로 어렵습니다.
 
-- *Output mode:* Specify what gets written to the output sink.
 
-- *Query name:* Optionally, specify a unique name of the query for identification.
+## **스트리밍 쿼리 시작하기**
 
-- *Trigger interval:* Optionally, specify the trigger interval. If it is not specified, the system will check for availability of new data as soon as the previous processing has completed. If a trigger time is missed because the previous processing has not completed, then the system will trigger processing immediately.
+최종 DataFrame/Dataset을 정의한 후에는 스트리밍 연산을 시작하면 됩니다. 이를 위해서는 `Dataset.writeStream()`을 통해 반환되는 `DataStreamWriter`([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.DataStreamWriter)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/DataStreamWriter.html)/[Python](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.streaming.DataStreamWriter) 문서)를 이용하면 됩니다. 이 인터페이스에서 다음 중 하나 이상을 지정해야 합니다.
 
-- *Checkpoint location:* For some output sinks where the end-to-end fault-tolerance can be guaranteed, specify the location where the system will write all the checkpoint information. This should be a directory in an HDFS-compatible fault-tolerant file system. The semantics of checkpointing is discussed in more detail in the next section.
 
-#### Output Modes
-There are a few types of output modes.
 
-- **Append mode (default)** - This is the default mode, where only the 
-new rows added to the Result Table since the last trigger will be 
-outputted to the sink. This is supported for only those queries where 
-rows added to the Result Table is never going to change. Hence, this mode 
-guarantees that each row will be output only once (assuming 
-fault-tolerant sink). For example, queries with only `select`, 
-`where`, `map`, `flatMap`, `filter`, `join`, etc. will support Append mode.
+*   _출력 싱크의 세부 사항_: 데이터 형식, 위치 등.
+*   _출력 모드_: 출력 싱크에 작성될 내용을 지정합니다.
+*   _쿼리 이름_: (선택) 쿼리를 구분할 고유 이름을 지정합니다.
+*   _트리거 간격_: (선택) 트리거의 간격을 지정합니다. 지정되지 않은 경우, 시스템은 이전 처리가 완료되자마자 새로운 데이터가 준비되었는지 확인합니다. 이전 처리가 완료되지 않아 처리 시간을 놓친 경우에는 시스템이 즉시 처리를 시작합니다.
+*   _체크포인트 위치_: 종단간 장애 허용이 보장되는 일부 출력 싱크에 대해, 시스템이 체크포인트 정보를 작성할 위치를 지정합니다. 지정된 위치는 HDFS와 호환되는 장애 허용 파일 시스템 상의 디렉토리여야 합니다. 체크포인팅의 동작에 대해서는 다음 섹션에서 더 자세하게 설명됩니다.
 
-- **Complete mode** - The whole Result Table will be outputted to the sink after every trigger.
- This is supported for aggregation queries.
 
-- **Update mode** - (*Available since Spark 2.1.1*) Only the rows in the Result Table that were 
-updated since the last trigger will be outputted to the sink. 
-More information to be added in future releases.
+#### **출력 모드**
 
-Different types of streaming queries support different output modes.
-Here is the compatibility matrix.
+출력 모드에는 몇 가지 종류가 있습니다.
 
-<table class="table">
+
+
+*   **Append 모드 (기본값)** - 기본 모드입니다. 마지막 트리거 이후 결과 테이블에 새로 추가된 로우만 싱크로 출력됩니다. 이는 결과 테이블에 dlal 추가된 로우를 절대 변경하지 않는 쿼리에만 지원됩니다. 그러므로 이 모드는 각 로우가 한 번만 출력되는 것을 보장합니다 (장애 허용 싱크를 사용할 경우). 예를 들어 `select`, `where`, `map`, `flatMap`, `filter`, `join` 등만 사용되는 쿼리에 한해 Append 모드를 지원합니다.
+*   **Complete 모드** - 매 트리거 후에 전체 결과 테이블이 싱크로 출력됩니다. 이 모드는 집계 쿼리를 지원합니다.
+*   **Update 모드** - (스파크 2.1.1 버전부터 사용 가능) 마지막 트리거 이후 결과 테이블에서 업데이트된 로우만 싱크로 출력됩니다. 향후 릴리즈에서 더 많은 정보가 추가될 예정입니다.
+
+각 스트리밍 쿼리는 서로 다른 출력 모드를 지원합니다. 다음은 호환성을 나타낸 표입니다.
+
+
+<table>
   <tr>
-    <th>Query Type</th>
-    <th></th>
-    <th>Supported Output Modes</th>
-    <th>Notes</th>        
+   <td><strong>쿼리 종류</strong>
+   </td>
+   <td>
+   </td>
+   <td><strong>지원하는 출력 모드</strong>
+   </td>
+   <td><strong>비고</strong>
+   </td>
   </tr>
   <tr>
-    <td rowspan="2" style="vertical-align: middle;">Queries with aggregation</td>
-    <td style="vertical-align: middle;">Aggregation on event-time with watermark</td>
-    <td style="vertical-align: middle;">Append, Update, Complete</td>
-    <td>
-        Append mode uses watermark to drop old aggregation state. But the output of a 
-        windowed aggregation is delayed the late threshold specified in `withWatermark()` as by
-        the modes semantics, rows can be added to the Result Table only once after they are 
-        finalized (i.e. after watermark is crossed). See the
-        <a href="#handling-late-data-and-watermarking">Late Data</a> section for more details.
-        <br/><br/>
-        Update mode uses watermark to drop old aggregation state.
-        <br/><br/>
-        Complete mode does not drop old aggregation state since by definition this mode
-        preserves all data in the Result Table.
-    </td>    
+   <td rowspan="2" >집계가 포함된 쿼리
+   </td>
+   <td>워터마크가 지정된 이벤트 시각 기준 집계
+   </td>
+   <td>Append, Update, Complete
+   </td>
+   <td>Append 모드는 워터마크를 이용하여 오래된 집계 상태를 비웁니다. 단, 윈도우별 집계의 경우  <code>withWatermark()</code>에 지정된 지연 임계 값만큼 출력이 지연됩니다. 이는 로우가 최종적으로 결정되어야(즉, 워터마크를 지나면) 결과 테이블에 추가될 수 있는 식으로 모드가 동작하기 때문입니다. 자세한 내용은 <a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#handling-late-data-and-watermarking">늦은 데이터</a> 섹션을 참고하세요.
+<p>
+Update 모드는 워터마크를 이용하여 오래된 집계 상태를 비웁니다.
+<p>
+Complete 모드는 정의 자체가 결과 테이블의 모든 데이터를 보존한다는 이 모드의 의미이므로 오래된 집계 상태를 비우지 않습니다.
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Other aggregations</td>
-    <td style="vertical-align: middle;">Complete, Update</td>
-    <td>
-        Since no watermark is defined (only defined in other category), 
-        old aggregation state is not dropped.
-        <br/><br/>
-        Append mode is not supported as aggregates can update thus violating the semantics of 
-        this mode.
-    </td>  
+   <td>기타 집계
+   </td>
+   <td>Complete, Update
+   </td>
+   <td>워터마크가 지정되지 않았기 때문에(다른 카테고리에서만 지정됨) 오래된 집계 상태는 비워지지 않습니다.
+<p>
+Append 모드의 정의 자체가 결과 업데이트를 할 수 있다는 집계 연산의 특성에 위배되므로 Append 모드는 지원하지 않습니다
+   </td>
   </tr>
   <tr>
-    <td colspan="2" style="vertical-align: middle;">Queries with <code>mapGroupsWithState</code></td>
-    <td style="vertical-align: middle;">Update</td>
-    <td style="vertical-align: middle;"></td>
+   <td colspan="2" ><code>mapGroupsWithState</code>가 포함된 쿼리
+   </td>
+   <td>Update
+   </td>
+   <td>
+   </td>
   </tr>
   <tr>
-    <td rowspan="2" style="vertical-align: middle;">Queries with <code>flatMapGroupsWithState</code></td>
-    <td style="vertical-align: middle;">Append operation mode</td>
-    <td style="vertical-align: middle;">Append</td>
-    <td style="vertical-align: middle;">
-      Aggregations are allowed after <code>flatMapGroupsWithState</code>.
-    </td>
+   <td rowspan="2" ><code>flatMapGroupsWithState</code>가 포함된 쿼리
+   </td>
+   <td>Append 연산 모드
+   </td>
+   <td>Append
+   </td>
+   <td><code>flatMapGroupsWithState </code>다음에 집계가 허용됩니다.
+   </td>
   </tr>
   <tr>
-    <td style="vertical-align: middle;">Update operation mode</td>
-    <td style="vertical-align: middle;">Update</td>
-    <td style="vertical-align: middle;">
-      Aggregations not allowed after <code>flatMapGroupsWithState</code>.
-    </td>
+   <td>Update 연산 모드
+   </td>
+   <td>Update
+   </td>
+   <td><code>flatMapGroupsWithState</code> 다음에는 집계가 허용되지 않습니다.
+   </td>
   </tr>
   <tr>
-      <td colspan="2" style="vertical-align: middle;">Queries with <code>joins</code></td>
-      <td style="vertical-align: middle;">Append</td>
-      <td style="vertical-align: middle;">
-        Update and Complete mode not supported yet. See the
-        <a href="#support-matrix-for-joins-in-streaming-queries">support matrix in the Join Operations section</a>
-         for more details on what types of joins are supported.
-      </td>
-    </tr>
-  <tr>
-    <td colspan="2" style="vertical-align: middle;">Other queries</td>
-    <td style="vertical-align: middle;">Append, Update</td>
-    <td style="vertical-align: middle;">
-      Complete mode not supported as it is infeasible to keep all unaggregated data in the Result Table.
-    </td>
+   <td colspan="2" ><code>join</code>이 포함된 쿼리
+   </td>
+   <td>Append
+   </td>
+   <td>Update와 Complete 모드는 아직 지원하지 않습니다. 지원되는 조인 종류에 대한 자세한 내용은 <a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries">조인 연산 섹션의 지원 여부 표</a>를 참조하세요.
+   </td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+   <td colspan="2" >기타 쿼리
+   </td>
+   <td>Append, Update
+   </td>
+   <td>모든 집계되지 않은 데이터를 결과 테이블에 유지하는 것이 불가능하기 때문에 Complete 모드는 지원하지 않습니다.
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
   </tr>
 </table>
 
 
-#### Output Sinks
-There are a few types of built-in output sinks.
 
-- **File sink** - Stores the output to a directory.
+#### **출력 싱크**
 
-{% highlight scala %}
+내장된 출력 싱크에는 몇 가지 타입이 있습니다.
+
+
+
+*   **파일 싱크** - 출력을 디렉토리에 저장합니다.
+
+
+```
 writeStream
-    .format("parquet")        // can be "orc", "json", "csv", etc.
+    .format("parquet")        // "orc", "json", "csv" 등이 될 수 있음
     .option("path", "path/to/destination/dir")
     .start()
-{% endhighlight %}
 
-- **Kafka sink** - Stores the output to one or more topics in Kafka.
+```
 
-{% highlight scala %}
+
+
+*   **Kafka 싱크** - 출력을 Kafka의 하나 이상의 토픽에 저장합니다.
+
+
+```
 writeStream
     .format("kafka")
     .option("kafka.bootstrap.servers", "host1:port1,host2:port2")
     .option("topic", "updates")
     .start()
-{% endhighlight %}
 
-- **Foreach sink** - Runs arbitrary computation on the records in the output. See later in the section for more details.
+```
 
-{% highlight scala %}
+
+
+*   **Foreach 싱크** - 출력의 레코드에 대해 임의의 연산을 실행합니다. 자세한 내용은 이 섹션의 후반부를 참조하세요.
+
+
+```
 writeStream
     .foreach(...)
     .start()
-{% endhighlight %}
 
-- **Console sink (for debugging)** - Prints the output to the console/stdout every time there is a trigger. Both, Append and Complete output modes, are supported. This should be used for debugging purposes on low data volumes as the entire output is collected and stored in the driver's memory after every trigger.
+```
 
-{% highlight scala %}
+
+
+*   **콘솔 싱크 (디버깅용)** - 트리거가 호출될 때마다 콘솔/표준 출력에 출력합니다. Append와 Complete 출력 모드 모두 지원합니다. 매 트리거 이후에 드라이버의 메모리에 출력 전체가 수집, 저장되기 때문에 적은 양의 데이터에 대해 디버깅 목적으로 사용되어야 합니다.
+
+
+```
 writeStream
     .format("console")
     .start()
-{% endhighlight %}
 
-- **Memory sink (for debugging)** - The output is stored in memory as an in-memory table.
-Both, Append and Complete output modes, are supported. This should be used for debugging purposes
-on low data volumes as the entire output is collected and stored in the driver's memory.
-Hence, use it with caution.
+```
 
-{% highlight scala %}
+
+
+*   **메모리 싱크 (디버깅용)** - 출력이 메모리에 in-memory 테이블 형태로 저장됩니다. Append와 Complete 모드 모두 지원합니다. 모든 출력이 드라이버의 메모리에 수집, 저장되기 때문에 적은 양의 데이터에 대해 디버깅 목적으로 사용되어야 합니다.
+
+
+```
 writeStream
     .format("memory")
     .queryName("tableName")
     .start()
-{% endhighlight %}
+```
 
-Some sinks are not fault-tolerant because they do not guarantee persistence of the output and are 
-meant for debugging purposes only. See the earlier section on 
-[fault-tolerance semantics](#fault-tolerance-semantics). 
-Here are the details of all the sinks in Spark.
 
-<table class="table">
+일부 싱크는 출력의 지속성을 보장하지 않으며 디버깅 목적으로 설계되었기 때문에 장애를 허용하지 않습니다. [장애 허용 의미 구조](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#fault-tolerance-semantics)에 대한 이전 섹션을 참조하세요. 스파크에 내장되어 있는 모든 싱크에 대한 세부 사항은 다음과 같습니다.
+
+
+<table>
   <tr>
-    <th>Sink</th>
-    <th>Supported Output Modes</th>
-    <th>Options</th>
-    <th>Fault-tolerant</th>
-    <th>Notes</th>
+   <td><strong>싱크</strong>
+   </td>
+   <td><strong>지원하는 출력 싱크</strong>
+   </td>
+   <td><strong>옵션</strong>
+   </td>
+   <td><strong>장애 허용</strong>
+   </td>
+   <td><strong>비고</strong>
+   </td>
   </tr>
   <tr>
-    <td><b>File Sink</b></td>
-    <td>Append</td>
-    <td>
-        <code>path</code>: path to the output directory, must be specified.
-        <br/><br/>
-        For file-format-specific options, see the related methods in DataFrameWriter
-        (<a href="api/scala/index.html#org.apache.spark.sql.DataFrameWriter">Scala</a>/<a href="api/java/org/apache/spark/sql/DataFrameWriter.html">Java</a>/<a href="api/python/pyspark.sql.html#pyspark.sql.DataFrameWriter">Python</a>/<a
-        href="api/R/write.stream.html">R</a>).
-        E.g. for "parquet" format options see <code>DataFrameWriter.parquet()</code>
-    </td>
-    <td>Yes (exactly-once)</td>
-    <td>Supports writes to partitioned tables. Partitioning by time may be useful.</td>
+   <td><strong>파일 싱크</strong>
+   </td>
+   <td>Append
+   </td>
+   <td><code>path</code>: 출력 디렉토리의 경로, 반드시 지정되어야 함.
+<p>
+특정 파일 형식에 대한 옵션은 <code>DataFrameWriter</code>(<a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.DataFrameWriter">Scala</a>/<a href="https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/DataFrameWriter.html">Java</a>/<a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameWriter">Python</a>/<a href="https://spark.apache.org/docs/latest/api/R/write.stream.html">R</a>)에서 관련 메소드를 참조하세요. 예를 들어, “parquet” 형식에 대한 옵션은 <code>DataFrameWriter.parquet()</code>을 확인하세요.
+   </td>
+   <td>네 (정확히 한 번)
+   </td>
+   <td>분할된 테이블에 쓰기를 지원합니다. 시간으로 분할하는 것이 유용할 수 있습니다.
+   </td>
   </tr>
   <tr>
-    <td><b>Kafka Sink</b></td>
-    <td>Append, Update, Complete</td>
-    <td>See the <a href="structured-streaming-kafka-integration.html">Kafka Integration Guide</a></td>
-    <td>Yes (at-least-once)</td>
-    <td>More details in the <a href="structured-streaming-kafka-integration.html">Kafka Integration Guide</a></td>
+   <td><strong>Kafka 싱크</strong>
+   </td>
+   <td>Append, Update, Complete
+   </td>
+   <td><a href="https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html">Kafka 통합 가이드</a>를 참조
+   </td>
+   <td>네 (최소 한 번)
+   </td>
+   <td><a href="https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html">Kafka 통합 가이드</a>에서 세부 사항을 참조
+   </td>
   </tr>
   <tr>
-    <td><b>Foreach Sink</b></td>
-    <td>Append, Update, Complete</td>
-    <td>None</td>
-    <td>Depends on ForeachWriter implementation</td>
-    <td>More details in the <a href="#using-foreach-and-foreachbatch">next section</a></td>
+   <td><strong>Foreach 싱크</strong>
+   </td>
+   <td>Append, Update, Complete
+   </td>
+   <td>없음
+   </td>
+   <td>ForeachWriter의 구현에 따라 다름
+   </td>
+   <td><a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#using-foreach-and-foreachbatch">다음 섹션</a>에서 세부 사항을 참조
+   </td>
   </tr>
   <tr>
-      <td><b>ForeachBatch Sink</b></td>
-      <td>Append, Update, Complete</td>
-      <td>None</td>
-      <td>Depends on the implementation</td>
-      <td>More details in the <a href="#using-foreach-and-foreachbatch">next section</a></td>
-    </tr>
-    
-  <tr>
-    <td><b>Console Sink</b></td>
-    <td>Append, Update, Complete</td>
-    <td>
-        <code>numRows</code>: Number of rows to print every trigger (default: 20)
-        <br/>
-        <code>truncate</code>: Whether to truncate the output if too long (default: true)
-    </td>
-    <td>No</td>
-    <td></td>
+   <td><strong>Foreach 배치 싱크</strong>
+   </td>
+   <td>Append, Update, Complete
+   </td>
+   <td>없음
+   </td>
+   <td>구현에 따라 다름
+   </td>
+   <td><a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#using-foreach-and-foreachbatch">다음 섹션</a>에서 세부 사항을 참조
+   </td>
   </tr>
   <tr>
-    <td><b>Memory Sink</b></td>
-    <td>Append, Complete</td>
-    <td>None</td>
-    <td>No. But in Complete Mode, restarted query will recreate the full table.</td>
-    <td>Table name is the query name.</td>
+   <td><strong>콘솔 싱크</strong>
+   </td>
+   <td>Append, Update, Complete
+   </td>
+   <td><code>numRows</code>: 매 트리거에서 출력할 로우의 수 (기본값: 20) 
+<p>
+<code>truncate</code>: 출력이 긴 경우 출력을 자를지 여부 (기본값: true)
+   </td>
+   <td>아니요
+   </td>
+   <td>
+   </td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+   <td><strong>메모리 싱크</strong>
+   </td>
+   <td>Append, Complete
+   </td>
+   <td>없음
+   </td>
+   <td>아니요. 하지만 Complete 모드에서 쿼리를 재시작하면 전체 테이블을 재작성합니다.
+   </td>
+   <td>테이블 이름이 쿼리 이름임.
+   </td>
+  </tr>
+  <tr>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
+   <td>
+   </td>
   </tr>
 </table>
 
-Note that you have to call `start()` to actually start the execution of the query. This returns a StreamingQuery object which is a handle to the continuously running execution. You can use this object to manage the query, which we will discuss in the next subsection. For now, let’s understand all this with a few examples.
+
+실제로 쿼리를 실행하려면 `start()`를 호출해야 한다는 것을 주의하세요. 이는 지속적으로 동작하는 쿼리 실행을 제어하는 StreamingQuery 객체를 반환합니다. 이 객체를 이용하여 쿼리를 관리할 수 있으며, 이는 다음 서브섹션에서 설명하겠습니다. 지금은 몇 가지 예시를 이용해 이를 이해해봅시다.
 
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-{% highlight scala %}
-// ========== DF with no aggregations ==========
+*   **Scala**
+
+
+```
+// ========== 집계가 없는 DataFrame ==========
 val noAggDF = deviceDataDf.select("device").where("signal > 10")   
 
-// Print new data to console
+// 새로운 데이터를 콘솔에 출력합니다
 noAggDF
   .writeStream
   .format("console")
   .start()
 
-// Write new data to Parquet files
+// 새로운 데이터를 Parquet 파일에 작성합니다
 noAggDF
   .writeStream
   .format("parquet")
@@ -1889,83 +1469,44 @@ noAggDF
   .option("path", "path/to/destination/dir")
   .start()
 
-// ========== DF with aggregation ==========
+// ========== 집계가 있는 DataFrame ==========
 val aggDF = df.groupBy("device").count()
 
-// Print updated aggregations to console
+// 업데이트된 집계를 콘솔에 출력합니다
 aggDF
   .writeStream
   .outputMode("complete")
   .format("console")
   .start()
 
-// Have all the aggregates in an in-memory table
+// 모든 집계를 in-memory 테이블에 저장합니다
 aggDF
   .writeStream
-  .queryName("aggregates")    // this query name will be the table name
+  .queryName("aggregates")    // 이 쿼리 이름이 테이블 이름이 됩니다
   .outputMode("complete")
   .format("memory")
   .start()
 
-spark.sql("select * from aggregates").show()   // interactively query in-memory table
-{% endhighlight %}
+spark.sql("select * from aggregates").show()   // in-memory 테이블에서 대화식으로 쿼리합니다
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-// ========== DF with no aggregations ==========
-Dataset<Row> noAggDF = deviceDataDf.select("device").where("signal > 10");
 
-// Print new data to console
-noAggDF
-  .writeStream()
-  .format("console")
-  .start();
 
-// Write new data to Parquet files
-noAggDF
-  .writeStream()
-  .format("parquet")
-  .option("checkpointLocation", "path/to/checkpoint/dir")
-  .option("path", "path/to/destination/dir")
-  .start();
+*   **Python**
 
-// ========== DF with aggregation ==========
-Dataset<Row> aggDF = df.groupBy("device").count();
 
-// Print updated aggregations to console
-aggDF
-  .writeStream()
-  .outputMode("complete")
-  .format("console")
-  .start();
-
-// Have all the aggregates in an in-memory table
-aggDF
-  .writeStream()
-  .queryName("aggregates")    // this query name will be the table name
-  .outputMode("complete")
-  .format("memory")
-  .start();
-
-spark.sql("select * from aggregates").show();   // interactively query in-memory table
-{% endhighlight %}
-
-</div>
-<div data-lang="python"  markdown="1">
-
-{% highlight python %}
-# ========== DF with no aggregations ==========
+```
+# ========== 집계가 없는 DataFrame ==========
 noAggDF = deviceDataDf.select("device").where("signal > 10")   
 
-# Print new data to console
+# 새로운 데이터를 콘솔에 출력합니다
 noAggDF \
     .writeStream \
     .format("console") \
     .start()
 
-# Write new data to Parquet files
+# 새로운 데이터를 Parquet 파일에 작성합니다
 noAggDF \
     .writeStream \
     .format("parquet") \
@@ -1973,17 +1514,17 @@ noAggDF \
     .option("path", "path/to/destination/dir") \
     .start()
 
-# ========== DF with aggregation ==========
+# ========== 집계가 있는 DataFrame ==========
 aggDF = df.groupBy("device").count()
 
-# Print updated aggregations to console
+# 업데이트된 집계를 콘솔에 출력합니다
 aggDF \
     .writeStream \
     .outputMode("complete") \
     .format("console") \
     .start()
 
-# Have all the aggregates in an in-memory table. The query name will be the table name
+# 모든 집계를 in-memory 테이블에 저장합니다. 쿼리 이름이 테이블 이름이 됩니다.
 aggDF \
     .writeStream \
     .queryName("aggregates") \
@@ -1991,603 +1532,386 @@ aggDF \
     .format("memory") \
     .start()
 
-spark.sql("select * from aggregates").show()   # interactively query in-memory table
-{% endhighlight %}
+spark.sql("select * from aggregates").show()   # in-memory 테이블에서 대화식으로 쿼리합니다
+```
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-# ========== DF with no aggregations ==========
-noAggDF <- select(where(deviceDataDf, "signal > 10"), "device")
 
-# Print new data to console
-write.stream(noAggDF, "console")
+##### **Foreach와 ForeachBatch 이용**
 
-# Write new data to Parquet files
-write.stream(noAggDF,
-             "parquet",
-             path = "path/to/destination/dir",
-             checkpointLocation = "path/to/checkpoint/dir")
+`foreach`와 `foreachBatch` 연산은 스트리밍 쿼리의 출력에 임의의 연산과 쓰기 로직을 적용 가능하게 합니다. 이 둘은 사용하는 경우가 약간 다릅니다. `foreach`는 사용자 정의 로직을 모든 로우에서 허용하는 반면, `foreachBatch`는 임의의 연산과 로직을 각 마이크로 배치의 출력에서 허용합니다. 각각의 자세한 사용법을 알아봅시다.
 
-# ========== DF with aggregation ==========
-aggDF <- count(groupBy(df, "device"))
 
-# Print updated aggregations to console
-write.stream(aggDF, "console", outputMode = "complete")
+###### **ForeachBatch**
 
-# Have all the aggregates in an in memory table. The query name will be the table name
-write.stream(aggDF, "memory", queryName = "aggregates", outputMode = "complete")
+`foreachBatch(...)`를 사용하면 스트리밍 쿼리의 모든 마이크로 배치의 출력 데이터에 대해 실행될 함수를 지정할 수 있습니다. 스파크 2.4 버전부터 Scala, Java, Python에서 이를 지원합니다. 이 함수는 총 두 개의 매개변수로 마이크로 배치의 출력 데이터를 가진 DataFrame/Dataset과 마이크로 배치의 고유 식별자를 받습니다.
 
-# Interactively query in-memory table
-head(sql("select * from aggregates"))
-{% endhighlight %}
 
-</div>
-</div>
 
-##### Using Foreach and ForeachBatch
-The `foreach` and `foreachBatch` operations allow you to apply arbitrary operations and writing 
-logic on the output of a streaming query. They have slightly different use cases - while `foreach` 
-allows custom write logic on every row, `foreachBatch` allows arbitrary operations 
-and custom logic on the output of each micro-batch. Let's understand their usages in more detail.  
+*   **Scala**
 
-###### ForeachBatch
-`foreachBatch(...)` allows you to specify a function that is executed on 
-the output data of every micro-batch of a streaming query. Since Spark 2.4, this is supported in Scala, Java and Python. 
-It takes two parameters: a DataFrame or Dataset that has the output data of a micro-batch and the unique ID of the micro-batch.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-
-{% highlight scala %}
+```
 streamingDF.writeStream.foreachBatch { (batchDF: DataFrame, batchId: Long) =>
-  // Transform and write batchDF 
+  // 변환 후 배치 DataFrame을 작성합니다
 }.start()
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-streamingDatasetOfString.writeStream().foreachBatch(
-  new VoidFunction2<Dataset<String>, Long> {
-    public void call(Dataset<String> dataset, Long batchId) {
-      // Transform and write batchDF
-    }    
-  }
-).start();
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 def foreach_batch_function(df, epoch_id):
-    # Transform and write batchDF
+    # 변환 후 배치 DataFrame을 작성합니다
     pass
   
-streamingDF.writeStream.foreachBatch(foreach_batch_function).start()   
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-R is not yet supported.
-</div>
-</div>
-
-With `foreachBatch`, you can do the following.
-
-- **Reuse existing batch data sources** - For many storage systems, there may not be a streaming sink available yet, 
-  but there may already exist a data writer for batch queries. Using `foreachBatch`, you can use the batch
-  data writers on the output of each micro-batch.
-- **Write to multiple locations** - If you want to write the output of a streaming query to multiple locations, 
-  then you can simply write the output DataFrame/Dataset multiple times. However, each attempt to write can 
-  cause the output data to be recomputed (including possible re-reading of the input data). To avoid recomputations,
-  you should cache the output DataFrame/Dataset, write it to multiple locations, and then uncache it. Here is an outline.  
-
-    streamingDF.writeStream.foreachBatch { (batchDF: DataFrame, batchId: Long) =>
-      batchDF.persist()
-      batchDF.write.format(...).save(...)  // location 1
-      batchDF.write.format(...).save(...)  // location 2
-      batchDF.unpersist()
-    }
-
-- **Apply additional DataFrame operations** - Many DataFrame and Dataset operations are not supported 
-  in streaming DataFrames because Spark does not support generating incremental plans in those cases. 
-  Using `foreachBatch`, you can apply some of these operations on each micro-batch output. However, you will have to reason about the end-to-end semantics of doing that operation yourself.
-
-**Note:**
-- By default, `foreachBatch` provides only at-least-once write guarantees. However, you can use the 
-  batchId provided to the function as way to deduplicate the output and get an exactly-once guarantee.  
-- `foreachBatch` does not work with the continuous processing mode as it fundamentally relies on the
-  micro-batch execution of a streaming query. If you write data in the continuous mode, use `foreach` instead.
+streamingDF.writeStream.foreachBatch(foreach_batch_function).start()
+```
 
 
-###### Foreach
-If `foreachBatch` is not an option (for example, corresponding batch data writer does not exist, or 
-continuous processing mode), then you can express you custom writer logic using `foreach`. 
-Specifically, you can express the data writing logic by dividing it into three methods: `open`, `process`, and `close`.
-Since Spark 2.4, `foreach` is available in Scala, Java and Python. 
+`foreachBatch`를 이용하면 다음과 같은 작업을 할 수 있습니다.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-In Scala, you have to extend the class `ForeachWriter` ([docs](api/scala/index.html#org.apache.spark.sql.ForeachWriter)).
 
-{% highlight scala %}
+*   **기존 배치 데이터 소스의 재사용** - 많은 스토리지 시스템에서 아직 스트리밍 싱크를 이용할 수 없을 수도 있지만, 배치 쿼리를 위한 data writer는 이미 있을 것입니다. `foreachBatch`를 사용하면 이를 각 마이크로 배치 출력에 배치 data writer를 이용할 수 있습니다.
+*   **여러 위치에 쓰기** - 스트리밍 쿼리의 출력을 여러 위치에 쓰고 싶은 경우, 간단히 DataFrame/Dataset의 출력을 여러 번 쓸 수 있습니다. 하지만, 쓰기를 시도할 때마다 (입력 데이터부터 다시 읽는 것을 포함하여) 출력값을 새로 다시 계산할 가능성이 있습니다. 다시 계산되는 것을 막기 위해서는 출력 DataFrame/Dataset을 캐시해 두고, 이를 여러 위치에 쓴 후에, 캐시를 제거하면 됩니다. 대략적으로 다음과 같습니다. \
+streamingDF.writeStream.foreachBatch { (batchDF: DataFrame, batchId: Long) => batchDF.persist() batchDF.write.format(…).save(…) // location 1 batchDF.write.format(…).save(…) // location 2 batchDF.unpersist() }
+*   **추가적인 DataFrame 연산 적용** - 스트리밍 DataFrame에서 많은 DataFrame과 Dataset 연산이 지원되지 않습니다. 왜냐하면 여러 경우에서 스파크가 점진적 플랜 생성을 지원하지 않기 때문입니다. `foreachBatch`를 사용하면 각 마이크로 배치 출력에 그 중 몇몇 연산을 적용할 수 있습니다. 하지만 이러한 연산을 왜 해야 하는지 그 종단간 의미에 대해서 잘 생각해 보셔야 합니다.
+
+**참고:**
+
+
+
+*   기본적으로 `foreachBatch`는 최소 한 번 이상의 쓰기가 이루어진다는 것을 보장합니다. 하지만 함수에 제공된 batchId를 이용하여 출력에서 중복을 제거하면 정확히 한 번만 이루어지도록 할 수 있습니다.
+*   `foreachBatch`는 근본적으로 스트리밍 쿼리의 마이크로 배치 실행에 의존하기 때문에, 지속 처리 모드에서 동작하지 않습니다. 데이터를 지속적인 모드에서 작성하기를 원하시는 경우, `foreach`를 사용하세요.
+
+
+###### **Foreach**
+
+`foreachBatch`를 사용할 수 없는 경우 (예를 들어, 해당하는 배치 data writer가 존재하지 않거나, 연속 처리 모드인 경우), `foreach`를 사용하여 직접 writer 로직을 표현할 수 있습니다. 명확히 말하자면, `open`, `process`, `close`의 세 가지 메소드로 분리하여 데이터 쓰기 로직을 작성할 수 있습니다. 스파크 2.4 버전부터 Scala, Java, Python에서 `foreach`를 지원합니다.
+
+
+
+*   **Scala**
+
+Scala에서는 클래스 `ForeachWriter`([문서](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.ForeachWriter))를 상속받아야 합니다.
+
+
+```
 streamingDatasetOfString.writeStream.foreach(
   new ForeachWriter[String] {
 
     def open(partitionId: Long, version: Long): Boolean = {
-      // Open connection
+      // 연결을 생성합니다
     }
 
     def process(record: String): Unit = {
-      // Write string to connection
+      // 연결에 string을 씁니다
     }
 
     def close(errorOrNull: Throwable): Unit = {
-      // Close the connection
+      // 연결을 끊습니다
     }
   }
 ).start()
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-In Java, you have to extend the class `ForeachWriter` ([docs](api/java/org/apache/spark/sql/ForeachWriter.html)).
-{% highlight java %}
-streamingDatasetOfString.writeStream().foreach(
-  new ForeachWriter[String] {
 
-    @Override public boolean open(long partitionId, long version) {
-      // Open connection
-    }
 
-    @Override public void process(String record) {
-      // Write string to connection
-    }
+*   **Python**
 
-    @Override public void close(Throwable errorOrNull) {
-      // Close the connection
-    }
-  }
-).start();
+Python에서는 foreach를 두 가지 방법으로 호출할 수 있습니다: 함수에서 혹은 객체에서. 이 함수는 처리 로직을 표현하는 간단한 방법을 제공하지만 오류로 인해 일부 입력 데이터가 재처리되어 발생하는 중복을 제거할 수는 없습니다. 이 경우 처리 로직을 객체 내부에 지정하는 방법을 써야 합니다.
 
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
 
-In Python, you can invoke foreach in two ways: in a function or in an object. 
-The function offers a simple way to express your processing logic but does not allow you to 
-deduplicate generated data when failures cause reprocessing of some input data. 
-For that situation you must specify the processing logic in an object.
+1. 이 함수는 로우를 매개변수로 받습니다:
 
-1. The function takes a row as input.
 
-  {% highlight python %}
-      def process_row(row):
-          # Write row to storage
+```
+     def process_row(row):
+          # 스토리지에 로우를 씁니다
           pass
       
       query = streamingDF.writeStream.foreach(process_row).start()  
-  {% endhighlight %}
+ 
 
-2. The object has a process method and optional open and close methods: 
+```
 
-  {% highlight python %}
-      class ForeachWriter:
+
+
+1. 이 객체는 process 메소드를 가지며, 선택적으로 open과 close 메소드를 가질 수 있습니다:
+
+
+```
+     class ForeachWriter:
           def open(self, partition_id, epoch_id):
-              # Open connection. This method is optional in Python.
+              # 연결을 생성합니다. 이 메소드는 Python에서 선택사항입니다.
               pass
       
           def process(self, row):
-              # Write row to connection. This method is NOT optional in Python.
+              # 연결에 로우를 씁니다. 이 메소드는 Python에서 반드시 필요합니다.
               pass
       
           def close(self, error):
-              # Close the connection. This method in optional in Python.
+              # 연결을 끊습니다. 이 메소드는 Python에서 선택사항입니다.
               pass
       
       query = streamingDF.writeStream.foreach(ForeachWriter()).start()
-  {% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-R is not yet supported.
-</div>
-</div>
+```
 
 
-**Execution semantics**
-When the streaming query is started, Spark calls the function or the object’s methods in the following way:
+**실행 의미 구조** 스트리밍 쿼리가 시작되면 스파크는 지정된 함수나 객체의 메소드를 다음과 같은 방법으로 호출합니다:
 
-- A single copy of this object is responsible for all the data generated by a single task in a query. 
-  In other words, one instance is responsible for processing one partition of the data generated in a distributed manner.
 
-- This object must be serializable, because each task will get a fresh serialized-deserialized copy 
-  of the provided object. Hence, it is strongly recommended that any initialization for writing data 
-  (for example. opening a connection or starting a transaction) is done after the open() method has 
-  been called, which signifies that the task is ready to generate data.
 
-- The lifecycle of the methods are as follows:
+*   이 객체의 단일 복사본은 쿼리의 하나의 작업에서 생성된 모든 데이터를 담당합니다. 즉, 하나의 인스턴스는 분산 방식으로 생성된 데이터의 한 파티션을 처리합니다.
+*   이 객체는 직렬화가 가능해야 합니다. 왜냐하면 각 작업은 제공된 객체의 직렬화-역직렬화된 새 복사본을 제공받을 것이기 때문입니다. 그러므로, 데이터 작성을 위한 초기화(예: 연결 생성, 트랜잭션 시작)는 작업이 데이터를 생성할 준비가 되었음을 알리는 open() 메소드가 호출된 이후에 하는 것을 권장합니다. 
+*   메소드의 생명주기는 다음과 같습니다:
+    *   partition_id를 가지는 각 파티션:
+        *   epoch_id를 가지는 스트리밍 데이터의 각 배치/세대(epoch):
+            *   메소드 open(partitionId, epochId)이 호출됩니다.
+            *   open(…)이 true를 반환하면, 파티션과 배치/세대의 각 로우에 대해 메소드 process(row)가 호출됩니다.
+            *   로우를 처리하던 중 에러가 발생하면 메소드 close(error)이 호출됩니다.
+*   만약 open() 메소드가 존재하고 성공적으로 반환된다면 (반환된 값은 상관없습니다), close() 메소드가 (존재한다면) 호출됩니다. JVM이나 Python 프로세스가 중간에 충돌하지 않는다면 호출되지 않을 수 있습니다.
+*   **참고:** open() 메소드의 partitionId와 epochId는 오류로 인해 일부 입력 데이터의 재처리가 발생했을 때 생성된 중복 데이터를 제거하는 데 사용할 수 있습니다. 이는 쿼리의 실행 모드에 따라 다릅니다. 스트리밍 쿼리가 마이크로 배치 모드에서 실행되고 있다면, 고유 튜플 (partition_id, epoch_id)로 표현되는 모든 파티션이 동일한 데이터를 가지고 있는 것이 보장됩니다. 그러므로, (partition_id, epoch_id)를 이용해 중복 제거나 트랜잭션으로 커밋하여 정확히 한 번 데이터 처리를 보장 받을 수 있습니다. 이 둘을 동시에 하는 것도 가능합니다. 하지만, 스트리밍 쿼리가 연속 모드에서 실행되고 있다면, 이는 보장될 수 없기 때문에 중복 제거를 위해 사용해서는 안 됩니다.
 
-  - For each partition with partition_id:
 
-    - For each batch/epoch of streaming data with epoch_id:
+#### **트리거**
 
-      - Method open(partitionId, epochId) is called.
+스트리밍 쿼리의 트리거 설정은 스트리밍 데이터가 언제 처리될지,즉 쿼리가 고정된 배치 간격의 마이크로 배치 방식으로 실행될지 또는 연속 처리 방식으로 실행될지를 정의합니다. 다음은 지원되는 여러 타입의 트리거를 나타낸 표입니다.
 
-      - If open(...) returns true, for each row in the partition and batch/epoch, method process(row) is called.
 
-      - Method close(error) is called with error (if any) seen while processing rows.
-
-- The close() method (if it exists) is called if an open() method exists and returns successfully (irrespective of the return value), except if the JVM or Python process crashes in the middle.
-
-- **Note:** The partitionId and epochId in the open() method can be used to deduplicate generated data 
-  when failures cause reprocessing of some input data. This depends on the execution mode of the query. 
-  If the streaming query is being executed in the micro-batch mode, then every partition represented 
-  by a unique tuple (partition_id, epoch_id) is guaranteed to have the same data. 
-  Hence, (partition_id, epoch_id) can be used to deduplicate and/or transactionally commit 
-  data and achieve exactly-once guarantees. However, if the streaming query is being executed 
-  in the continuous mode, then this guarantee does not hold and therefore should not be used for deduplication.
-
-#### Triggers
-The trigger settings of a streaming query defines the timing of streaming data processing, whether
-the query is going to executed as micro-batch query with a fixed batch interval or as a continuous processing query.
-Here are the different kinds of triggers that are supported.
-
-<table class="table">
+<table>
   <tr>
-    <th>Trigger Type</th>
-    <th>Description</th>
+   <td><strong>트리거 타입</strong>
+   </td>
+   <td><strong>설명</strong>
+   </td>
   </tr>
   <tr>
-    <td><i>unspecified (default)</i></td>
-    <td>
-        If no trigger setting is explicitly specified, then by default, the query will be
-        executed in micro-batch mode, where micro-batches will be generated as soon as
-        the previous micro-batch has completed processing.
-    </td>
+   <td><em>지정되지 않음 (기본값)</em>
+   </td>
+   <td>트리거 설정을 명시적으로 지정하지 않은 경우는 기본적으로 쿼리가 마이크로 배치 모드로 실행됩니다. 이 모드에서는 이전 마이크로 배치의 처리가 완료되는대로 다음 마이크로 배치가 생성됩니다.
+   </td>
   </tr>
   <tr>
-    <td><b>Fixed interval micro-batches</b></td>
-    <td>
-        The query will be executed with micro-batches mode, where micro-batches will be kicked off
-        at the user-specified intervals.
-        <ul>
-          <li>If the previous micro-batch completes within the interval, then the engine will wait until
-          the interval is over before kicking off the next micro-batch.</li>
+   <td><strong>고정 간격 마이크로 배치</strong>
+   </td>
+   <td>쿼리는 마이크로 배치 모드로 실행됩니다. 마이크로 배치는 사용자가 지정한 간격대로 실행됩니다.
+<ul>
 
-          <li>If the previous micro-batch takes longer than the interval to complete (i.e. if an
-          interval boundary is missed), then the next micro-batch will start as soon as the
-          previous one completes (i.e., it will not wait for the next interval boundary).</li>
+<li>이전 마이크로 배치가 지정한 간격이 끝나기 전에 완료되면, 엔진은 다음 마이크로 배치를 바로 시작하지 않고 해당 간격이 끝날 때까지 대기합니다.
 
-          <li>If no new data is available, then no micro-batch will be kicked off.</li>
-        </ul>
-    </td>
+<li>이전 마이크로 배치가 완료되는데 지정한 간격보다 더 많은 시간을 소모하면(지정된 간격을 넘기면), 다음 마이크로 배치는 해당 마이크로 배치가 끝나는대로 바로 시작됩니다. (즉, 다음 간격이 끝날 때까지 대기하지 않습니다.)
+
+<li>새로운 데이터가 없다면, 마이크로 배치는 시작되지 않습니다.
+</li>
+</ul>
+   </td>
   </tr>
   <tr>
-    <td><b>One-time micro-batch</b></td>
-    <td>
-        The query will execute *only one* micro-batch to process all the available data and then
-        stop on its own. This is useful in scenarios you want to periodically spin up a cluster,
-        process everything that is available since the last period, and then shutdown the
-        cluster. In some case, this may lead to significant cost savings.
-    </td>
+   <td><strong>일회성 마이크로 배치</strong>
+   </td>
+   <td>쿼리는 모든 데이터를 처리할 <strong>오직 하나</strong>의 마이크로 배치만 실행하고 스스로 종료합니다. 이는 주기적으로 클러스터를 띄우고, 마지막 처리 구간 이후에 주어진 모든 데이터를 처리한 뒤 클러스터를 내리는 경우에 유용합니다. 특정한 상황에서는 이 방법으로 상당한 비용 절감이 가능할 수 있습니다.
+   </td>
   </tr>
   <tr>
-    <td><b>Continuous with fixed checkpoint interval</b><br/><i>(experimental)</i></td>
-    <td>
-        The query will be executed in the new low-latency, continuous processing mode. Read more
-        about this in the <a href="#continuous-processing-experimental">Continuous Processing section</a> below.
-    </td>
+   <td><strong>고정 체크포인트 간격으로 연속 \
+<em>(실험 기능)</em></strong>
+   </td>
+   <td>쿼리는 새로운 낮은 지연의 연속 처리 모드로 실행됩니다. 이에 대한 더 자세한 내용은 아래의 연<a href="https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#continuous-processing-experimental">속 처리 섹션</a>를 참조하세요.
+   </td>
   </tr>
 </table>
 
-Here are a few code examples.
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+다음은 몇 가지 코드 예시입니다.
 
-{% highlight scala %}
+
+
+*   **Scala**
+
+
+```
 import org.apache.spark.sql.streaming.Trigger
 
-// Default trigger (runs micro-batch as soon as it can)
+// 기본 트리거 (마이크로 배치를 실행 가능한대로 바로 실행)
 df.writeStream
   .format("console")
   .start()
 
-// ProcessingTime trigger with two-seconds micro-batch interval
+// 2초 마이크로 배치 간격의 ProcessingTime 트리거
 df.writeStream
   .format("console")
   .trigger(Trigger.ProcessingTime("2 seconds"))
   .start()
 
-// One-time trigger
+// 일회성 트리거
 df.writeStream
   .format("console")
   .trigger(Trigger.Once())
   .start()
 
-// Continuous trigger with one-second checkpointing interval
+// 1초 체크포인트 간격의 연속 트리거
 df.writeStream
   .format("console")
   .trigger(Trigger.Continuous("1 second"))
   .start()
 
-{% endhighlight %}
+```
 
 
-</div>
-<div data-lang="java"  markdown="1">
 
-{% highlight java %}
-import org.apache.spark.sql.streaming.Trigger
+*   **Python**
 
-// Default trigger (runs micro-batch as soon as it can)
-df.writeStream
-  .format("console")
-  .start();
 
-// ProcessingTime trigger with two-seconds micro-batch interval
-df.writeStream
-  .format("console")
-  .trigger(Trigger.ProcessingTime("2 seconds"))
-  .start();
-
-// One-time trigger
-df.writeStream
-  .format("console")
-  .trigger(Trigger.Once())
-  .start();
-
-// Continuous trigger with one-second checkpointing interval
-df.writeStream
-  .format("console")
-  .trigger(Trigger.Continuous("1 second"))
-  .start();
-
-{% endhighlight %}
-
-</div>
-<div data-lang="python"  markdown="1">
-
-{% highlight python %}
-
-# Default trigger (runs micro-batch as soon as it can)
+```
+# 기본 트리거 (마이크로 배치를 실행 가능한대로 바로 실행)
 df.writeStream \
   .format("console") \
   .start()
 
-# ProcessingTime trigger with two-seconds micro-batch interval
+# 2초 마이크로 배치 간격의 ProcessingTime 트리거
 df.writeStream \
   .format("console") \
   .trigger(processingTime='2 seconds') \
   .start()
 
-# One-time trigger
+# 일회성 트리거
 df.writeStream \
   .format("console") \
   .trigger(once=True) \
   .start()
 
-# Continuous trigger with one-second checkpointing interval
+# 1초 체크포인트 간격의 연속 트리거
 df.writeStream
   .format("console")
   .trigger(continuous='1 second')
   .start()
+```
 
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
+## **스트리밍 쿼리 관리**
 
-{% highlight r %}
-# Default trigger (runs micro-batch as soon as it can)
-write.stream(df, "console")
-
-# ProcessingTime trigger with two-seconds micro-batch interval
-write.stream(df, "console", trigger.processingTime = "2 seconds")
-
-# One-time trigger
-write.stream(df, "console", trigger.once = TRUE)
-
-# Continuous trigger is not yet supported
-{% endhighlight %}
-</div>
-</div>
+쿼리가 시작될 때 생성되는 `StreamingQuery` 객체를 이용하여 쿼리를 모니터링하고 관리할 수 있습니다.
 
 
-## Managing Streaming Queries
-The `StreamingQuery` object created when a query is started can be used to monitor and manage the query. 
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-
-{% highlight scala %}
-val query = df.writeStream.format("console").start()   // get the query object
-
-query.id          // get the unique identifier of the running query that persists across restarts from checkpoint data
-
-query.runId       // get the unique id of this run of the query, which will be generated at every start/restart
-
-query.name        // get the name of the auto-generated or user-specified name
-
-query.explain()   // print detailed explanations of the query
-
-query.stop()      // stop the query
-
-query.awaitTermination()   // block until query is terminated, with stop() or with error
-
-query.exception       // the exception if the query has been terminated with error
-
-query.recentProgress  // an array of the most recent progress updates for this query
-
-query.lastProgress    // the most recent progress update of this streaming query
-{% endhighlight %}
+*   **Scala**
 
 
-</div>
-<div data-lang="java"  markdown="1">
+```
+val query = df.writeStream.format("console").start()   // 쿼리 객체를 가져옵니다
 
-{% highlight java %}
-StreamingQuery query = df.writeStream().format("console").start();   // get the query object
+query.id          // 체크포인트 데이터에서 재시작되어도 일정하게 유지되는 고유 식별자를 가져옵니다
 
-query.id();          // get the unique identifier of the running query that persists across restarts from checkpoint data
+query.runId       // 실행되는 쿼리의 고유 식별자를 가져옵니다. 이 식별자는 시작/재시작할 때마다 생성됩니다.
 
-query.runId();       // get the unique id of this run of the query, which will be generated at every start/restart
+query.name        // 자동 생성된 또는 사용자가 지정한 이름을 가져옵니다
 
-query.name();        // get the name of the auto-generated or user-specified name
+query.explain()   // 쿼리에 대한 자세한 정보를 출력합니다
 
-query.explain();   // print detailed explanations of the query
+query.stop()      // 쿼리를 중지합니다
 
-query.stop();      // stop the query
+query.awaitTermination()   // stop()이나 에러에 의해 쿼리가 종료될 때까지 대기합니다
 
-query.awaitTermination();   // block until query is terminated, with stop() or with error
+query.exception       // 쿼리가 에러에 의해 종료되는 경우에 발생하는 예외
 
-query.exception();       // the exception if the query has been terminated with error
+query.recentProgress  // 이 쿼리의 가장 최근 프로그레스 업데이트 정보를 저장한 배열
 
-query.recentProgress();  // an array of the most recent progress updates for this query
+query.lastProgress    // 이 스트리밍 쿼리의 가장 최근 프로그레스 업데이트
+```
 
-query.lastProgress();    // the most recent progress update of this streaming query
 
-{% endhighlight %}
+하나의 SparkSession에 많은 수의 쿼리를 시작할 수 있습니다. 쿼리들은 모두 클러스터의 자원을 함께 공유하며 실행됩니다. `sparkSession.streams()`를 사용하여 현재 활성 쿼리를 관리하는데 사용할 수 있는 `StreamingQueryManager` ([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryManager)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/StreamingQueryManager.html)/[Python](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.streaming.StreamingQueryManager) 문서)를 받아올 수 있습니다.
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
-query = df.writeStream.format("console").start()   # get the query object
 
-query.id()          # get the unique identifier of the running query that persists across restarts from checkpoint data
+*   **Python**
 
-query.runId()       # get the unique id of this run of the query, which will be generated at every start/restart
 
-query.name()        # get the name of the auto-generated or user-specified name
+```
+query = df.writeStream.format("console").start()   # 쿼리 객체를 가져옵니다
 
-query.explain()   # print detailed explanations of the query
+query.id()          # 체크포인트 데이터에서 재시작되어도 일정하게 유지되는 고유 식별자를 가져옵니다
 
-query.stop()      # stop the query
+query.runId()       # 실행되는 쿼리의 고유 식별자를 가져옵니다. 이 식별자는 시작/재시작할 때마다 생성됩니다.
 
-query.awaitTermination()   # block until query is terminated, with stop() or with error
+query.name()        # 자동 생성된 또는 사용자가 지정한 이름을 가져옵니다
 
-query.exception()       # the exception if the query has been terminated with error
+query.explain()   # 쿼리에 대한 자세한 정보를 출력합니다
 
-query.recentProgress()  # an array of the most recent progress updates for this query
+query.stop()      # 쿼리를 중지합니다
 
-query.lastProgress()    # the most recent progress update of this streaming query
+query.awaitTermination()   # stop()이나 에러에 의해 쿼리가 종료될 때까지 대기합니다
 
-{% endhighlight %}
+query.exception()       # 쿼리가 에러에 의해 종료되는 경우에 발생하는 예외
 
-</div>
-<div data-lang="r"  markdown="1">
+query.recentProgress()  # 이 쿼리의 가장 최근 프로그레스 업데이트 정보를 저장한 배열
 
-{% highlight r %}
-query <- write.stream(df, "console")  # get the query object
+query.lastProgress()    # 이 스트리밍 쿼리의 가장 최근 프로그레스 업데이트
 
-queryName(query)          # get the name of the auto-generated or user-specified name
+```
 
-explain(query)            # print detailed explanations of the query
 
-stopQuery(query)          # stop the query
 
-awaitTermination(query)   # block until query is terminated, with stop() or with error
+*   **Scala**
 
-lastProgress(query)       # the most recent progress update of this streaming query
 
-{% endhighlight %}
-
-</div>
-</div>
-
-You can start any number of queries in a single SparkSession. They will all be running concurrently sharing the cluster resources. You can use `sparkSession.streams()` to get the `StreamingQueryManager`
-([Scala](api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryManager)/[Java](api/java/org/apache/spark/sql/streaming/StreamingQueryManager.html)/[Python](api/python/pyspark.sql.html#pyspark.sql.streaming.StreamingQueryManager) docs)
-that can be used to manage the currently active queries.
-
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-
-{% highlight scala %}
+```
 val spark: SparkSession = ...
 
-spark.streams.active    // get the list of currently active streaming queries
+spark.streams.active    // 현재 활성 쿼리의 목록을 가져옵니다
 
-spark.streams.get(id)   // get a query object by its unique id
+spark.streams.get(id)   // 고유 ID를 이용하여 쿼리 객체를 가져옵니다
 
-spark.streams.awaitAnyTermination()   // block until any one of them terminates
-{% endhighlight %}
+spark.streams.awaitAnyTermination()   // 실행 중인 여러 쿼리 중 어느 하나가 종료될 때까지 대기합니다
 
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-SparkSession spark = ...
-
-spark.streams().active();    // get the list of currently active streaming queries
-
-spark.streams().get(id);   // get a query object by its unique id
-
-spark.streams().awaitAnyTermination();   // block until any one of them terminates
-{% endhighlight %}
-
-</div>
-<div data-lang="python"  markdown="1">
-
-{% highlight python %}
-spark = ...  # spark session
-
-spark.streams().active  # get the list of currently active streaming queries
-
-spark.streams().get(id)  # get a query object by its unique id
-
-spark.streams().awaitAnyTermination()  # block until any one of them terminates
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight bash %}
-Not available in R.
-{% endhighlight %}
-
-</div>
-</div>
+```
 
 
-## Monitoring Streaming Queries
-There are multiple ways to monitor active streaming queries. You can either push metrics to external systems using Spark's Dropwizard Metrics support, or access them programmatically.
 
-### Reading Metrics Interactively
+*   **Python**
 
-You can directly get the current status and metrics of an active query using 
-`streamingQuery.lastProgress()` and `streamingQuery.status()`. 
-`lastProgress()` returns a `StreamingQueryProgress` object 
-in [Scala](api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryProgress) 
-and [Java](api/java/org/apache/spark/sql/streaming/StreamingQueryProgress.html)
-and a dictionary with the same fields in Python. It has all the information about
-the progress made in the last trigger of the stream - what data was processed, 
-what were the processing rates, latencies, etc. There is also 
-`streamingQuery.recentProgress` which returns an array of last few progresses.  
 
-In addition, `streamingQuery.status()` returns a `StreamingQueryStatus` object 
-in [Scala](api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryStatus) 
-and [Java](api/java/org/apache/spark/sql/streaming/StreamingQueryStatus.html)
-and a dictionary with the same fields in Python. It gives information about
-what the query is immediately doing - is a trigger active, is data being processed, etc.
+```
+spark = ...  # 스파크 세션
 
-Here are a few examples.
+spark.streams().active  # 현재 활성 쿼리의 목록을 가져옵니다
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
+spark.streams().get(id)  # 고유 ID를 이용하여 쿼리 객체를 가져옵니다
 
-{% highlight scala %}
+spark.streams().awaitAnyTermination()  # 실행 중인 여러 쿼리 중 어느 하나가 종료될 때까지 대기합니다
+
+```
+
+## **스트리밍 쿼리의 모니터링**
+
+현재 동작중인 스트리밍 쿼리를 모니터링하는 방법에는 여러 가지가 있습니다. 스파크의 Dropwizard Metrics 지원을 이용하여 메트릭(Metrics)을 외부 시스템으로 푸시하거나 프로그래밍적으로 접근할 수 있습니다.
+
+
+### **대화형으로 메트릭 읽어오기**
+
+`streamingQuery.lastProgress()`와 `streamingQuery.status()`.`lastProgress()`를 이용해 현재 동작중인 쿼리의 상태와 메트릭을 직접 가져올 수 있습니다. `lastProgress()`는 [Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryProgress)와 [Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/StreamingQueryProgress.html)에서는 `StreamingQueryProgress `객체를 반환하고, Python에서는 같은 필드를 가진 딕셔너리를 반환합니다. 반환값은 스트림에서 수행된 마지막 트리거의 모든 진행 정보(어떤 데이터가 처리되었는지, 처리 속도와 지연 속도는 어땠는지 등)를 가집니다. 마지막 몇 부분의 진행 정보만 배열로 반환하는 `streamingQuery.recentProgress`를 사용할 수도 있습니다.
+
+또한, `streamingQuery.status()`는 [Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryStatus)와 [Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/StreamingQueryStatus.html)에서는 `StreamingQueryStatus` 객체를 반환하고 Python에서는 동일한 필드를 가진 딕셔너리를 반환합니다. 이는 현재 당장 쿼리가 어떤 작업을 하고 있는지에 대한 정보(트리거가 활성화되어 있는지, 데이터가 처리되고 있는지 등)를 제공합니다.
+
+아래는 몇 가지 예시입니다.
+
+
+
+*   **Scala**
+
+
+```
 val query: StreamingQuery = ...
 
 println(query.lastProgress)
 
-/* Will print something like the following.
+/* 다음과 같은 결과를 출력할 것입니다
 
 {
   "id" : "ce011fdc-8762-4dcb-84eb-a77333e28109",
@@ -2638,170 +1962,51 @@ println(query.lastProgress)
 
 println(query.status)
 
-/*  Will print something like the following.
+/*  다음과 같은 결과를 출력할 것입니다
 {
   "message" : "Waiting for data to arrive",
   "isDataAvailable" : false,
   "isTriggerActive" : false
 }
 */
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
-
-{% highlight java %}
-StreamingQuery query = ...
-
-System.out.println(query.lastProgress());
-/* Will print something like the following.
-
-{
-  "id" : "ce011fdc-8762-4dcb-84eb-a77333e28109",
-  "runId" : "88e2ff94-ede0-45a8-b687-6316fbef529a",
-  "name" : "MyQuery",
-  "timestamp" : "2016-12-14T18:45:24.873Z",
-  "numInputRows" : 10,
-  "inputRowsPerSecond" : 120.0,
-  "processedRowsPerSecond" : 200.0,
-  "durationMs" : {
-    "triggerExecution" : 3,
-    "getOffset" : 2
-  },
-  "eventTime" : {
-    "watermark" : "2016-12-14T18:45:24.873Z"
-  },
-  "stateOperators" : [ ],
-  "sources" : [ {
-    "description" : "KafkaSource[Subscribe[topic-0]]",
-    "startOffset" : {
-      "topic-0" : {
-        "2" : 0,
-        "4" : 1,
-        "1" : 1,
-        "3" : 1,
-        "0" : 1
-      }
-    },
-    "endOffset" : {
-      "topic-0" : {
-        "2" : 0,
-        "4" : 115,
-        "1" : 134,
-        "3" : 21,
-        "0" : 534
-      }
-    },
-    "numInputRows" : 10,
-    "inputRowsPerSecond" : 120.0,
-    "processedRowsPerSecond" : 200.0
-  } ],
-  "sink" : {
-    "description" : "MemorySink"
-  }
-}
-*/
+```
 
 
-System.out.println(query.status());
-/*  Will print something like the following.
-{
-  "message" : "Waiting for data to arrive",
-  "isDataAvailable" : false,
-  "isTriggerActive" : false
-}
-*/
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
+*   **Python**
 
-{% highlight python %}
-query = ...  # a StreamingQuery
+
+```
+query = ...  # 스트리밍 쿼리
 print(query.lastProgress)
 
 '''
-Will print something like the following.
+다음과 같은 결과를 출력할 것입니다
 
 {u'stateOperators': [], u'eventTime': {u'watermark': u'2016-12-14T18:45:24.873Z'}, u'name': u'MyQuery', u'timestamp': u'2016-12-14T18:45:24.873Z', u'processedRowsPerSecond': 200.0, u'inputRowsPerSecond': 120.0, u'numInputRows': 10, u'sources': [{u'description': u'KafkaSource[Subscribe[topic-0]]', u'endOffset': {u'topic-0': {u'1': 134, u'0': 534, u'3': 21, u'2': 0, u'4': 115}}, u'processedRowsPerSecond': 200.0, u'inputRowsPerSecond': 120.0, u'numInputRows': 10, u'startOffset': {u'topic-0': {u'1': 1, u'0': 1, u'3': 1, u'2': 0, u'4': 1}}}], u'durationMs': {u'getOffset': 2, u'triggerExecution': 3}, u'runId': u'88e2ff94-ede0-45a8-b687-6316fbef529a', u'id': u'ce011fdc-8762-4dcb-84eb-a77333e28109', u'sink': {u'description': u'MemorySink'}}
 '''
 
 print(query.status)
 ''' 
-Will print something like the following.
+다음과 같은 결과를 출력할 것입니다
 
 {u'message': u'Waiting for data to arrive', u'isTriggerActive': False, u'isDataAvailable': False}
 '''
-{% endhighlight %}
+```
 
-</div>
-<div data-lang="r"  markdown="1">
 
-{% highlight r %}
-query <- ...  # a StreamingQuery
-lastProgress(query)
 
-'''
-Will print something like the following.
+### **프로그램 상에서 비동기 API를 이용한 메트릭 보고**
 
-{
-  "id" : "8c57e1ec-94b5-4c99-b100-f694162df0b9",
-  "runId" : "ae505c5a-a64e-4896-8c28-c7cbaf926f16",
-  "name" : null,
-  "timestamp" : "2017-04-26T08:27:28.835Z",
-  "numInputRows" : 0,
-  "inputRowsPerSecond" : 0.0,
-  "processedRowsPerSecond" : 0.0,
-  "durationMs" : {
-    "getOffset" : 0,
-    "triggerExecution" : 1
-  },
-  "stateOperators" : [ {
-    "numRowsTotal" : 4,
-    "numRowsUpdated" : 0
-  } ],
-  "sources" : [ {
-    "description" : "TextSocketSource[host: localhost, port: 9999]",
-    "startOffset" : 1,
-    "endOffset" : 1,
-    "numInputRows" : 0,
-    "inputRowsPerSecond" : 0.0,
-    "processedRowsPerSecond" : 0.0
-  } ],
-  "sink" : {
-    "description" : "org.apache.spark.sql.execution.streaming.ConsoleSink@76b37531"
-  }
-}
-'''
+`StreamingQueryListener` ([Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryListener)/[Java](https://spark.apache.org/docs/latest/api/java/org/apache/spark/sql/streaming/StreamingQueryListener.html) 문서)를 사용하여 `SparkSession`과 관련된 모든 쿼리를 비동기적으로 모니터링 할 수도 있습니다. `sparkSession.streams.attachListener()`에 사용자가 정의한 `StreamingQueryListener` 객체를 등록하면, 쿼리가 시작 또는 중지되고 활성 쿼리가 진행될 때 콜백을 받게 됩니다. 다음은 예시입니다.
 
-status(query)
-'''
-Will print something like the following.
 
-{
-  "message" : "Waiting for data to arrive",
-  "isDataAvailable" : false,
-  "isTriggerActive" : false
-}
-'''
-{% endhighlight %}
 
-</div>
-</div>
+*   **Scala**
 
-### Reporting Metrics programmatically using Asynchronous APIs
 
-You can also asynchronously monitor all queries associated with a
-`SparkSession` by attaching a `StreamingQueryListener`
-([Scala](api/scala/index.html#org.apache.spark.sql.streaming.StreamingQueryListener)/[Java](api/java/org/apache/spark/sql/streaming/StreamingQueryListener.html) docs).
-Once you attach your custom `StreamingQueryListener` object with
-`sparkSession.streams.attachListener()`, you will get callbacks when a query is started and
-stopped and when there is progress made in an active query. Here is an example,
-
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-
-{% highlight scala %}
+```
 val spark: SparkSession = ...
 
 spark.streams.addListener(new StreamingQueryListener() {
@@ -2815,212 +2020,141 @@ spark.streams.addListener(new StreamingQueryListener() {
         println("Query made progress: " + queryProgress.progress)
     }
 })
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-SparkSession spark = ...
 
-spark.streams().addListener(new StreamingQueryListener() {
-    @Override
-    public void onQueryStarted(QueryStartedEvent queryStarted) {
-        System.out.println("Query started: " + queryStarted.id());
-    }
-    @Override
-    public void onQueryTerminated(QueryTerminatedEvent queryTerminated) {
-        System.out.println("Query terminated: " + queryTerminated.id());
-    }
-    @Override
-    public void onQueryProgress(QueryProgressEvent queryProgress) {
-        System.out.println("Query made progress: " + queryProgress.progress());
-    }
-});
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
-{% highlight bash %}
-Not available in Python.
-{% endhighlight %}
+*   **Python**
 
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight bash %}
-Not available in R.
-{% endhighlight %}
 
-</div>
-</div>
+```
+Python에서는 지원하지 않음
+```
 
-### Reporting Metrics using Dropwizard 
-Spark supports reporting metrics using the [Dropwizard Library](monitoring.html#metrics). To enable metrics of Structured Streaming queries to be reported as well, you have to explicitly enable the configuration `spark.sql.streaming.metricsEnabled` in the SparkSession. 
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-{% highlight scala %}
+
+### **Dropwizard를 이용한 메트릭 보고**
+
+스파크는 [Dropwizard 라이브러리](https://spark.apache.org/docs/latest/monitoring.html#metrics)를 사용하여 메트릭을 보고할 수 있도록 지원합니다. 구조적 스트리밍 쿼리의 메트릭도 함께 보고하기 위해서는, SparkSession에서 `spark.sql.streaming.metricsEnabled` 설정을 명시적으로 활성화해야 합니다.
+
+
+
+*   **Scala**
+
+
+```
 spark.conf.set("spark.sql.streaming.metricsEnabled", "true")
-// or
+// 또는
 spark.sql("SET spark.sql.streaming.metricsEnabled=true")
-{% endhighlight %}
-</div>
-<div data-lang="java"  markdown="1">  
-{% highlight java %}
-spark.conf().set("spark.sql.streaming.metricsEnabled", "true");
-// or
-spark.sql("SET spark.sql.streaming.metricsEnabled=true");
-{% endhighlight %}
-</div>
-<div data-lang="python"  markdown="1">  
-{% highlight python %}
+
+```
+
+
+
+*   **Python**
+
+
+```
 spark.conf.set("spark.sql.streaming.metricsEnabled", "true")
-# or
+# 또는
 spark.sql("SET spark.sql.streaming.metricsEnabled=true")
-{% endhighlight %}
-</div>
-<div data-lang="r"  markdown="1">
-{% highlight r %}
-sql("SET spark.sql.streaming.metricsEnabled=true")
-{% endhighlight %}
-</div>
-</div>
+```
 
 
-All queries started in the SparkSession after this configuration has been enabled will report metrics through Dropwizard to whatever [sinks](monitoring.html#metrics) have been configured (e.g. Ganglia, Graphite, JMX, etc.).
+이 구성이 활성화된 후 SparkSession의 모든 쿼리는 Dropwizard를 통해 메트릭을 사전에 구성된 [싱크](https://spark.apache.org/docs/latest/monitoring.html#metrics)(예: Ganglia, Graphite, JMX 등)로 보고합니다.
 
-## Recovering from Failures with Checkpointing 
-In case of a failure or intentional shutdown, you can recover the previous progress and state of a previous query, and continue where it left off. This is done using checkpointing and write-ahead logs. You can configure a query with a checkpoint location, and the query will save all the progress information (i.e. range of offsets processed in each trigger) and the running aggregates (e.g. word counts in the [quick example](#quick-example)) to the checkpoint location. This checkpoint location has to be a path in an HDFS compatible file system, and can be set as an option in the DataStreamWriter when [starting a query](#starting-streaming-queries).
 
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
 
-{% highlight scala %}
+## **체크포인트를 이용한 오류 복구**
+
+오류가 발생하거나 의도적인 종료한 경우에도 이전 진행 상태나 이전 쿼리의 상태를 복구하여 중단된 지점에서 이어서 진행할 수 있습니다. 이는 체크포인트와 로그 선행 기입(write-ahead logs)에 의해 수행됩니다. 쿼리를 정의할 때 체크포인트 위치를 지정할 경우, 쿼리는 모든 진행 정보(즉, 각 트리거에서 진행된 오프셋의 범위)와 실행 중인 집계(예: [빠른 예제](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#quick-example)에서 살펴보았던 단어 수)를 지정된 체크포인트 위치에 저장합니다. 이 체크포인트 위치는 HDFS 호환 파일 시스템의 경로이어야 하고, [쿼리를 시작할 때](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#starting-streaming-queries) DataStreamWriter의 옵션으로 지정할 수 있습니다.
+
+
+
+*   **Scala**
+
+
+```
 aggDF
   .writeStream
   .outputMode("complete")
   .option("checkpointLocation", "path/to/HDFS/dir")
   .format("memory")
   .start()
-{% endhighlight %}
 
-</div>
-<div data-lang="java"  markdown="1">
+```
 
-{% highlight java %}
-aggDF
-  .writeStream()
-  .outputMode("complete")
-  .option("checkpointLocation", "path/to/HDFS/dir")
-  .format("memory")
-  .start();
-{% endhighlight %}
 
-</div>
-<div data-lang="python"  markdown="1">
 
-{% highlight python %}
+*   **Python**
+
+
+```
 aggDF \
     .writeStream \
     .outputMode("complete") \
     .option("checkpointLocation", "path/to/HDFS/dir") \
     .format("memory") \
     .start()
-{% endhighlight %}
-
-</div>
-<div data-lang="r"  markdown="1">
-
-{% highlight r %}
-write.stream(aggDF, "memory", outputMode = "complete", checkpointLocation = "path/to/HDFS/dir")
-{% endhighlight %}
-
-</div>
-</div>
 
 
-## Recovery Semantics after Changes in a Streaming Query
-There are limitations on what changes in a streaming query are allowed between restarts from the 
-same checkpoint location. Here are a few kinds of changes that are either not allowed, or 
-the effect of the change is not well-defined. For all of them:
 
-- The term *allowed* means you can do the specified change but whether the semantics of its effect 
-  is well-defined depends on the query and the change.
+```
 
-- The term *not allowed* means you should not do the specified change as the restarted query is likely 
-  to fail with unpredictable errors. `sdf` represents a streaming DataFrame/Dataset 
-  generated with sparkSession.readStream.
-  
-**Types of changes**
 
-- *Changes in the number or type (i.e. different source) of input sources*: This is not allowed.
+## **스트리밍 쿼리에 변경점이 있을 때 복구의 동작**
 
-- *Changes in the parameters of input sources*: Whether this is allowed and whether the semantics 
-  of the change are well-defined depends on the source and the query. Here are a few examples.
+동일한 체크포인트 위치에서 재시작 시에 스트리밍 쿼리를 변경하는 경우에 몇 가지 제한 사항이 있습니다. 다음은 허용하지 않거나 변경의 효과가 명확하지 않은 몇 가지 종류의 변경입니다. 모든 경우에 대해:
 
-  - Addition/deletion/modification of rate limits is allowed: `spark.readStream.format("kafka").option("subscribe", "topic")` to `spark.readStream.format("kafka").option("subscribe", "topic").option("maxOffsetsPerTrigger", ...)`
 
-  - Changes to subscribed topics/files is generally not allowed as the results are unpredictable: `spark.readStream.format("kafka").option("subscribe", "topic")` to `spark.readStream.format("kafka").option("subscribe", "newTopic")`
 
-- *Changes in the type of output sink*: Changes between a few specific combinations of sinks 
-  are allowed. This needs to be verified on a case-by-case basis. Here are a few examples.
+*   ‘허용한다’는 것은 해당 변경은 가능하지만 그 효과가 지니는 의미가 명확한지는 쿼리와 변경점에 따라 다르다는 것을 의미합니다.
+*   ‘허용하지 않는다’는 것은 재시작된 쿼리가 예측 불가능한 오류로 인해 실패할 가능성이 있으므로 해당 변경을 해서는 안 된다는 것을 의미합니다. `sdf`는 `sparkSession.readStream`으로 생성된 스트리밍 DataFrame/Dataset을 나타냅니다.
 
-  - File sink to Kafka sink is allowed. Kafka will see only the new data.
+**변경의 종류**
 
-  - Kafka sink to file sink is not allowed.
 
-  - Kafka sink changed to foreach, or vice versa is allowed.
 
-- *Changes in the parameters of output sink*: Whether this is allowed and whether the semantics of 
-  the change are well-defined depends on the sink and the query. Here are a few examples.
+*   _입력 소스의 수 혹은 타입(즉, 다른 소스)의 변경_: 허용하지 않습니다
+*   _입력 소스의 매개변수 변경_: 이 변경이 허용되는지와 이 변경의 의미가 명확한지는 소스와 쿼리에 따라 달라집니다.
+    *   속도 제한의 추가/삭제/수정은 허용합니다: `spark.readStream.format("kafka").option("subscribe", "topic")`에서 `spark.readStream.format("kafka").option("subscribe", "topic").option("maxOffsetsPerTrigger", ...)`로의 변경 
+    *   구독 중인(subscribed`)` 토픽/파일의 변경은 결과를 예측할 수 없기 때문에 일반적으로 허용하지 않습니다: `spark.readStream.format("kafka").option("subscribe", "topic")`에서 `spark.readStream.format("kafka").option("subscribe", "newTopic")`로의 변경
+*   _출력 싱크 타입의 변경_: 몇몇 특정 싱크 간의 변경에서 허용합니다. 이는 각 케이스별로 확인이 필요합니다. 몇 가지 예시입니다.
+    *   파일 싱크에서 Kafka 싱크로의 변경은 허용합니다. Kafka에서는 새로운 데이터만 확인할 수 있습니다.
+    *   Kafka 싱크에서 파일 싱크로의 변경은 허용하지 않습니다.
+    *   Kafka 싱크에서 foreach나 그 반대 방향으로의 변경은 허용합니다.
+*   _출력 싱크의 매개변수 변경_: 이 변경이 허용되는지와 잘 정의되는지는 싱크와 쿼리에 따라 달라집니다. 몇 가지 예시입니다.
+    *   파일 싱크의 출력 경로 변경은 허용하지 않습니다: `sdf.writeStream.format("parquet").option("path", "/somePath")`에서 `sdf.writeStream.format("parquet").option("path", "/anotherPath")`로의 변경
+    *   출력 토픽 변경은 허용합니다: `sdf.writeStream.format("kafka").option("topic", "someTopic")`에서 `sdf.writeStream.format("kafka").option("topic", "anotherTopic")`로의 변경
+    *   사용자 지정 foreach 싱크(즉, `ForeachWriter `코드)의 변경은 허용되지만, 그 변경의 의미는 코드에 따라 달라집니다.
+*   _*프로젝션 / 필터 / map 류 연산의 변경*_: 일부의 경우만 허용합니다. 예:
+    *   필터의 추가/삭제는 허용합니다: `sdf.selectExpr("a")`에서 `sdf.where(...).selectExpr("a").filter(...)`로의 변경
+    *   같은 출력 스키마일 때의 프로젝션의 변경은 허용합니다: `sdf.selectExpr("stringColumn AS json").writeStream`에서 `sdf.selectExpr("anotherStringColumn AS json").writeStream`로의 변경
+    *   출력 스키마가 다를 때의 프로젝션 변경은 조건적으로 허용합니다: `sdf.selectExpr("a").writeStream` 에서 `sdf.selectExpr("b").writeStream` 로의 변경은 출력 싱크가 `"a"`에서 `"b"`로의 스키마 변경을 허용하는 경우에만 허용합니다.
+*   _상태가 존재하는 연산의 변경_: 스트리밍 쿼리의 일부 연산은 지속적으로 결과를 업데이트하기 위해 상태 데이터를 유지해야 합니다. 구조적 스트리밍은 자동으로 상태 데이터의 체크포인트를 장애 허용 스토리지(예: HDFS, AWS S3, Azure Blob 스토리지)에 생성하며, 재시작된 이후에는 이를 복원합니다. 단, 이 때 상태 데이터의 스키마가 재시작 전후로 같다고 가정합니다. 재시작 시에 스트리밍 쿼리에서 상태가 존재하는 연산의 변경(즉, 추가, 삭제, 스키마 변경)은 허용하지 않는다는 뜻입니다. 다음은 상태 복구를 보장하기 위해 재시작 시에 스키마가 변경되어서는 안 되는 상태가 존재하는 연산의 목록입니다:
+    *   _스트리밍 집계_: 예: `sdf.groupBy("a").agg(...)`. 그룹 키나 집계의 수 또는 타입의 변경을 허용하지 않습니다.
+    *   _스트리밍 중복 제거_: 예: `sdf.dropDuplicates("a")`. 그룹 키나 집계의 수 또는 타입의 변경을 허용하지 않습니다.
+    *   _스트림-스트림 간 조인_: 예: `sdf1.join(sdf2, ...) `(두 입력은 `sparkSession.readStream`로 생성됨). 스키마나 동등 조인 시의 컬럼 변경은 허용하지 않습니다. 조인 타입(외부 혹은 내부)의 변경을 허용하지 않습니다. 다른 종류의 조인 조건 변경은 의미가 명확하지 않습니다.
+    *   _임의의 상태가 존재하는 연산_: 예: `sdf.groupByKey(...).mapGroupsWithState(...) `또는 `sdf.groupByKey(...).flatMapGroupsWithState(...)`. 사용자 정의 상태와 timeout의 타입의 스키마를 변경하는 것은 허용하지 않습니다. 사용자 정의 상태 매핑 함수의 변경은 허용하나, 이에 따른 의미는 사용자가 정의한 로직에 따라 다릅니다. 상태 스키마의 변경을 지원하고 싶은 경우, 스키마 마이그레이션을 지원하는 인코딩/디코딩 스키마를 이용하여 복잡한 상태 데이터 구조를 바이트로 명시적으로 인코딩/디코딩할 수 있습니다. 예를 들어, 이진 상태는 항상 성공적으로 복원될 수 있으므로, 상태를 Avro로 인코딩된 바이트로 저장하면 쿼리 재시작 시에 Avro 상태 스키마를 자유롭게 변경할 수 있습니다.
 
-  - Changes to output directory of a file sink is not allowed: `sdf.writeStream.format("parquet").option("path", "/somePath")` to `sdf.writeStream.format("parquet").option("path", "/anotherPath")`
 
-  - Changes to output topic is allowed: `sdf.writeStream.format("kafka").option("topic", "someTopic")` to `sdf.writeStream.format("kafka").option("topic", "anotherTopic")`
 
-  - Changes to the user-defined foreach sink (that is, the `ForeachWriter` code) is allowed, but the semantics of the change depends on the code.
+# **연속 처리 모드**
 
-- *Changes in projection / filter / map-like operations**: Some cases are allowed. For example:
 
-  - Addition / deletion of filters is allowed: `sdf.selectExpr("a")` to `sdf.where(...).selectExpr("a").filter(...)`.
+## **[실험적 기능]**
 
-  - Changes in projections with same output schema is allowed: `sdf.selectExpr("stringColumn AS json").writeStream` to `sdf.selectExpr("anotherStringColumn AS json").writeStream`
+**연속 처리 모드**는 스파크 2.3 버전에서 추가된 새로운 스트리밍 실행 모드로서, 아직 실험적인 기능입니다. 이 모드는 지연 시간이 짧은 대신(~1ms) 장애 발생시 종단간 최소 한 번(at-least-once) 전달을 보장합니다. 이에 반해 기본 스트리밍 실행 모드인 _마이크로 배치 처리 모드 _는 종단간 정확히 한 번(exactly-once) 데이터 처리를 보장하지만, 지연 시간이 최대 100ms까지 걸릴 수 있습니다. (아래에서 다루는) 몇몇 쿼리 타입에서, 애플리케이션의 로직을 수정할 필요 없이 (즉, DataFrame/Dataset에서 호출되는 연산을 수정할 필요 없이) 쿼리의 실행 모드를 선택할 수 있습니다.
 
-  - Changes in projections with different output schema are conditionally allowed: `sdf.selectExpr("a").writeStream` to `sdf.selectExpr("b").writeStream` is allowed only if the output sink allows the schema change from `"a"` to `"b"`.
+연속 처리 모드로 쿼리를 실행하려면 체크포인트 간격을 매개변수로 하여 **연속형 트리거**를 사용함을 명시해야 합니다. 예제는 아래와 같습니다:
 
-- *Changes in stateful operations*: Some operations in streaming queries need to maintain
-  state data in order to continuously update the result. Structured Streaming automatically checkpoints
-  the state data to fault-tolerant storage (for example, HDFS, AWS S3, Azure Blob storage) and restores it after restart.
-  However, this assumes that the schema of the state data remains same across restarts. This means that
-  *any changes (that is, additions, deletions, or schema modifications) to the stateful operations of a streaming query are not allowed between restarts*.
-  Here is the list of stateful operations whose schema should not be changed between restarts in order to ensure state recovery:
 
-  - *Streaming aggregation*: For example, `sdf.groupBy("a").agg(...)`. Any change in number or type of grouping keys or aggregates is not allowed.
 
-  - *Streaming deduplication*: For example, `sdf.dropDuplicates("a")`. Any change in number or type of grouping keys or aggregates is not allowed.
+*   **Scala**
 
-  - *Stream-stream join*: For example, `sdf1.join(sdf2, ...)` (i.e. both inputs are generated with `sparkSession.readStream`). Changes
-    in the schema or equi-joining columns are not allowed. Changes in join type (outer or inner) not allowed. Other changes in the join condition are ill-defined.
 
-  - *Arbitrary stateful operation*: For example, `sdf.groupByKey(...).mapGroupsWithState(...)` or `sdf.groupByKey(...).flatMapGroupsWithState(...)`.
-    Any change to the schema of the user-defined state and the type of timeout is not allowed.
-    Any change within the user-defined state-mapping function are allowed, but the semantic effect of the change depends on the user-defined logic.
-    If you really want to support state schema changes, then you can explicitly encode/decode your complex state data
-    structures into bytes using an encoding/decoding scheme that supports schema migration. For example,
-    if you save your state as Avro-encoded bytes, then you are free to change the Avro-state-schema between query
-    restarts as the binary state will always be restored successfully.
-
-# Continuous Processing
-## [Experimental]
-{:.no_toc}
-
-**Continuous processing** is a new, experimental streaming execution mode introduced in Spark 2.3 that enables low (~1 ms) end-to-end latency with at-least-once fault-tolerance guarantees. Compare this with the default *micro-batch processing* engine which can achieve exactly-once guarantees but achieve latencies of ~100ms at best. For some types of queries (discussed below), you can choose which mode to execute them in without modifying the application logic (i.e. without changing the DataFrame/Dataset operations). 
-
-To run a supported query in continuous processing mode, all you need to do is specify a **continuous trigger** with the desired checkpoint interval as a parameter. For example, 
-
-<div class="codetabs">
-<div data-lang="scala"  markdown="1">
-{% highlight scala %}
+```
 import org.apache.spark.sql.streaming.Trigger
 
 spark
@@ -3040,31 +2174,17 @@ spark
   .format("kafka")
   .option("kafka.bootstrap.servers", "host1:port1,host2:port2")
   .option("topic", "topic1")
-  .trigger(Trigger.Continuous("1 second"))  // only change in query
+  .trigger(Trigger.Continuous("1 second"))  // 쿼리만 변경
   .start()
-{% endhighlight %}
-</div>
-<div data-lang="java"  markdown="1">  
-{% highlight java %}
-import org.apache.spark.sql.streaming.Trigger;
 
-spark
-  .readStream
-  .format("kafka")
-  .option("kafka.bootstrap.servers", "host1:port1,host2:port2")
-  .option("subscribe", "topic1")
-  .load()
-  .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-  .writeStream
-  .format("kafka")
-  .option("kafka.bootstrap.servers", "host1:port1,host2:port2")
-  .option("topic", "topic1")
-  .trigger(Trigger.Continuous("1 second"))  // only change in query
-  .start();
-{% endhighlight %}
-</div>
-<div data-lang="python"  markdown="1">  
-{% highlight python %}
+```
+
+
+
+*   **Python**
+
+
+```
 spark \
   .readStream \
   .format("kafka") \
@@ -3078,61 +2198,70 @@ spark \
   .option("topic", "topic1") \
   .trigger(continuous="1 second") \     # only change in query
   .start()
+```
 
-{% endhighlight %}
-</div>
-</div>
 
-A checkpoint interval of 1 second means that the continuous processing engine will records the progress of the query every second. The resulting checkpoints are in a format compatible with the micro-batch engine, hence any query can be restarted with any trigger. For example, a supported query started with the micro-batch mode can be restarted in continuous mode, and vice versa. Note that any time you switch to continuous mode, you will get at-least-once fault-tolerance guarantees.
+체크포인트 간격을 1초로 설정한 것은 연속형 처리 엔진이 1초마다 쿼리의 진행 상황을 기록한다는 것을 의미합니다. 이렇게 저장된 체크포인트 정보는 마이크로 배치형 처리 엔진과 호환되는 형식으로 저장되기 때문에, 어떠한 쿼리든 간에 트리거 설정과 상관없이 재시작 될 수 있습니다. 즉, 마이크로 배치 처리 모드에서 시작된 쿼리를 연속 처리 모드로 재시작할 수 있으며, 그 반대도 가능하다는 것입니다. 단, 연속 처리 모드로 전환할 경우 장애 발생시 (정확히 한 번(exactly-once)이 아니라) 최소 한 번(at-least-once) 전달이 보장된다는 점을 주의해야 합니다. (역자 주: 장애가 발생해도 종단 간에 정확히 한 번만 메시지가 전달되어야 하는 경우에는 연속 처리 모드로 재시작하면 안 된다는 의미입니다.)
 
-## Supported Queries
-{:.no_toc}
 
-As of Spark 2.3, only the following type of queries are supported in the continuous processing mode.
+## **지원되는 쿼리**
 
-- *Operations*: Only map-like Dataset/DataFrame operations are supported in continuous mode, that is, only projections (`select`, `map`, `flatMap`, `mapPartitions`, etc.) and selections (`where`, `filter`, etc.).
-  + All SQL functions are supported except aggregation functions (since aggregations are not yet supported), `current_timestamp()` and `current_date()` (deterministic computations using time is challenging).
+스파크 2.3 에서의 연속 처리 모드에서는 아래와 같은 쿼리만 사용할 수 있습니다.
 
-- *Sources*:
-  + Kafka source: All options are supported.
-  + Rate source: Good for testing. Only options that are supported in the continuous mode are `numPartitions` and `rowsPerSecond`.
 
-- *Sinks*: 
-  + Kafka sink: All options are supported.
-  + Memory sink: Good for debugging.
-  + Console sink: Good for debugging. All options are supported. Note that the console will print every checkpoint interval that you have specified in the continuous trigger. 
 
-See [Input Sources](#input-sources) and [Output Sinks](#output-sinks) sections for more details on them. While the console sink is good for testing, the end-to-end low-latency processing can be best observed with Kafka as the source and sink, as this allows the engine to process the data and make the results available in the output topic within milliseconds of the input data being available in the input topic.
+*   _연산_: 연속 처리 모드에서는 map 형태의 Dataset/DataFrame 연산만이 지원됩니다. 즉, 프로젝션 연산(projection; `select`, `map`, `flatMap`, `mapPartitions` 등)과 셀렉션 연산(selection; `where`, `filter` 등)만이 사용 가능합니다. 
+    *   집계 함수, `current_timestamp(),` `current_date()`를 제외한 모든 SQL 함수. 집계 함수는 단순히 아직 지원되지 않기 때문에, 나머지는 쿼리가 실행되는 시점에서야 값이 결정되기 때문에 사용할 수 없습니다.
+*   _소스_:
+    *   Kafka 소스: 모든 옵션이 지원됩니다.
+    *   Rate 소스: 테스트에 유용합니다. 단, 연속 처리 모드에서는 `numPartitions`과 `rowsPerSecond `옵션만 지원합니다.
+*   _싱크_:
+    *   Kafka 싱크: 모든 옵션이 지원됩니다.
+    *   메모리 싱크: 디버깅에 유용합니다.
+    *   콘솔 싱크: 디버깅에 유용하며 모든 옵션을 지원합니다. 연속 처리 트리거에서 명시한 체크포인트 간격마다 콘솔에 결과가 출력됩니다.
 
-## Caveats
-{:.no_toc}
+자세한 내용은 [입력 소스](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#input-sources)와 [출력 싱크](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#output-sinks) 항목에서 볼 수 있습니다. 콘솔 싱크가 테스트에 유용한 반면 Kafka 소스/싱크는 종단간 낮은 지연 처리 측면에서 가장 좋습니다. 입력 토픽에 데이터가 주어진 지 몇 밀리초 이내에 출력 토픽에서 결과를 확인할 수 있기 때문입니다.
 
-- Continuous processing engine launches multiple long-running tasks that continuously read data from sources, process it and continuously write to sinks. The number of tasks required by the query depends on how many partitions the query can read from the sources in parallel. Therefore, before starting a continuous processing query, you must ensure there are enough cores in the cluster to all the tasks in parallel. For example, if you are reading from a Kafka topic that has 10 partitions, then the cluster must have at least 10 cores for the query to make progress.
-- Stopping a continuous processing stream may produce spurious task termination warnings. These can be safely ignored.
-- There are currently no automatic retries of failed tasks. Any failure will lead to the query being stopped and it needs to be manually restarted from the checkpoint.
 
-# Additional Information
+## **주의사항**
 
-**Further Reading**
 
-- See and run the
-  [Scala]({{site.SPARK_GITHUB_URL}}/tree/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/scala/org/apache/spark/examples/sql/streaming)/[Java]({{site.SPARK_GITHUB_URL}}/tree/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/java/org/apache/spark/examples/sql/streaming)/[Python]({{site.SPARK_GITHUB_URL}}/tree/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/python/sql/streaming)/[R]({{site.SPARK_GITHUB_URL}}/tree/v{{site.SPARK_VERSION_SHORT}}/examples/src/main/r/streaming)
-  examples.
-    - [Instructions](index.html#running-the-examples-and-shell) on how to run Spark examples
-- Read about integrating with Kafka in the [Structured Streaming Kafka Integration Guide](structured-streaming-kafka-integration.html)
-- Read more details about using DataFrames/Datasets in the [Spark SQL Programming Guide](sql-programming-guide.html)
-- Third-party Blog Posts
-    - [Real-time Streaming ETL with Structured Streaming in Apache Spark 2.1 (Databricks Blog)](https://databricks.com/blog/2017/01/19/real-time-streaming-etl-structured-streaming-apache-spark-2-1.html)
-    - [Real-Time End-to-End Integration with Apache Kafka in Apache Spark’s Structured Streaming (Databricks Blog)](https://databricks.com/blog/2017/04/04/real-time-end-to-end-integration-with-apache-kafka-in-apache-sparks-structured-streaming.html)
-    - [Event-time Aggregation and Watermarking in Apache Spark’s Structured Streaming (Databricks Blog)](https://databricks.com/blog/2017/05/08/event-time-aggregation-watermarking-apache-sparks-structured-streaming.html)
 
-**Talks**
+*   연속형 처리 엔진은 소스에서 데이터를 계속해서 읽어 와서 처리 결과를 싱크에 쓰는, 오랫동안 돌아가는 태스크(task)를 여럿 띄우는 방식으로 동작합니다. 쿼리를 실행하기 위해 띄워야 하는 태스크(task)의 수는 쿼리가 소스로부터 병렬로 데이터를 읽어들일 수 있는 파티션이 몇 개냐에 따라서 결정됩니다. 따라서 연속 처리 모드로 쿼리를 실행하기 전에, 클러스터가 모든 작업을 병렬로 수행할 수 있는 충분한 코어를 가지는지 확인해야 합니다. 예를 들어, 10개의 파티션을 가지는 Kafka 토픽에서 데이터를 읽어들일 경우, 클러스터가 최소한 10개의 코어를 가지고 있어야 쿼리를 실행할 수 있습니다.
+*   연속 처리 스트림을 중지하면 작업 종료 경고가 발생할 수 있지만, 무시해도 상관 없습니다.
+*   실패한 작업에 대한 자동 재시도는 아직 지원하지 않습니다. 작업이 실패하면 쿼리가 중단되며 체크포인트에서 수동으로 재시작해야 합니다.
 
-- Spark Summit Europe 2017
-  - Easy, Scalable, Fault-tolerant Stream Processing with Structured Streaming in Apache Spark -
-    [Part 1 slides/video](https://databricks.com/session/easy-scalable-fault-tolerant-stream-processing-with-structured-streaming-in-apache-spark), [Part 2 slides/video](https://databricks.com/session/easy-scalable-fault-tolerant-stream-processing-with-structured-streaming-in-apache-spark-continues)
-  - Deep Dive into Stateful Stream Processing in Structured Streaming - [slides/video](https://databricks.com/session/deep-dive-into-stateful-stream-processing-in-structured-streaming)
-- Spark Summit 2016
-  - A Deep Dive into Structured Streaming - [slides/video](https://spark-summit.org/2016/events/a-deep-dive-into-structured-streaming/)
+
+
+
+
+
+# **기타 자료**
+
+**더 읽어보기**
+
+
+
+*   직접 실행해볼 수 있는 [Scala](https://github.com/apache/spark/tree/v2.4.0/examples/src/main/scala/org/apache/spark/examples/sql/streaming)/[Java](https://github.com/apache/spark/tree/v2.4.0/examples/src/main/java/org/apache/spark/examples/sql/streaming)/[Python](https://github.com/apache/spark/tree/v2.4.0/examples/src/main/python/sql/streaming)/[R](https://github.com/apache/spark/tree/v2.4.0/examples/src/main/r/streaming) 예제
+    *   스파크 프로젝트에 포함된 [예제 실행법](https://spark.apache.org/docs/latest/index.html#running-the-examples-and-shell)
+*   <span style="text-decoration:underline;">구조적 스트리밍 - Kafka 연동 가이드</span>
+*   DataFrame/Dataset 의 구체적인 사용법은 [스파크 SQL 프로그래밍 가이드](https://spark.apache.org/docs/latest/sql-programming-guide.html)를 참조.
+*   외부 블로그 포스트
+    *   [스파크 2.1의 구조적 스트리밍을 사용해서 실시간 스트리밍 ETL 구현하기 (Databricks Blog)](https://databricks.com/blog/2017/01/19/real-time-streaming-etl-structured-streaming-apache-spark-2-1.html)
+    *   [구조적 스트리밍을 사용한 Kafka 실시간 연동 (Databricks Blog)](https://databricks.com/blog/2017/04/04/real-time-end-to-end-integration-with-apache-kafka-in-apache-sparks-structured-streaming.html)
+    *   [스파크 구조적 스트리밍에서의 이벤트-시각 집계와 워터마킹 (Databricks Blog)](https://databricks.com/blog/2017/05/08/event-time-aggregation-watermarking-apache-sparks-structured-streaming.html)
+
+**발표**
+
+
+
+*   Spark Summit Europe 2017
+    *   스파크 구조적 스트리밍을 사용한 쉽고 확장성 있는 장애 허용 스트리밍 처리 - [Part 1 slides/video](https://databricks.com/session/easy-scalable-fault-tolerant-stream-processing-with-structured-streaming-in-apache-spark), [Part 2 slides/video](https://databricks.com/session/easy-scalable-fault-tolerant-stream-processing-with-structured-streaming-in-apache-spark-continues)
+    *   구조적 스트리밍에서의 상태 유지 스트리밍 처리 자세히 알아보기 - [slides/video](https://databricks.com/session/deep-dive-into-stateful-stream-processing-in-structured-streaming)
+*   Spark Summit 2016
+    *   구조적 스트리밍 자세히 알아보기 - [slides/video](https://spark-summit.org/2016/events/a-deep-dive-into-structured-streaming/)
+
+
+
 
 
