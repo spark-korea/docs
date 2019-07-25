@@ -11,44 +11,14 @@ description: Apache Spark SPARK_VERSION_SHORT documentation homepage
 * [RDD Programming Guide](rdd-programming-guide.html): overview of Spark basics - RDDs (core but old API), accumulators, and broadcast variables
 * [스파크 SQL, DataFrame, Dataset 가이드](sql-programming-guide.html): processing structured data with relational queries (newer API than RDDs)
 * [구조화된 스트리밍](structured-streaming-programming-guide.html): processing structured data streams with relation queries (using Datasets and DataFrames, newer API than DStreams)
-* [Spark Streaming](streaming-programming-guide.html): processing data streams using DStreams (old API)
-* [MLlib](ml-guide.html): applying machine learning algorithms
-* [GraphX](graphx-programming-guide.html): processing graphs 
 
 **API Docs:**
 
-* [Spark Scala API (Scaladoc)](api/scala/index.html#org.apache.spark.package)
-* [Spark Java API (Javadoc)](api/java/index.html)
-* [Spark Python API (Sphinx)](api/python/index.html)
-* [Spark R API (Roxygen2)](api/R/index.html)
-* [Spark SQL, Built-in Functions (MkDocs)](api/sql/index.html)
-
-**Deployment Guides:**
-
-* [Cluster Overview](cluster-overview.html): overview of concepts and components when running on a cluster
-* [Submitting Applications](submitting-applications.html): packaging and deploying applications
-* Deployment modes:
-  * [Amazon EC2](https://github.com/amplab/spark-ec2): scripts that let you launch a cluster on EC2 in about 5 minutes
-  * [Standalone Deploy Mode](spark-standalone.html): launch a standalone cluster quickly without a third-party cluster manager
-  * [Mesos](running-on-mesos.html): deploy a private cluster using
-      [Apache Mesos](https://mesos.apache.org)
-  * [YARN](running-on-yarn.html): deploy Spark on top of Hadoop NextGen (YARN)
-  * [Kubernetes](running-on-kubernetes.html): deploy Spark on top of Kubernetes
-
-**Other Documents:**
-
-* [Configuration](configuration.html): customize Spark via its configuration system
-* [Monitoring](monitoring.html): track the behavior of your applications
-* [Tuning Guide](tuning.html): best practices to optimize performance and memory use
-* [Job Scheduling](job-scheduling.html): scheduling resources across and within Spark applications
-* [Security](security.html): Spark security support
-* [Hardware Provisioning](hardware-provisioning.html): recommendations for cluster hardware
-* Integration with other storage systems:
-  * [Cloud Infrastructures](cloud-integration.html)
-  * [OpenStack Swift](storage-openstack-swift.html)
-* [Building Spark](building-spark.html): build Spark using the Maven system
-* [Contributing to Spark](https://spark.apache.org/contributing.html)
-* [Third Party Projects](https://spark.apache.org/third-party-projects.html): related third party Spark projects
+* [Spark Scala API (Scaladoc)](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package)
+* [Spark Java API (Javadoc)](https://spark.apache.org/docs/latest/api/java/index.html)
+* [Spark Python API (Sphinx)](https://spark.apache.org/docs/latest/api/python/index.html)
+* [Spark R API (Roxygen2)](https://spark.apache.org/docs/latest/api/R/index.html)
+* [Spark SQL, Built-in Functions (MkDocs)](https://spark.apache.org/docs/latest/api/sql/index.html)
 
 **External Resources:**
 

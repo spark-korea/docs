@@ -63,13 +63,6 @@
       url: sql-pyspark-pandas-with-arrow.html#pandas-udfs-aka-vectorized-udfs
     - text: Usage Notes
       url: sql-pyspark-pandas-with-arrow.html#usage-notes
-- text: Migration Guide
-  url: sql-migration-guide.html
-  subitems:
-    - text: Spark SQL Upgrading Guide
-      url: sql-migration-guide-upgrade.html
-    - text: Compatibility with Apache Hive
-      url: sql-migration-guide-hive-compatibility.html
 - text: Reference
   url: sql-reference.html
   subitems:
