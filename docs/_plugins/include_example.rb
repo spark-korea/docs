@@ -58,8 +58,7 @@ module Jekyll
 
       rendered_code = Pygments.highlight(code, :lexer => @lang)
 
-      hint = "<div><small>Find full example code at " \
-        "\"examples/src/main/#{snippet_file}\" in the Spark repo.</small></div>"
+      hint = "<div><small>스파크 저장소의 \"examples/src/main/#{snippet_file}\"에서 전체 예제 코드를 볼 수 있습니다.</small></div>"
 
       rendered_code + hint
     end

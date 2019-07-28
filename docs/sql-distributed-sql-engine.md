@@ -1,29 +1,23 @@
 ---
 layout: global
-title: Distributed SQL Engine
-displayTitle: Distributed SQL Engine
+title: 분산 SQL 엔진
+displayTitle: 분산 SQL 엔진
 ---
 
 * Table of contents
 {:toc}
 
-Spark SQL can also act as a distributed query engine using its JDBC/ODBC or command-line interface.
-In this mode, end-users or applications can interact with Spark SQL directly to run SQL queries,
-without the need to write any code.
+스파크 SQL은 JDBC/ODBC나 커맨드 라인 인터페이스를 사용하여 분산 쿼리 엔진처럼 사용할 수도 있습니다. 이 모드를 사용하면 사용자 혹은 독립 애플리케이션은 SQL 쿼리를 실행하는 코드를 작성할 필요 없이 스파크 SQL과 직접 상호작용 할 수 있습니다.
 
-## Running the Thrift JDBC/ODBC server
+## Thrift JDBC/ODBC 서버 실행하기
 
-The Thrift JDBC/ODBC server implemented here corresponds to the [`HiveServer2`](https://cwiki.apache.org/confluence/display/Hive/Setting+Up+HiveServer2)
-in Hive 1.2.1. You can test the JDBC server with the beeline script that comes with either Spark or Hive 1.2.1.
+여기서 구현된 Thrift JDBC/ODBC 서버는 Hive 1.2.1의 `HiveServer2`에 해당합니다. 스파크나 Hive 1.2.1과 함께 제공되는 beeline 스크립트로 JDBC 서버를 테스트해 볼 수 있습니다.
 
-To start the JDBC/ODBC server, run the following in the Spark directory:
+JDBC/ODBC 서버를 시작하기 위해 스파크 디렉토리에 있는 다음 스크립트를 실행해보세요:
 
     ./sbin/start-thriftserver.sh
 
-This script accepts all `bin/spark-submit` command line options, plus a `--hiveconf` option to
-specify Hive properties. You may run `./sbin/start-thriftserver.sh --help` for a complete list of
-all available options. By default, the server listens on localhost:10000. You may override this
-behaviour via either environment variables, i.e.:
+이 스크립트는 모든 `bin/spark-submit `커맨드 라인 옵션과 Hive 속성을 지정하는 `--hiveconf `옵션을 허용합니다. `./sbin/start-thriftserver.sh --help` 를 실행해 사용 가능한 옵션의 전체 리스트를 볼 수 있습니다. 기본적으로, 서버는 localhost:10000에서 연결이 들어오 기다립니다. 이를 수정하기 위해, 다음과 같이 환경 변수를 이용할 수 있으며:
 
 {% highlight bash %}
 export HIVE_SERVER2_THRIFT_PORT=<listening-port>
@@ -33,7 +27,7 @@ export HIVE_SERVER2_THRIFT_BIND_HOST=<listening-host>
   ...
 {% endhighlight %}
 
-or system properties:
+또는 시스템 속성을 수정할 수도 있습니다:
 
 {% highlight bash %}
 ./sbin/start-thriftserver.sh \
@@ -43,42 +37,37 @@ or system properties:
   ...
 {% endhighlight %}
 
-Now you can use beeline to test the Thrift JDBC/ODBC server:
+이제 beeline을 이용해 Thrift JDBC/ODBC 서버를 테스트해 볼 수 있습니다:
 
     ./bin/beeline
 
-Connect to the JDBC/ODBC server in beeline with:
+beeline에서 JDBC/ODBC 서버에 연결하세요:
 
     beeline> !connect jdbc:hive2://localhost:10000
 
-Beeline will ask you for a username and password. In non-secure mode, simply enter the username on
-your machine and a blank password. For secure mode, please follow the instructions given in the
-[beeline documentation](https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients).
+Beeline이 사용자 이름과 패스워드를 물을 것입니다. 비보안 모드(non-secure mode)에서는 사용자 이름만 입력하고 패스워드는 빈칸을 입력하면 됩니다. 보안 모드에서는 [beeline 문서](https://cwiki.apache.org/confluence/display/Hive/HiveServer2+Clients)의 지시 사항을 따르세요.
 
-Configuration of Hive is done by placing your `hive-site.xml`, `core-site.xml` and `hdfs-site.xml` files in `conf/`.
+`hive-site.xml`, `core-site.xml`과 `hdfs-site.xml`파일을 `conf/`에 넣어 Hive를 설정합니다.
 
-You may also use the beeline script that comes with Hive.
+Hive와 함께 제공되는 beeline 스크립트도 사용할 수 있습니다.
 
-Thrift JDBC server also supports sending thrift RPC messages over HTTP transport.
-Use the following setting to enable HTTP mode as system property or in `hive-site.xml` file in `conf/`:
+Thrift JDBC 서버는 HTTP 전송을 통해 thrift RPC 메시지를 보내는 기능도 지원합니다. 다음 설정을 사용하여 HTTP 모드를 시스템 속성으로 활성화하거나 `conf/`: 의 `hive-site.xml`에서 활성화합니다.
 
-    hive.server2.transport.mode - Set this to value: http
-    hive.server2.thrift.http.port - HTTP port number to listen on; default is 10001
-    hive.server2.http.endpoint - HTTP endpoint; default is cliservice
+    hive.server2.transport.mode - 이 값을 http 로 설정합니다.
+    hive.server2.thrift.http.port - 수신할 HTTP 포트 숫자; 기본값은 10001.
+    hive.server2.http.endpoint - HTTP 엔드포인트; 기본값은 cliservice.
 
-To test, use beeline to connect to the JDBC/ODBC server in http mode with:
+beeline을 사용해 http 모드에서의 JDBC/ODBC 서버 연결을 테스트해 보세요:
 
     beeline> !connect jdbc:hive2://<host>:<port>/<database>?hive.server2.transport.mode=http;hive.server2.thrift.http.path=<http_endpoint>
 
 
-## Running the Spark SQL CLI
+## 스파크 SQL CLI 실행
 
-The Spark SQL CLI is a convenient tool to run the Hive metastore service in local mode and execute
-queries input from the command line. Note that the Spark SQL CLI cannot talk to the Thrift JDBC server.
+스파크 SQL CLI은 로컬 모드에서 Hive metastore 서비스를 실행하고 커맨드 라인에서 쿼리 입력을 실행하는 편리한 도구입니다. 스파크 SQL CLI는 Thrift JDBC 서버와 통신할 수 없습니다.
 
-To start the Spark SQL CLI, run the following in the Spark directory:
+스파크 SQL CLI을 시작하기위해, Spark 디렉토리에서 다음 명령어를 실행하세요:
 
     ./bin/spark-sql
 
-Configuration of Hive is done by placing your `hive-site.xml`, `core-site.xml` and `hdfs-site.xml` files in `conf/`.
-You may run `./bin/spark-sql --help` for a complete list of all available options.
+`hive-site.xml`, `core-site.xml`과 `hdfs-site.xml` 파일을 `conf/`에 넣어 Hive를 설정합니다. `./bin/spark-sql --help` 를 실행해 사용 가능한 옵션의 전체 리스트를 볼 수 있습니다.

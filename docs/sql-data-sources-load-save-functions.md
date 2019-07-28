@@ -1,15 +1,14 @@
 ---
 layout: global
-title: Generic Load/Save Functions
-displayTitle: Generic Load/Save Functions
+title: 일반 불러오기/저장하기 함수
+displayTitle: 일반 불러오기/저장하기 함수
 ---
 
 * Table of contents
 {:toc}
 
 
-In the simplest form, the default data source (`parquet` unless otherwise configured by
-`spark.sql.sources.default`) will be used for all operations.
+가장 간단한 형태로, 모든 연산에서는 기본 데이터 소스(`spark.sql.sources.default`값이 따로 설정되지 않았을 경우 기본값은 `parquet`)가 사용됩니다.
 
 
 <div class="codetabs">
@@ -17,77 +16,41 @@ In the simplest form, the default data source (`parquet` unless otherwise config
 {% include_example generic_load_save_functions scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
 </div>
 
-<div data-lang="java"  markdown="1">
-{% include_example generic_load_save_functions java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
-</div>
-
 <div data-lang="python"  markdown="1">
 
 {% include_example generic_load_save_functions python/sql/datasource.py %}
 </div>
-
-<div data-lang="r"  markdown="1">
-
-{% include_example generic_load_save_functions r/RSparkSQLExample.R %}
-
-</div>
 </div>
 
-### Manually Specifying Options
+### 직접 옵션 지정하기
 
-You can also manually specify the data source that will be used along with any extra options
-that you would like to pass to the data source. Data sources are specified by their fully qualified
-name (i.e., `org.apache.spark.sql.parquet`), but for built-in sources you can also use their short
-names (`json`, `parquet`, `jdbc`, `orc`, `libsvm`, `csv`, `text`). DataFrames loaded from any data
-source type can be converted into other types using this syntax.
+사용될 데이터 소스와 여기에 추가할 옵션을 직접 명시할 수 있습니다. 데이터 소스는 각 전체 이름(예: `org.apache.spark.sql.parquet`)으로 명시되어야 하지만 내장된 데이터 소스의 경우 축약된 이름(`json`, `parquet`, `jdbc`, `orc`, `libsvm`, `csv`, `text`)만으로도 사용할 수 있습니다. 임의의 데이터 소스 타입에서 불러온 DataFrame을 다른 타입으로 변환하려면 아래와 같이 할 수 있습니다.
 
-To load a JSON file you can use:
+JSON 파일을 로드하려면 아래와 같이 할 수 있습니다:
 
 <div class="codetabs">
 <div data-lang="scala"  markdown="1">
 {% include_example manual_load_options scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
 </div>
 
-<div data-lang="java"  markdown="1">
-{% include_example manual_load_options java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
-</div>
-
 <div data-lang="python"  markdown="1">
 {% include_example manual_load_options python/sql/datasource.py %}
 </div>
-
-<div data-lang="r"  markdown="1">
-{% include_example manual_load_options r/RSparkSQLExample.R %}
-</div>
 </div>
 
-To load a CSV file you can use:
+CSV 파일을 로드하려면 아래와 같이 할 수 있습니다:
 
 <div class="codetabs">
 <div data-lang="scala"  markdown="1">
 {% include_example manual_load_options_csv scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
 </div>
 
-<div data-lang="java"  markdown="1">
-{% include_example manual_load_options_csv java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
-</div>
-
 <div data-lang="python"  markdown="1">
 {% include_example manual_load_options_csv python/sql/datasource.py %}
 </div>
-
-<div data-lang="r"  markdown="1">
-{% include_example manual_load_options_csv r/RSparkSQLExample.R %}
-
-</div>
 </div>
 
-The extra options are also used during write operation.
-For example, you can control bloom filters and dictionary encodings for ORC data sources.
-The following ORC example will create bloom filter on `favorite_color` and use dictionary encoding for `name` and `favorite_color`.
-For Parquet, there exists `parquet.enable.dictionary`, too.
-To find more detailed information about the extra ORC/Parquet options,
-visit the official Apache ORC/Parquet websites.
+쓰기 동작에서도 별도의 옵션을 사용할 수 있습니다. 예를 들어 ORC 데이터 소스에 블룸 필터(bloom filters)를 사용하거나 사전식 인코딩(dictionary encodings)을 사용할 수 있습니다. 아래 ORC 예제에서는 `favorite_color`라는 블룸 필터를 생성하고 `name`과 `favorite_color`에 사전식 인코딩을 사용합니다. Parquet에서는 `parquet.enable.dictionary`를 사용할 수 있습니다. ORC/Parquet에 대한 추가 옵션에 대한 내용을 더 자세히 알고 싶다면 아파치 ORC/Parquet 프로젝트의 공식 웹사이트를 참조하세요.
 
 <div class="codetabs">
 
@@ -95,16 +58,8 @@ visit the official Apache ORC/Parquet websites.
 {% include_example manual_save_options_orc scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
 </div>
 
-<div data-lang="java"  markdown="1">
-{% include_example manual_save_options_orc java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
-</div>
-
 <div data-lang="python"  markdown="1">
 {% include_example manual_save_options_orc python/sql/datasource.py %}
-</div>
-
-<div data-lang="r"  markdown="1">
-{% include_example manual_save_options_orc r/RSparkSQLExample.R %}
 </div>
 
 <div data-lang="sql"  markdown="1">
@@ -125,10 +80,9 @@ OPTIONS (
 
 </div>
 
-### Run SQL on files directly
+### 파일 내에서 SQL 바로 실행하기
 
-Instead of using read API to load a file into DataFrame and query it, you can also query that
-file directly with SQL.
+읽기 API를 사용하여 파일을 DataFrame으로 로드하고 쿼리하는 대신, 파일 내에서 바로 SQL을 실행할 수 있습니다.
 
 <div class="codetabs">
 <div data-lang="scala"  markdown="1">
@@ -149,87 +103,63 @@ file directly with SQL.
 </div>
 </div>
 
-### Save Modes
+### 저장 모드
 
-Save operations can optionally take a `SaveMode`, that specifies how to handle existing data if
-present. It is important to realize that these save modes do not utilize any locking and are not
-atomic. Additionally, when performing an `Overwrite`, the data will be deleted before writing out the
-new data.
+저장 동작에서는 기존의 데이터를 어떻게 처리할지 명시하는 `SaveMode `옵션을 사용할 수 있습니다. 이 저장 모드는 원자적(atomic)이지 않거나 락이 걸려있지 않은 경우에는 사용할 수 없다는 점을 꼭 알아두어야 합니다. 또한, `Overwrite`를 수행할 때는 새로운 데이터를 쓰기 이전에 기존의 데이터가 먼저 지워집니다.
 
 <table class="table">
-<tr><th>Scala/Java</th><th>Any Language</th><th>Meaning</th></tr>
+<tr><th>Scala/Java</th><th>다른 언어</th><th>의미</th></tr>
 <tr>
-  <td><code>SaveMode.ErrorIfExists</code> (default)</td>
-  <td><code>"error" or "errorifexists"</code> (default)</td>
+  <td><code>SaveMode.ErrorIfExists</code> (기본값)</td>
+  <td><code>"error"</code> 또는 <code>"errorifexists"</code>(기본값)</td>
   <td>
-    When saving a DataFrame to a data source, if data already exists,
-    an exception is expected to be thrown.
+    DataFrame을 데이터 소스로 저장할 때 데이터가 이미 존재한다면 예외를 발생시킵니다.
   </td>
 </tr>
 <tr>
   <td><code>SaveMode.Append</code></td>
   <td><code>"append"</code></td>
   <td>
-    When saving a DataFrame to a data source, if data/table already exists,
-    contents of the DataFrame are expected to be appended to existing data.
+    DataFrame을 데이터 소스에 저장할 때 데이터/테이블이 이미 존재한다면 DataFrame의 내용을 기존의 데이터에 추가합니다.
   </td>
 </tr>
 <tr>
   <td><code>SaveMode.Overwrite</code></td>
   <td><code>"overwrite"</code></td>
   <td>
-    Overwrite mode means that when saving a DataFrame to a data source,
-    if data/table already exists, existing data is expected to be overwritten by the contents of
-    the DataFrame.
+    덮어쓰기 모드는 DataFrame을 데이터 소스에 저장할 때 데이터/테이블이 이미 존재한다면 DataFrame의 내용으로 덮어쓰기합니다.
   </td>
 </tr>
 <tr>
   <td><code>SaveMode.Ignore</code></td>
   <td><code>"ignore"</code></td>
   <td>
-    Ignore mode means that when saving a DataFrame to a data source, if data already exists,
-    the save operation is expected not to save the contents of the DataFrame and not to
-    change the existing data. This is similar to a <code>CREATE TABLE IF NOT EXISTS</code> in SQL.
+    건너뛰기(ignore) 모드는 DataFrame을 데이터 소스에 저장할 때 데이터가 이미 존재한다면 DataFrame의 저장 동작을 수행하지 않고 기존의 데이터를 변경하지 않습니다. SQL의 <code>CREATE TABLE IF NOT EXISTS</code>과 유사합니다.
   </td>
 </tr>
 </table>
 
-### Saving to Persistent Tables
+### 지속(Persistent) 테이블에 저장하기
 
-`DataFrames` can also be saved as persistent tables into Hive metastore using the `saveAsTable`
-command. Notice that an existing Hive deployment is not necessary to use this feature. Spark will create a
-default local Hive metastore (using Derby) for you. Unlike the `createOrReplaceTempView` command,
-`saveAsTable` will materialize the contents of the DataFrame and create a pointer to the data in the
-Hive metastore. Persistent tables will still exist even after your Spark program has restarted, as
-long as you maintain your connection to the same metastore. A DataFrame for a persistent table can
-be created by calling the `table` method on a `SparkSession` with the name of the table.
+`saveAsTable`명령어를 사용하면 `DataFrame`을 Hive 메타스토어에 지속 테이블로 저장할 수 있습니다. 이 기능은 이미 사용중인 Hive가 있어야 하는 것은 아닙니다. 스파크는 사용자를 위해 (Derby를 사용하여) 로컬 Hive 메타스토어를 생성합니다. `createOrReplaceTempView` 명령어와는 다르게 `saveAsTable`는 DataFrame의 내용을 저장한 뒤 Hive 메타스토어에 저장된 위치를 가리키는 포인터를 생성합니다. 지속 테이블은 스파크 프로그램을 재시작하더라도 동일한 메타스토어에 연결을 유지하기만 한다면 계속 유지됩니다. 지속 테이블의 DataFrame은 `SparkSession`에서 테이블 이름으로 `table`메소드를 호출하여 생성할 수 있습니다.
 
-For file-based data source, e.g. text, parquet, json, etc. you can specify a custom table path via the
-`path` option, e.g. `df.write.option("path", "/some/path").saveAsTable("t")`. When the table is dropped,
-the custom table path will not be removed and the table data is still there. If no custom table path is
-specified, Spark will write data to a default table path under the warehouse directory. When the table is
-dropped, the default table path will be removed too.
+파일 기반 데이터 소스(예: text, parquet, json 등)에서는 `path` 옵션을 사용하여 커스텀 테이블 경로를 명시할 수 있습니다(예: `df.write.option("path", "/some/path").saveAsTable("t")`). 테이블이 삭제될 때 커스텀 테이블 경로는 삭제되지 않고 테이블의 데이터도 그대로 유지됩니다. 테이블에 지정된 경로가 존재하지 않을 때, 스파크는 웨어하우스 디렉토리의 기본 테이블 경로에 데이터를 작성합니다. 테이블이 삭제되면 기본 테이블 경로도 함께 삭제됩니다. \
 
-Starting from Spark 2.1, persistent datasource tables have per-partition metadata stored in the Hive metastore. This brings several benefits:
+스파크 2.1버전부터, 지속 데이터 소스 테이블은 Hive 메타스토어 내에서 각 파티션마다 메타데이터를 가지게 됩니다. 이는 여러 가지 장점이 있습니다:
 
-- Since the metastore can return only necessary partitions for a query, discovering all the partitions on the first query to the table is no longer needed.
-- Hive DDLs such as `ALTER TABLE PARTITION ... SET LOCATION` are now available for tables created with the Datasource API.
+- 메타스토어는 각 쿼리에 필요한 파티션만 반환하기 때문에 테이블에 대한 전체 파티션의 탐색은 필요하지 않습니다.
+- 데이터 소스 API로 생성된 테이블에서 `ALTER TABLE PARTITION ... SET LOCATION`과 같은 Hive DDL를 사용할 수 있습니다.
 
-Note that partition information is not gathered by default when creating external datasource tables (those with a `path` option). To sync the partition information in the metastore, you can invoke `MSCK REPAIR TABLE`.
+주의: (`path` 옵션을 이용하여) 외부 데이터 소스로 테이블을 생성할 때, 각 파티션의 정보는 자동으로 얻을 수 없습니다. 메타스토어의 파티션 정보를 동기화하기 위해서는 `MSCK REPAIR TABLE`을 실행해야 합니다.
 
-### Bucketing, Sorting and Partitioning
+### 버키팅, 정렬, 파티셔닝
 
-For file-based data source, it is also possible to bucket and sort or partition the output.
-Bucketing and sorting are applicable only to persistent tables:
+파일 기반 데이터 소스에서 버키팅(Bucketing), 정렬, 파티셔닝을 사용할 수 있습니다. 버키팅, 정렬은 지속 테이블에만 사용할 수 있습니다:
 
 <div class="codetabs">
 
 <div data-lang="scala"  markdown="1">
 {% include_example write_sorting_and_bucketing scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
-</div>
-
-<div data-lang="java"  markdown="1">
-{% include_example write_sorting_and_bucketing java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
 </div>
 
 <div data-lang="python"  markdown="1">
@@ -253,17 +183,13 @@ CLUSTERED BY(name) INTO 42 BUCKETS;
 
 </div>
 
-while partitioning can be used with both `save` and `saveAsTable` when using the Dataset APIs.
+반면, 분할은 Dataset API를 사용할 경우 `save`와 `saveAsTable`에 모두 사용할 수 있습니다.
 
 
 <div class="codetabs">
 
 <div data-lang="scala"  markdown="1">
 {% include_example write_partitioning scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
-</div>
-
-<div data-lang="java"  markdown="1">
-{% include_example write_partitioning java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
 </div>
 
 <div data-lang="python"  markdown="1">
@@ -286,16 +212,12 @@ CREATE TABLE users_by_favorite_color(
 
 </div>
 
-It is possible to use both partitioning and bucketing for a single table:
+단일 테이블에서는 분할과 버키팅을 동시에 사용할 수 있습니다:
 
 <div class="codetabs">
 
 <div data-lang="scala"  markdown="1">
 {% include_example write_partition_and_bucket scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala %}
-</div>
-
-<div data-lang="java"  markdown="1">
-{% include_example write_partition_and_bucket java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java %}
 </div>
 
 <div data-lang="python"  markdown="1">
@@ -320,7 +242,4 @@ CLUSTERED BY(name) SORTED BY (favorite_numbers) INTO 42 BUCKETS;
 
 </div>
 
-`partitionBy` creates a directory structure as described in the [Partition Discovery](sql-data-sources-parquet.html#partition-discovery) section.
-Thus, it has limited applicability to columns with high cardinality. In contrast
- `bucketBy` distributes
-data across a fixed number of buckets and can be used when a number of unique values is unbounded.
+`partitionBy`는 [파티션 탐색](sql-data-sources-parquet.html#partition-discovery)에서 설명하고 있는 디렉토리 구조를 생성합니다. 따라서 컬럼에 저장되는 값의 집합의 크기(cardinality)가 큰 경우 사용에 한계가 있습니다. (역자 주: 컬럼에 저장되는 값마다 디렉토리가 하나씩 생성되니까.) 반면에 `bucketBy`는 정해진 수의 버킷에 데이터를 분산시키므로 주어진 컬럼에 무한히 많은 값들이 저장되는 경우에도 문제가 없습니다.

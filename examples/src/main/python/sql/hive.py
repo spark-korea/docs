@@ -32,7 +32,7 @@ from pyspark.sql import Row
 
 if __name__ == "__main__":
     # $example on:spark_hive$
-    # warehouse_location points to the default location for managed databases and tables
+    # warehouse_location은 hive 데이터베이스와 테이블의 기본 위치를 지정합니다.
     warehouse_location = abspath('spark-warehouse')
 
     spark = SparkSession \
@@ -42,11 +42,11 @@ if __name__ == "__main__":
         .enableHiveSupport() \
         .getOrCreate()
 
-    # spark is an existing SparkSession
+    # spark는 위에서 생성한 SparkSession 객체입니다.
     spark.sql("CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive")
     spark.sql("LOAD DATA LOCAL INPATH 'examples/src/main/resources/kv1.txt' INTO TABLE src")
 
-    # Queries are expressed in HiveQL
+    # HiveQL로 쿼리를 표현합니다.
     spark.sql("SELECT * FROM src").show()
     # +---+-------+
     # |key|  value|
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # |311|val_311|
     # ...
 
-    # Aggregation queries are also supported.
+    # 집계 쿼리도 지원합니다.
     spark.sql("SELECT COUNT(*) FROM src").show()
     # +--------+
     # |count(1)|
@@ -64,10 +64,10 @@ if __name__ == "__main__":
     # |    500 |
     # +--------+
 
-    # The results of SQL queries are themselves DataFrames and support all normal functions.
+    # SQL 쿼리의 결과는 DataFrame으로 생성되며 모든 일반 함수를 지원합니다.
     sqlDF = spark.sql("SELECT key, value FROM src WHERE key < 10 ORDER BY key")
 
-    # The items in DataFrames are of type Row, which allows you to access each column by ordinal.
+    # DataFrame은 Row 타입으로 이루어져 있습니다. 각 컬럼에는 index를 사용해서 접근할 수 있습니다.
     stringsDS = sqlDF.rdd.map(lambda row: "Key: %d, Value: %s" % (row.key, row.value))
     for record in stringsDS.collect():
         print(record)
@@ -76,12 +76,12 @@ if __name__ == "__main__":
     # Key: 0, Value: val_0
     # ...
 
-    # You can also use DataFrames to create temporary views within a SparkSession.
+    # DataFrame을 사용하여 SparkSession에 임시 뷰를 생성할 수 있습니다.
     Record = Row("key", "value")
     recordsDF = spark.createDataFrame([Record(i, "val_" + str(i)) for i in range(1, 101)])
     recordsDF.createOrReplaceTempView("records")
 
-    # Queries can then join DataFrame data with data stored in Hive.
+    # 이제, DataFrame의 데이터와 Hive에 저장된 데이터에 JOIN 쿼리를 사용할 수 있습니다.
     spark.sql("SELECT * FROM records r JOIN src s ON r.key = s.key").show()
     # +---+------+---+------+
     # |key| value|key| value|

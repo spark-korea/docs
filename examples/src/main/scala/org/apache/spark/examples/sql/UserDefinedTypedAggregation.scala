@@ -28,26 +28,26 @@ object UserDefinedTypedAggregation {
   case class Average(var sum: Long, var count: Long)
 
   object MyAverage extends Aggregator[Employee, Average, Double] {
-    // A zero value for this aggregation. Should satisfy the property that any b + zero = b
+    // 이 집계 함수의 영값(zero value)입니다. 임의의 b 값에 대해서 b + zero = b를 만족합니다.
     def zero: Average = Average(0L, 0L)
-    // Combine two values to produce a new value. For performance, the function may modify `buffer`
-    // and return it instead of constructing a new object
+    // 두 값을 가지고 새로운 값을 생성합니다. 성능을 위해 새로운 객체를 만드는 대신,
+    // 함수에서 직접 `buffer`를 수정하여 반환할 수도 있습니다.
     def reduce(buffer: Average, employee: Employee): Average = {
       buffer.sum += employee.salary
       buffer.count += 1
       buffer
     }
-    // Merge two intermediate values
+    // 두 중간값을 병합합니다.
     def merge(b1: Average, b2: Average): Average = {
       b1.sum += b2.sum
       b1.count += b2.count
       b1
     }
-    // Transform the output of the reduction
+    // reduce 호출 결과를 최종 리턴값으로 변환합니다.
     def finish(reduction: Average): Double = reduction.sum.toDouble / reduction.count
-    // Specifies the Encoder for the intermediate value type
+    // 중간값 타입에 대한 인코더를 명시합니다.
     def bufferEncoder: Encoder[Average] = Encoders.product
-    // Specifies the Encoder for the final output value type
+    // 최종 출력값 타입에 대한 인코더를 명시합니다.
     def outputEncoder: Encoder[Double] = Encoders.scalaDouble
   }
   // $example off:typed_custom_aggregation$
@@ -72,7 +72,7 @@ object UserDefinedTypedAggregation {
     // |  Berta|  4000|
     // +-------+------+
 
-    // Convert the function to a `TypedColumn` and give it a name
+    // 함수를 `TypedColumn`으로 변환하고 이름을 지정합니다.
     val averageSalary = MyAverage.toColumn.name("average_salary")
     val result = ds.select(averageSalary)
     result.show()

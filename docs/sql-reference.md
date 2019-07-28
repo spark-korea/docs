@@ -1,67 +1,51 @@
 ---
 layout: global
-title: Reference
-displayTitle: Reference
+title: 참조
+displayTitle: 참조
 ---
 
 * Table of contents
 {:toc}
 
-## Data Types
+## 데이터 타입
 
-Spark SQL and DataFrames support the following data types:
+스파크 SQL 과 DataFrame은 다음 데이터 타입을 지원합니다:
 
-* Numeric types
-  - `ByteType`: Represents 1-byte signed integer numbers.
-  The range of numbers is from `-128` to `127`.
-  - `ShortType`: Represents 2-byte signed integer numbers.
-  The range of numbers is from `-32768` to `32767`.
-  - `IntegerType`: Represents 4-byte signed integer numbers.
-  The range of numbers is from `-2147483648` to `2147483647`.
-  - `LongType`: Represents 8-byte signed integer numbers.
-  The range of numbers is from `-9223372036854775808` to `9223372036854775807`.
-  - `FloatType`: Represents 4-byte single-precision floating point numbers.
-  - `DoubleType`: Represents 8-byte double-precision floating point numbers.
-  - `DecimalType`: Represents arbitrary-precision signed decimal numbers. Backed internally by `java.math.BigDecimal`. A `BigDecimal` consists of an arbitrary precision integer unscaled value and a 32-bit integer scale.
-* String type
-  - `StringType`: Represents character string values.
-* Binary type
-  - `BinaryType`: Represents byte sequence values.
-* Boolean type
-  - `BooleanType`: Represents boolean values.
-* Datetime type
-  - `TimestampType`: Represents values comprising values of fields year, month, day,
-  hour, minute, and second.
-  - `DateType`: Represents values comprising values of fields year, month, day.
-* Complex types
-  - `ArrayType(elementType, containsNull)`: Represents values comprising a sequence of
-  elements with the type of `elementType`. `containsNull` is used to indicate if
-  elements in a `ArrayType` value can have `null` values.
-  - `MapType(keyType, valueType, valueContainsNull)`:
-  Represents values comprising a set of key-value pairs. The data type of keys are
-  described by `keyType` and the data type of values are described by `valueType`.
-  For a `MapType` value, keys are not allowed to have `null` values. `valueContainsNull`
-  is used to indicate if values of a `MapType` value can have `null` values.
-  - `StructType(fields)`: Represents values with the structure described by
-  a sequence of `StructField`s (`fields`).
-    * `StructField(name, dataType, nullable)`: Represents a field in a `StructType`.
-    The name of a field is indicated by `name`. The data type of a field is indicated
-    by `dataType`. `nullable` is used to indicate if values of this fields can have
-    `null` values.
+* 숫자 타입
+  - `ByteType`: 1 바이트 부호 있는(signed) 정수를 나타냅니다. 범위는 `-128` 부터 `127`까지 입니다.
+  - `ShortType`: 2 바이트 부호 있는(signed) 정수를 나타냅니다. 범위는 `-32768`부터 `32767`까지입니다.
+  - `IntegerType`: 4 바이트 부호 있는(signed) 정수를 나타냅니다. 범위는 `-2147483648`부터 `2147483647`까지 입니다.
+  - `LongType`: 8 바이트 부호 있는(signed) 정수를 나타냅니다. 범위는 `-9223372036854775808`부터 `9223372036854775807`입니다.
+  - `FloatType`: 4 바이트 단정밀도(single-precision) 부동 소수점수를 나타냅니다.
+  - `DoubleType`: 8 바이트 배정밀도(double-precision) 부동 소수점수를 나타냅니다.
+  - `DecimalType`: 임의정밀도(arbitrary-precision)의 부호 있는(signed) 소수를 나타냅니다. `java.math.BigDecimal`로 내부적으로 지원됩니다. `BigDecimal` 은 임의정밀도(arbitrary-precision)의 제한 없는(unscaled) 정수와 32비트의 제한 있는(scaled) 정수 스케일로 구성됩니다.
+* 문자열 타입
+  - `StringType`: 문자열 값을 나타냅니다.
+* 이진 타입
+  - `BinaryType`: 바이트 시퀀스 값을 나타냅니다.
+* Boolean 타입
+  - `BooleanType`: boolean값을 나타냅니다.
+* 날짜시간 타입
+  - `TimestampType`: 년, 월, 일, 시, 분, 초 필드 값으로 구성된 값을 나타냅니다.
+  - `DateType`: 연, 월, 일 필드 값으로 구성된 값을 나타냅니다.
+* 복합 타입
+  - `ArrayType(elementType, containsNull)`: `elementType`의 요소 시퀀스로 구성된 값을 나타냅니다. `containsNull`은 `ArrayType`의 요소가 `null`값을 가질 수 있는지 여부를 나타내는데 사용됩니다.
+  - `MapType(keyType, valueType, valueContainsNull)`: 일련의 키-값 쌍으로 구성된 값을 나타냅니다. 키의 데이터 타입은 `keyType` 이고 값의 데이터 타입은 `valueType` 입니다. `MapType` 값에서 키는 `null`값을 가질 수 없습니다. `valueContainsNull` 은 `MapType` 이 `null` 값을 가질 수 있는지 여부를 나타내는 데 사용됩니다.
+  - `StructType(fields)`: `StructField `(`fields`)` `구조의 시퀀스를 가진 값을 나타냅니다.
+    - `StructField(name, dataType, nullable)`: `StructType` 의 필드를 나타냅니다. 필드 이름은 `name`으로 지정됩니다. 필드의 데이터 타입은 `dataType`으로 지정됩니다. `nullable` 은 필드 값이 `null`값을 가질 수 있는지 여부를 나타내는 데 사용됩니다.
 
 <div class="codetabs">
 <div data-lang="scala"  markdown="1">
 
-All data types of Spark SQL are located in the package `org.apache.spark.sql.types`.
-You can access them by doing
+스파크 SQL의 모든 데이터 타입은 `org.apache.spark.sql.types` 패키지에 있습니다. 다음 코드를 통해 해당 데이터 타입에 접근할 수 있습니다.
 
 {% include_example data_types scala/org/apache/spark/examples/sql/SparkSQLExample.scala %}
 
 <table class="table">
 <tr>
-  <th style="width:20%">Data type</th>
-  <th style="width:40%">Value type in Scala</th>
-  <th>API to access or create a data type</th></tr>
+  <th style="width:20%">데이터 타입</th>
+  <th style="width:40%">Scala에서의 타입</th>
+  <th>데이터 타입에 접근하거나 데이터 타입을 생성하기 위한 API</th></tr>
 <tr>
   <td> <b>ByteType</b> </td>
   <td> Byte </td>
@@ -151,7 +135,7 @@ You can access them by doing
   <td> scala.collection.Seq </td>
   <td>
   ArrayType(<i>elementType</i>, [<i>containsNull</i>])<br />
-  <b>Note:</b> The default value of <i>containsNull</i> is <i>true</i>.
+  <b>주의:</b> <i>containsNull</i>의 기본값은 <i>true</i> 입니다.
   </td>
 </tr>
 <tr>
@@ -159,161 +143,24 @@ You can access them by doing
   <td> scala.collection.Map </td>
   <td>
   MapType(<i>keyType</i>, <i>valueType</i>, [<i>valueContainsNull</i>])<br />
-  <b>Note:</b> The default value of <i>valueContainsNull</i> is <i>true</i>.
+  <b>주의:</b> <i>valueContainsNull</i>의 기본값은 <i>true</i> 입니다.
   </td>
 </tr>
 <tr>
-  <td> <b>StructType</b> </td>
+ <td> <b>StructType</b> </td>
   <td> org.apache.spark.sql.Row </td>
   <td>
   StructType(<i>fields</i>)<br />
-  <b>Note:</b> <i>fields</i> is a Seq of StructFields. Also, two fields with the same
-  name are not allowed.
+  <b>Note:</b> <i>fields</i>는 StructField의 Seq 입니다. 또한, 두 필드가 같은 이름을 가질 수는 없습니다.
   </td>
 </tr>
 <tr>
   <td> <b>StructField</b> </td>
-  <td> The value type in Scala of the data type of this field
-  (For example, Int for a StructField with the data type IntegerType) </td>
+  <td> 필드 데이터 타입의 Scala 값 유형.
+  (예를 들어, 데이터 타입으로 IntegerType를 가지는 StructField는 Int) </td>
   <td>
   StructField(<i>name</i>, <i>dataType</i>, [<i>nullable</i>])<br />
-  <b>Note:</b> The default value of <i>nullable</i> is <i>true</i>.
-  </td>
-</tr>
-</table>
-
-</div>
-
-<div data-lang="java" markdown="1">
-
-All data types of Spark SQL are located in the package of
-`org.apache.spark.sql.types`. To access or create a data type,
-please use factory methods provided in
-`org.apache.spark.sql.types.DataTypes`.
-
-<table class="table">
-<tr>
-  <th style="width:20%">Data type</th>
-  <th style="width:40%">Value type in Java</th>
-  <th>API to access or create a data type</th></tr>
-<tr>
-  <td> <b>ByteType</b> </td>
-  <td> byte or Byte </td>
-  <td>
-  DataTypes.ByteType
-  </td>
-</tr>
-<tr>
-  <td> <b>ShortType</b> </td>
-  <td> short or Short </td>
-  <td>
-  DataTypes.ShortType
-  </td>
-</tr>
-<tr>
-  <td> <b>IntegerType</b> </td>
-  <td> int or Integer </td>
-  <td>
-  DataTypes.IntegerType
-  </td>
-</tr>
-<tr>
-  <td> <b>LongType</b> </td>
-  <td> long or Long </td>
-  <td>
-  DataTypes.LongType
-  </td>
-</tr>
-<tr>
-  <td> <b>FloatType</b> </td>
-  <td> float or Float </td>
-  <td>
-  DataTypes.FloatType
-  </td>
-</tr>
-<tr>
-  <td> <b>DoubleType</b> </td>
-  <td> double or Double </td>
-  <td>
-  DataTypes.DoubleType
-  </td>
-</tr>
-<tr>
-  <td> <b>DecimalType</b> </td>
-  <td> java.math.BigDecimal </td>
-  <td>
-  DataTypes.createDecimalType()<br />
-  DataTypes.createDecimalType(<i>precision</i>, <i>scale</i>).
-  </td>
-</tr>
-<tr>
-  <td> <b>StringType</b> </td>
-  <td> String </td>
-  <td>
-  DataTypes.StringType
-  </td>
-</tr>
-<tr>
-  <td> <b>BinaryType</b> </td>
-  <td> byte[] </td>
-  <td>
-  DataTypes.BinaryType
-  </td>
-</tr>
-<tr>
-  <td> <b>BooleanType</b> </td>
-  <td> boolean or Boolean </td>
-  <td>
-  DataTypes.BooleanType
-  </td>
-</tr>
-<tr>
-  <td> <b>TimestampType</b> </td>
-  <td> java.sql.Timestamp </td>
-  <td>
-  DataTypes.TimestampType
-  </td>
-</tr>
-<tr>
-  <td> <b>DateType</b> </td>
-  <td> java.sql.Date </td>
-  <td>
-  DataTypes.DateType
-  </td>
-</tr>
-<tr>
-  <td> <b>ArrayType</b> </td>
-  <td> java.util.List </td>
-  <td>
-  DataTypes.createArrayType(<i>elementType</i>)<br />
-  <b>Note:</b> The value of <i>containsNull</i> will be <i>true</i><br />
-  DataTypes.createArrayType(<i>elementType</i>, <i>containsNull</i>).
-  </td>
-</tr>
-<tr>
-  <td> <b>MapType</b> </td>
-  <td> java.util.Map </td>
-  <td>
-  DataTypes.createMapType(<i>keyType</i>, <i>valueType</i>)<br />
-  <b>Note:</b> The value of <i>valueContainsNull</i> will be <i>true</i>.<br />
-  DataTypes.createMapType(<i>keyType</i>, <i>valueType</i>, <i>valueContainsNull</i>)<br />
-  </td>
-</tr>
-<tr>
-  <td> <b>StructType</b> </td>
-  <td> org.apache.spark.sql.Row </td>
-  <td>
-  DataTypes.createStructType(<i>fields</i>)<br />
-  <b>Note:</b> <i>fields</i> is a List or an array of StructFields.
-  Also, two fields with the same name are not allowed.
-  </td>
-</tr>
-<tr>
-  <td> <b>StructField</b> </td>
-  <td> The value type in Java of the data type of this field
-  (For example, int for a StructField with the data type IntegerType) </td>
-  <td>
-  DataTypes.createStructField(<i>name</i>, <i>dataType</i>, <i>nullable</i>)
+  <b>Note:</b> <i>nullable</i>의 기본값은 <i>true</i> 입니다.
   </td>
 </tr>
 </table>
@@ -322,23 +169,22 @@ please use factory methods provided in
 
 <div data-lang="python"  markdown="1">
 
-All data types of Spark SQL are located in the package of `pyspark.sql.types`.
-You can access them by doing
+스파크 SQL의 모든 데이터 타입은 `pyspark.sql.types` 패키지에 있습니다. 다음 코드를 통해 해당 데이터 타입에 접근할 수 있습니다.
+
 {% highlight python %}
 from pyspark.sql.types import *
 {% endhighlight %}
 
 <table class="table">
 <tr>
-  <th style="width:20%">Data type</th>
-  <th style="width:40%">Value type in Python</th>
-  <th>API to access or create a data type</th></tr>
+  <th style="width:20%">데이터 타입</th>
+  <th style="width:40%">Python 값 타입</th>
+  <th>데이터 타입에 접근하거나 데이터 타입을 생성하기 위한 API</th></tr>
 <tr>
   <td> <b>ByteType</b> </td>
   <td>
-  int or long <br />
-  <b>Note:</b> Numbers will be converted to 1-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of -128 to 127.
+  int 또는 long <br />
+  <b>주의:</b> 런타임 시 숫자가 1바이트 부호 있는 정수로 변환됩니다. 숫자가  -128에서 127 사이인지 확인하십시오.
   </td>
   <td>
   ByteType()
@@ -347,9 +193,8 @@ from pyspark.sql.types import *
 <tr>
   <td> <b>ShortType</b> </td>
   <td>
-  int or long <br />
-  <b>Note:</b> Numbers will be converted to 2-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of -32768 to 32767.
+  int 또는 long <br />
+  <b>주의:</b> Note: 런타임 시 숫자가 2바이트 부호 있는 정수로 변환됩니다. 숫자가 -32768에서 32767 사이인지 확인하십시오.
   </td>
   <td>
   ShortType()
@@ -357,7 +202,7 @@ from pyspark.sql.types import *
 </tr>
 <tr>
   <td> <b>IntegerType</b> </td>
-  <td> int or long </td>
+  <td> int 또는 long </td>
   <td>
   IntegerType()
   </td>
@@ -366,10 +211,7 @@ from pyspark.sql.types import *
   <td> <b>LongType</b> </td>
   <td>
   long <br />
-  <b>Note:</b> Numbers will be converted to 8-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of
-  -9223372036854775808 to 9223372036854775807.
-  Otherwise, please convert data to decimal.Decimal and use DecimalType.
+  <b>주의:</b> 런타임 시 숫자가 8바이트 부호 있는 정수로 변환됩니다. 숫자가 9223372036854775808에서 9223372036854775807 사이인지 확인하십시오. 해당 범위의 숫자가 아니라면 데이터를 decimal.Decimal로 변환하고 DecimalType을 사용하십시오.
   </td>
   <td>
   LongType()
@@ -379,8 +221,7 @@ from pyspark.sql.types import *
   <td> <b>FloatType</b> </td>
   <td>
   float <br />
-  <b>Note:</b> Numbers will be converted to 4-byte single-precision floating
-  point numbers at runtime.
+  <b>주의:</b> 런타임 시 숫자가 4바이트 단정도 부동 소수점수로 변환됩니다.
   </td>
   <td>
   FloatType()
@@ -437,10 +278,10 @@ from pyspark.sql.types import *
 </tr>
 <tr>
   <td> <b>ArrayType</b> </td>
-  <td> list, tuple, or array </td>
+  <td> list, tuple, 또는 array </td>
   <td>
   ArrayType(<i>elementType</i>, [<i>containsNull</i>])<br />
-  <b>Note:</b> The default value of <i>containsNull</i> is <i>True</i>.
+  <b>Note:</b> <i>containsNull</i>의 기본값은 <i>True</i> 입니다.
   </td>
 </tr>
 <tr>
@@ -448,172 +289,23 @@ from pyspark.sql.types import *
   <td> dict </td>
   <td>
   MapType(<i>keyType</i>, <i>valueType</i>, [<i>valueContainsNull</i>])<br />
-  <b>Note:</b> The default value of <i>valueContainsNull</i> is <i>True</i>.
+  <b>Note:</b> <i>valueContainsNull</i>의 기본값은 <i>True</i> 입니다.
   </td>
 </tr>
 <tr>
   <td> <b>StructType</b> </td>
-  <td> list or tuple </td>
+  <td> list 또는 tuple </td>
   <td>
   StructType(<i>fields</i>)<br />
-  <b>Note:</b> <i>fields</i> is a Seq of StructFields. Also, two fields with the same
-  name are not allowed.
+  <b>주의:</b> <i>fields</i>는 StructField의 연속입니다. 또한, 두 개의 필드가 같은 이름을 가질 수 없습니다.
   </td>
 </tr>
 <tr>
   <td> <b>StructField</b> </td>
-  <td> The value type in Python of the data type of this field
-  (For example, Int for a StructField with the data type IntegerType) </td>
+  <td> 필드 데이터 타입의 Python 값 유형 (예를 들어, 데이터 타입으로 IntegerType를 가지는 StructField는 Int) </td>
   <td>
   StructField(<i>name</i>, <i>dataType</i>, [<i>nullable</i>])<br />
-  <b>Note:</b> The default value of <i>nullable</i> is <i>True</i>.
-  </td>
-</tr>
-</table>
-
-</div>
-
-<div data-lang="r"  markdown="1">
-
-<table class="table">
-<tr>
-  <th style="width:20%">Data type</th>
-  <th style="width:40%">Value type in R</th>
-  <th>API to access or create a data type</th></tr>
-<tr>
-  <td> <b>ByteType</b> </td>
-  <td>
-  integer <br />
-  <b>Note:</b> Numbers will be converted to 1-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of -128 to 127.
-  </td>
-  <td>
-  "byte"
-  </td>
-</tr>
-<tr>
-  <td> <b>ShortType</b> </td>
-  <td>
-  integer <br />
-  <b>Note:</b> Numbers will be converted to 2-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of -32768 to 32767.
-  </td>
-  <td>
-  "short"
-  </td>
-</tr>
-<tr>
-  <td> <b>IntegerType</b> </td>
-  <td> integer </td>
-  <td>
-  "integer"
-  </td>
-</tr>
-<tr>
-  <td> <b>LongType</b> </td>
-  <td>
-  integer <br />
-  <b>Note:</b> Numbers will be converted to 8-byte signed integer numbers at runtime.
-  Please make sure that numbers are within the range of
-  -9223372036854775808 to 9223372036854775807.
-  Otherwise, please convert data to decimal.Decimal and use DecimalType.
-  </td>
-  <td>
-  "long"
-  </td>
-</tr>
-<tr>
-  <td> <b>FloatType</b> </td>
-  <td>
-  numeric <br />
-  <b>Note:</b> Numbers will be converted to 4-byte single-precision floating
-  point numbers at runtime.
-  </td>
-  <td>
-  "float"
-  </td>
-</tr>
-<tr>
-  <td> <b>DoubleType</b> </td>
-  <td> numeric </td>
-  <td>
-  "double"
-  </td>
-</tr>
-<tr>
-  <td> <b>DecimalType</b> </td>
-  <td> Not supported </td>
-  <td>
-   Not supported
-  </td>
-</tr>
-<tr>
-  <td> <b>StringType</b> </td>
-  <td> character </td>
-  <td>
-  "string"
-  </td>
-</tr>
-<tr>
-  <td> <b>BinaryType</b> </td>
-  <td> raw </td>
-  <td>
-  "binary"
-  </td>
-</tr>
-<tr>
-  <td> <b>BooleanType</b> </td>
-  <td> logical </td>
-  <td>
-  "bool"
-  </td>
-</tr>
-<tr>
-  <td> <b>TimestampType</b> </td>
-  <td> POSIXct </td>
-  <td>
-  "timestamp"
-  </td>
-</tr>
-<tr>
-  <td> <b>DateType</b> </td>
-  <td> Date </td>
-  <td>
-  "date"
-  </td>
-</tr>
-<tr>
-  <td> <b>ArrayType</b> </td>
-  <td> vector or list </td>
-  <td>
-  list(type="array", elementType=<i>elementType</i>, containsNull=[<i>containsNull</i>])<br />
-  <b>Note:</b> The default value of <i>containsNull</i> is <i>TRUE</i>.
-  </td>
-</tr>
-<tr>
-  <td> <b>MapType</b> </td>
-  <td> environment </td>
-  <td>
-  list(type="map", keyType=<i>keyType</i>, valueType=<i>valueType</i>, valueContainsNull=[<i>valueContainsNull</i>])<br />
-  <b>Note:</b> The default value of <i>valueContainsNull</i> is <i>TRUE</i>.
-  </td>
-</tr>
-<tr>
-  <td> <b>StructType</b> </td>
-  <td> named list</td>
-  <td>
-  list(type="struct", fields=<i>fields</i>)<br />
-  <b>Note:</b> <i>fields</i> is a Seq of StructFields. Also, two fields with the same
-  name are not allowed.
-  </td>
-</tr>
-<tr>
-  <td> <b>StructField</b> </td>
-  <td> The value type in R of the data type of this field
-  (For example, integer for a StructField with the data type IntegerType) </td>
-  <td>
-  list(name=<i>name</i>, type=<i>dataType</i>, nullable=[<i>nullable</i>])<br />
-  <b>Note:</b> The default value of <i>nullable</i> is <i>TRUE</i>.
+  <b>Note:</b> <i>nullable</i>의 기본값은 <i>True</i> 입니다.
   </td>
 </tr>
 </table>
@@ -622,20 +314,15 @@ from pyspark.sql.types import *
 
 </div>
 
-## NaN Semantics
+## NaN 의미 구조
 
-There is specially handling for not-a-number (NaN) when dealing with `float` or `double` types that
-does not exactly match standard floating point semantics.
-Specifically:
+표준 부동 소수점 의미와 정확히 일치하지 않는 float 또는 double 타입을 처리 할 때 not-a-number (NaN)을 다루는 방법이 있습니다. 구체적으로는 다음과 같이 처리합니다.
 
- - NaN = NaN returns true.
- - In aggregations, all NaN values are grouped together.
- - NaN is treated as a normal value in join keys.
- - NaN values go last when in ascending order, larger than any other numeric value.
- 
-## Arithmetic operations
- 
-Operations performed on numeric types (with the exception of `decimal`) are not checked for overflow.
-This means that in case an operation causes an overflow, the result is the same that the same operation
-returns in a Java/Scala program (eg. if the sum of 2 integers is higher than the maximum value representable,
-the result is a negative number).
+ - NaN = NaN은 true를 반환합니다.
+ - 집계에서 모든 NaN값은 같은 그룹으로 묶입니다.
+ - 조인 키에서 NaN은 일반 값으로 다뤄집니다.
+ - 오름차순일 때, NaN 값은 가장 큰 숫자로서 제일 마지막에 위치합니다.
+
+## 산술 연산
+
+숫자 타입 (`decimal`제외) 연산 시 오버플로가 체크되지 않습니다. 이는 오버플로를 발생시키는 연산 시 그 결과값이 Java/Scala 프로그램에서 반환되는 연산 결과값과 같다는 것을 의미합니다. (예. 두 정수의 합이 표현할 수 있는 최댓값보다 크다면 결과값이 음수가 됩니다).

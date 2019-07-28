@@ -40,7 +40,8 @@ object SparkSQLExample {
       .config("spark.some.config.option", "some-value")
       .getOrCreate()
 
-    // For implicit conversions like converting RDDs to DataFrames
+    // RDD를 DataFrame으로 바꾸는 것과 같은 암시적 변환(implicit conversion)을 처리하기 위해
+    // 아래와 같이 import를 해 줍니다.
     import spark.implicits._
     // $example off:init_session$
 
@@ -56,7 +57,7 @@ object SparkSQLExample {
     // $example on:create_df$
     val df = spark.read.json("examples/src/main/resources/people.json")
 
-    // Displays the content of the DataFrame to stdout
+    // 표준출력(stdout)에 DataFrame의 내용을 보여줍니다.
     df.show()
     // +----+-------+
     // | age|   name|
@@ -68,15 +69,15 @@ object SparkSQLExample {
     // $example off:create_df$
 
     // $example on:untyped_ops$
-    // This import is needed to use the $-notation
+    // $-notation을 사용하기 위해 임포트합니다.
     import spark.implicits._
-    // Print the schema in a tree format
+    // 트리 형태로 스키마를 출력합니다.
     df.printSchema()
     // root
     // |-- age: long (nullable = true)
     // |-- name: string (nullable = true)
 
-    // Select only the "name" column
+    // "name" 컬럼을 선택합니다.
     df.select("name").show()
     // +-------+
     // |   name|
@@ -86,7 +87,7 @@ object SparkSQLExample {
     // | Justin|
     // +-------+
 
-    // Select everybody, but increment the age by 1
+    // 모든 사람을 선택하고, 나이를 1씩 증가시킵니다.
     df.select($"name", $"age" + 1).show()
     // +-------+---------+
     // |   name|(age + 1)|
@@ -96,7 +97,7 @@ object SparkSQLExample {
     // | Justin|       20|
     // +-------+---------+
 
-    // Select people older than 21
+    // 나이가 21살보다 많은 사람을 선택합니다.
     df.filter($"age" > 21).show()
     // +---+----+
     // |age|name|
@@ -104,7 +105,7 @@ object SparkSQLExample {
     // | 30|Andy|
     // +---+----+
 
-    // Count people by age
+    // 각 나이별로 사람의 수를 셉니다.
     df.groupBy("age").count().show()
     // +----+-----+
     // | age|count|
@@ -116,7 +117,7 @@ object SparkSQLExample {
     // $example off:untyped_ops$
 
     // $example on:run_sql$
-    // Register the DataFrame as a SQL temporary view
+    // DataFrame을 SQL 임시 뷰로 등록합니다.
     df.createOrReplaceTempView("people")
 
     val sqlDF = spark.sql("SELECT * FROM people")
@@ -131,10 +132,10 @@ object SparkSQLExample {
     // $example off:run_sql$
 
     // $example on:global_temp_view$
-    // Register the DataFrame as a global temporary view
+    // DataFrame을 전역 임시 뷰에 등록합니다.
     df.createGlobalTempView("people")
 
-    // Global temporary view is tied to a system preserved database `global_temp`
+    // 전역 임시 뷰는 시스템 데이터베이스에 `global_temp` 라는 이름으로 등록됩니다.
     spark.sql("SELECT * FROM global_temp.people").show()
     // +----+-------+
     // | age|   name|
@@ -144,7 +145,7 @@ object SparkSQLExample {
     // |  19| Justin|
     // +----+-------+
 
-    // Global temporary view is cross-session
+    // 전역 임시 뷰는 다른 SparkSession에서도 사용할 수 있습니다.
     spark.newSession().sql("SELECT * FROM global_temp.people").show()
     // +----+-------+
     // | age|   name|
@@ -159,7 +160,7 @@ object SparkSQLExample {
   private def runDatasetCreationExample(spark: SparkSession): Unit = {
     import spark.implicits._
     // $example on:create_ds$
-    // Encoders are created for case classes
+    // Encoder는 케이스 클래스별로 생성됩니다.
     val caseClassDS = Seq(Person("Andy", 32)).toDS()
     caseClassDS.show()
     // +----+---+
@@ -168,11 +169,11 @@ object SparkSQLExample {
     // |Andy| 32|
     // +----+---+
 
-    // Encoders for most common types are automatically provided by importing spark.implicits._
+    // 일반적으로 사용되는 대부분의 타입에 대한 인코더는 spark.implicits._를 임포트하면 자동으로 포함됩니다.
     val primitiveDS = Seq(1, 2, 3).toDS()
-    primitiveDS.map(_ + 1).collect() // Returns: Array(2, 3, 4)
+    primitiveDS.map(_ + 1).collect() // Array(2, 3, 4) 반환.
 
-    // DataFrames can be converted to a Dataset by providing a class. Mapping will be done by name
+    // 클래스를 지정함으로써 DataFrame을 Dataset으로 변환할 수 있습니다. 값들은 클래스의 속성 변수 이름에 따라 자동으로 할당됩니다.
     val path = "examples/src/main/resources/people.json"
     val peopleDS = spark.read.json(path).as[Person]
     peopleDS.show()
@@ -188,22 +189,23 @@ object SparkSQLExample {
 
   private def runInferSchemaExample(spark: SparkSession): Unit = {
     // $example on:schema_inferring$
-    // For implicit conversions from RDDs to DataFrames
+    // RDD를 DataFrame으로 암시적으로 변환(implicit conversion)하기 위해 임포트합니다.
     import spark.implicits._
 
     // Create an RDD of Person objects from a text file, convert it to a Dataframe
+    // 텍스트 파일을 읽어 Person 객체의 RDD를 생성하고, 이를 DataFrame으로 변환합니다.
     val peopleDF = spark.sparkContext
       .textFile("examples/src/main/resources/people.txt")
       .map(_.split(","))
       .map(attributes => Person(attributes(0), attributes(1).trim.toInt))
       .toDF()
-    // Register the DataFrame as a temporary view
+    // DataFrame을 임시 뷰로 등록합니다.
     peopleDF.createOrReplaceTempView("people")
 
-    // SQL statements can be run by using the sql methods provided by Spark
+    // 스파크에서 제공하는 sql 메소드를 이용해서 SQL문을 실행할 수 있습니다.
     val teenagersDF = spark.sql("SELECT name, age FROM people WHERE age BETWEEN 13 AND 19")
 
-    // The columns of a row in the result can be accessed by field index
+    // 결과에서 각 로우의 컬럼은 필드의 인덱스로 접근할 수 있습니다.
     teenagersDF.map(teenager => "Name: " + teenager(0)).show()
     // +------------+
     // |       value|
@@ -211,7 +213,7 @@ object SparkSQLExample {
     // |Name: Justin|
     // +------------+
 
-    // or by field name
+    // 필드의 이름으로 접근할 수도 있습니다.
     teenagersDF.map(teenager => "Name: " + teenager.getAs[String]("name")).show()
     // +------------+
     // |       value|
@@ -219,12 +221,12 @@ object SparkSQLExample {
     // |Name: Justin|
     // +------------+
 
-    // No pre-defined encoders for Dataset[Map[K,V]], define explicitly
+    // Dataset[Map[K,V]]에 대한 인코더가 선언되어 있지 않으므로, 여기서 명시적으로 선언해줍니다.
     implicit val mapEncoder = org.apache.spark.sql.Encoders.kryo[Map[String, Any]]
-    // Primitive types and case classes can be also defined as
+    // 기본 타입과 케이스 클래스는 아래와 같이 정의할 수 있습니다:
     // implicit val stringIntMapEncoder: Encoder[Map[String, Any]] = ExpressionEncoder()
 
-    // row.getValuesMap[T] retrieves multiple columns at once into a Map[String, T]
+    // row.getValuesMap[T]는 여러 개의 컬럼을 한번에 Map[String, T] 형태로 가져옵니다.
     teenagersDF.map(teenager => teenager.getValuesMap[Any](List("name", "age"))).collect()
     // Array(Map("name" -> "Justin", "age" -> 19))
     // $example off:schema_inferring$
@@ -233,33 +235,33 @@ object SparkSQLExample {
   private def runProgrammaticSchemaExample(spark: SparkSession): Unit = {
     import spark.implicits._
     // $example on:programmatic_schema$
-    // Create an RDD
+    // RDD를 생성합니다.
     val peopleRDD = spark.sparkContext.textFile("examples/src/main/resources/people.txt")
 
-    // The schema is encoded in a string
+    // 스키마는 문자열로 인코딩됩니다.
     val schemaString = "name age"
 
-    // Generate the schema based on the string of schema
+    // 스키마 문자열을 기반으로 스키마를 생성합니다.
     val fields = schemaString.split(" ")
       .map(fieldName => StructField(fieldName, StringType, nullable = true))
     val schema = StructType(fields)
 
-    // Convert records of the RDD (people) to Rows
+    // RDD(people)에 들어 있는 레코드를 Row 객체로 변환합니다.
     val rowRDD = peopleRDD
       .map(_.split(","))
       .map(attributes => Row(attributes(0), attributes(1).trim))
 
-    // Apply the schema to the RDD
+    // RDD에 스키마를 적용합니다.
     val peopleDF = spark.createDataFrame(rowRDD, schema)
 
-    // Creates a temporary view using the DataFrame
+    // DataFrame을 사용하여 임시 뷰를 생성합니다.
     peopleDF.createOrReplaceTempView("people")
 
-    // SQL can be run over a temporary view created using DataFrames
+    // 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.
     val results = spark.sql("SELECT name FROM people")
 
-    // The results of SQL queries are DataFrames and support all the normal RDD operations
-    // The columns of a row in the result can be accessed by field index or by field name
+    // SQL 쿼리의 결과 역시 DataFrame이 되며, 모든 일반적인 RDD 동작을 지원합니다.
+    // 각 컬럼의 로우는 필드의 인덱스 값 또는 이름으로 접근할 수 있습니다.
     results.map(attributes => "Name: " + attributes(0)).show()
     // +-------------+
     // |        value|

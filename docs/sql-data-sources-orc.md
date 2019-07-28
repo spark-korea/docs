@@ -1,26 +1,22 @@
 ---
 layout: global
-title: ORC Files
-displayTitle: ORC Files
+title: ORC 파일
+displayTitle: ORC 파일
 ---
 
-Since Spark 2.3, Spark supports a vectorized ORC reader with a new ORC file format for ORC files.
-To do that, the following configurations are newly added. The vectorized reader is used for the
-native ORC tables (e.g., the ones created using the clause `USING ORC`) when `spark.sql.orc.impl`
-is set to `native` and `spark.sql.orc.enableVectorizedReader` is set to `true`. For the Hive ORC
-serde tables (e.g., the ones created using the clause `USING HIVE OPTIONS (fileFormat 'ORC')`),
-the vectorized reader is used when `spark.sql.hive.convertMetastoreOrc` is also set to `true`.
+스파크 2.3 버전부터 스파크는 새로운 ORC 파일 포맷과 함께 벡터화된 ORC 읽기 기능을 지원합니다. 이 기능을 위해 아래의 설정이 새로 추가되었습니다. `spark.sql.orc.impl`이 `native` 로 설정되어 있고 `spark.sql.orc.enableVectorizedReader`이 `true로` 설정된 경우, 네이티브 ORC 테이블(즉, 사용자가 `USING ORC`를 사용하여 생성한 테이블)에서 벡터화된 리더를 사용할 수 있습니다. Hive ORC SerDe 테이블(즉, 사용자가 `USING HIVE OPTIONS (fileFormat 'ORC')`를 사용하여 생성한 테이블)에서는  `spark.sql.hive.convertMetastoreOrc`을 `true`로 설정하였을 때 벡터화된 리더를 사용할 수 있습니다.
+
 
 <table class="table">
-  <tr><th><b>Property Name</b></th><th><b>Default</b></th><th><b>Meaning</b></th></tr>
+  <tr><th><b>속성 이름</b></th><th><b>기본값</b></th><th><b>의미</b></th></tr>
   <tr>
     <td><code>spark.sql.orc.impl</code></td>
     <td><code>native</code></td>
-    <td>The name of ORC implementation. It can be one of <code>native</code> and <code>hive</code>. <code>native</code> means the native ORC support that is built on Apache ORC 1.4. `hive` means the ORC library in Hive 1.2.1.</td>
+    <td>사용할 ORC 구현체 이름. <code>native</code> 또는 <code>hive</code>를 사용할 수 있습니다.  <code>native</code>는 아파치 ORC 1.4에 내장된 네이티브 ORC를 의미하며 <code>hive</code>는 Hive 1.2.1의 ORC 라이브러리를 의미합니다.</td>
   </tr>
   <tr>
     <td><code>spark.sql.orc.enableVectorizedReader</code></td>
     <td><code>true</code></td>
-    <td>Enables vectorized orc decoding in <code>native</code> implementation. If <code>false</code>, a new non-vectorized ORC reader is used in <code>native</code> implementation. For <code>hive</code> implementation, this is ignored.</td>
+    <td><code>native</code> 구현체에서 벡터화된 ORC 읽기 기능을 활성화합니다.  <code>false</code>인 경우, 벡터화되지 않은 ORC 리더를 사용합니다. <code>hive </code>구현체에는 적용되지 않습니다.</td>
   </tr>
 </table>

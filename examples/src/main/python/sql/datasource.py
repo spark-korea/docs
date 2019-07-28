@@ -81,15 +81,15 @@ def parquet_example(spark):
     # $example on:basic_parquet_example$
     peopleDF = spark.read.json("examples/src/main/resources/people.json")
 
-    # DataFrames can be saved as Parquet files, maintaining the schema information.
+    # DataFrame은 스키마 정보를 유지하면서 Parquet 파일로 저장할 수 있습니다.
     peopleDF.write.parquet("people.parquet")
 
-    # Read in the Parquet file created above.
-    # Parquet files are self-describing so the schema is preserved.
-    # The result of loading a parquet file is also a DataFrame.
+    # 위에서 생성한 parquet 파일을 읽습니다.
+    # parquet 파일에는 스키마 정보가 포함되어 있습니다. 따라서 위에서 읽어온 스키마는 그대로 보존됩니다.
+    # parquet 파일을 불러온 결과 역시 DataFrame이 됩니다.
     parquetFile = spark.read.parquet("people.parquet")
 
-    # Parquet files can also be used to create a temporary view and then used in SQL statements.
+    # parquet 파일은 임시 뷰를 생성하고 SQL문을 실행하는데 사용할 수 있습니다.
     parquetFile.createOrReplaceTempView("parquetFile")
     teenagers = spark.sql("SELECT name FROM parquetFile WHERE age >= 13 AND age <= 19")
     teenagers.show()
@@ -103,26 +103,26 @@ def parquet_example(spark):
 
 def parquet_schema_merging_example(spark):
     # $example on:schema_merging$
-    # spark is from the previous example.
-    # Create a simple DataFrame, stored into a partition directory
+    # spark는 이전 예제에서 나온 것입니다.
+    # 간단한 DataFrame을 생성하고 분할 디렉토리에 저장합니다.
     sc = spark.sparkContext
 
     squaresDF = spark.createDataFrame(sc.parallelize(range(1, 6))
                                       .map(lambda i: Row(single=i, double=i ** 2)))
     squaresDF.write.parquet("data/test_table/key=1")
 
-    # Create another DataFrame in a new partition directory,
-    # adding a new column and dropping an existing column
+    # 새로운 컬럼을 추가하고 기존의 컬럼을 삭제함으로써 또 다른 DataFrame을 생성하고,
+    # 새로운 분할 디렉토리에 저장합니다.
     cubesDF = spark.createDataFrame(sc.parallelize(range(6, 11))
                                     .map(lambda i: Row(single=i, triple=i ** 3)))
     cubesDF.write.parquet("data/test_table/key=2")
 
-    # Read the partitioned table
+    # 분할된 테이블을 읽어옵니다.
     mergedDF = spark.read.option("mergeSchema", "true").parquet("data/test_table")
     mergedDF.printSchema()
 
-    # The final schema consists of all 3 columns in the Parquet files together
-    # with the partitioning column appeared in the partition directory paths.
+    # 최종 스키마는 Parquet 파일에 들어 있는 세 개의 컬럼과
+    # 파티션 디렉토리 경로에 나타나는 파티션 컬럼, 모두 네 개의 컬럼으로 이루어집니다.
     # root
     #  |-- double: long (nullable = true)
     #  |-- single: long (nullable = true)
@@ -133,24 +133,24 @@ def parquet_schema_merging_example(spark):
 
 def json_dataset_example(spark):
     # $example on:json_dataset$
-    # spark is from the previous example.
+    # spark는 이전 예제에서 나온 것입니다.
     sc = spark.sparkContext
 
-    # A JSON dataset is pointed to by path.
-    # The path can be either a single text file or a directory storing text files
+    # JSON dataset의 경로를 지정합니다.
+    # 경로는 단일 텍스트 파일 또는 텍스트 파일들을 담고있는 디렉토리가 될 수 있습니다.
     path = "examples/src/main/resources/people.json"
     peopleDF = spark.read.json(path)
 
-    # The inferred schema can be visualized using the printSchema() method
+    # 추론된 스키마는 printSchema() 메소드를 이용해 시각화할 수 있습니다.
     peopleDF.printSchema()
     # root
     #  |-- age: long (nullable = true)
     #  |-- name: string (nullable = true)
 
-    # Creates a temporary view using the DataFrame
+    # DataFrame을 이용하여 임시 뷰(temporary view)를 만듭니다.
     peopleDF.createOrReplaceTempView("people")
 
-    # SQL statements can be run by using the sql methods provided by spark
+    # 스파크에서 제공하는 sql 메소드를 이용하여 SQL 명령문을 실행할 수 있습니다.
     teenagerNamesDF = spark.sql("SELECT name FROM people WHERE age BETWEEN 13 AND 19")
     teenagerNamesDF.show()
     # +------+
@@ -159,8 +159,8 @@ def json_dataset_example(spark):
     # |Justin|
     # +------+
 
-    # Alternatively, a DataFrame can be created for a JSON dataset represented by
-    # an RDD[String] storing one JSON object per string
+    # 다른 방법으로, string마다 하나의 JSON 객체를 저장하는 RDD[String]로 표현되는
+    # JSON dataset에 대한 DataFrame을 만들 수 있습니다.
     jsonStrings = ['{"name":"Yin","address":{"city":"Columbus","state":"Ohio"}}']
     otherPeopleRDD = sc.parallelize(jsonStrings)
     otherPeople = spark.read.json(otherPeopleRDD)
@@ -175,8 +175,8 @@ def json_dataset_example(spark):
 
 def jdbc_dataset_example(spark):
     # $example on:jdbc_dataset$
-    # Note: JDBC loading and saving can be achieved via either the load/save or jdbc methods
-    # Loading data from a JDBC source
+    # 주의: JDBC 불러오기와 저장하기는 load/save나 jdbc 메소드로 할 수 있습니다
+    # JDBC 소스에서 데이터 불러오기
     jdbcDF = spark.read \
         .format("jdbc") \
         .option("url", "jdbc:postgresql:dbserver") \
@@ -189,7 +189,7 @@ def jdbc_dataset_example(spark):
         .jdbc("jdbc:postgresql:dbserver", "schema.tablename",
               properties={"user": "username", "password": "password"})
 
-    # Specifying dataframe column data types on read
+    # 읽기 DataFrame의 컬럼 데이터 유형 지정하기
     jdbcDF3 = spark.read \
         .format("jdbc") \
         .option("url", "jdbc:postgresql:dbserver") \
@@ -199,7 +199,7 @@ def jdbc_dataset_example(spark):
         .option("customSchema", "id DECIMAL(38, 0), name STRING") \
         .load()
 
-    # Saving data to a JDBC source
+    # JDBC 소스로 데이터 저장하기
     jdbcDF.write \
         .format("jdbc") \
         .option("url", "jdbc:postgresql:dbserver") \
@@ -212,7 +212,7 @@ def jdbc_dataset_example(spark):
         .jdbc("jdbc:postgresql:dbserver", "schema.tablename",
               properties={"user": "username", "password": "password"})
 
-    # Specifying create table column data types on write
+    # 쓰기의 테이블 생성시 컬럼 데이터 유형 지정하기
     jdbcDF.write \
         .option("createTableColumnTypes", "name CHAR(64), comments VARCHAR(1024)") \
         .jdbc("jdbc:postgresql:dbserver", "schema.tablename",

@@ -35,16 +35,16 @@ def dataframe_with_arrow_example(spark):
     import numpy as np
     import pandas as pd
 
-    # Enable Arrow-based columnar data transfers
+    # Arrow 기반 컬럼 데이터 전송을 활성화합니다.
     spark.conf.set("spark.sql.execution.arrow.enabled", "true")
 
-    # Generate a Pandas DataFrame
+    # Pandas DataFrame 생성합니다.
     pdf = pd.DataFrame(np.random.rand(100, 3))
 
-    # Create a Spark DataFrame from a Pandas DataFrame using Arrow
+    # Arrow를 사용하여 Pandas DataFrame에서 스파크 DataFrame을 생성합니다.
     df = spark.createDataFrame(pdf)
 
-    # Convert the Spark DataFrame back to a Pandas DataFrame using Arrow
+    # Arrow를 사용하여 스파크 DataFrame을 Pandas DataFrame으로 다시 변환합니다.
     result_pdf = df.select("*").toPandas()
     # $example off:dataframe_with_arrow$
     print("Pandas DataFrame result statistics:\n%s\n" % str(result_pdf.describe()))
@@ -57,13 +57,13 @@ def scalar_pandas_udf_example(spark):
     from pyspark.sql.functions import col, pandas_udf
     from pyspark.sql.types import LongType
 
-    # Declare the function and create the UDF
+    # 함수를 정의하고 UDF를 생성합니다.
     def multiply_func(a, b):
         return a * b
 
     multiply = pandas_udf(multiply_func, returnType=LongType())
 
-    # The function for a pandas_udf should be able to execute with local Pandas data
+    # pandas_udf에 주어지는 함수는 로컬 Pandas 데이터와 실행될 수 있어야 합니다.
     x = pd.Series([1, 2, 3])
     print(multiply_func(x, x))
     # 0    1
@@ -71,10 +71,10 @@ def scalar_pandas_udf_example(spark):
     # 2    9
     # dtype: int64
 
-    # Create a Spark DataFrame, 'spark' is an existing SparkSession
+    # 스파크 DataFrame을 생성합니다. ('spark'는 이전에 생성한 SparkSession입니다.)
     df = spark.createDataFrame(pd.DataFrame(x, columns=["x"]))
 
-    # Execute function as a Spark vectorized UDF
+    # 스파크 벡터화된 UDF로 함수를 실행합니다.
     df.select(multiply(col("x"), col("x"))).show()
     # +-------------------+
     # |multiply_func(x, x)|
@@ -96,7 +96,7 @@ def grouped_map_pandas_udf_example(spark):
 
     @pandas_udf("id long, v double", PandasUDFType.GROUPED_MAP)
     def subtract_mean(pdf):
-        # pdf is a pandas.DataFrame
+        # pdf의 타입은 pandas.DataFrame 입니다.
         v = pdf.v
         return pdf.assign(v=v - v.mean())
 

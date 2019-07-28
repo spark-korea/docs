@@ -31,16 +31,16 @@ from pyspark.sql import Row
 # $example off:schema_inferring$
 
 # $example on:programmatic_schema$
-# Import data types
+# 데이터 타입을 임포트합니다.
 from pyspark.sql.types import *
 # $example off:programmatic_schema$
 
 
 def basic_df_example(spark):
     # $example on:create_df$
-    # spark is an existing SparkSession
+    # 여기에서 spark는 이미 생성된 SparkSession입니다.
     df = spark.read.json("examples/src/main/resources/people.json")
-    # Displays the content of the DataFrame to stdout
+    # 표준출력(stdout)에 DataFrame의 내용을 보여줍니다.
     df.show()
     # +----+-------+
     # | age|   name|
@@ -52,14 +52,14 @@ def basic_df_example(spark):
     # $example off:create_df$
 
     # $example on:untyped_ops$
-    # spark, df are from the previous example
-    # Print the schema in a tree format
+    # spark와 df는 이전 예제와 동일합니다.
+    # 트리 형태로 스키마를 출력합니다.
     df.printSchema()
     # root
     # |-- age: long (nullable = true)
     # |-- name: string (nullable = true)
 
-    # Select only the "name" column
+    # "name" 컬럼을 선택합니다.
     df.select("name").show()
     # +-------+
     # |   name|
@@ -69,7 +69,7 @@ def basic_df_example(spark):
     # | Justin|
     # +-------+
 
-    # Select everybody, but increment the age by 1
+    # 모든 사람을 선택하고, 나이를 1씩 증가시킵니다.
     df.select(df['name'], df['age'] + 1).show()
     # +-------+---------+
     # |   name|(age + 1)|
@@ -79,7 +79,7 @@ def basic_df_example(spark):
     # | Justin|       20|
     # +-------+---------+
 
-    # Select people older than 21
+    # 나이가 21살보다 많은 사람을 선택합니다.
     df.filter(df['age'] > 21).show()
     # +---+----+
     # |age|name|
@@ -87,7 +87,7 @@ def basic_df_example(spark):
     # | 30|Andy|
     # +---+----+
 
-    # Count people by age
+    # 각 나이별로 사람의 수를 셉니다.
     df.groupBy("age").count().show()
     # +----+-----+
     # | age|count|
@@ -99,7 +99,7 @@ def basic_df_example(spark):
     # $example off:untyped_ops$
 
     # $example on:run_sql$
-    # Register the DataFrame as a SQL temporary view
+    # DataFrame을 SQL 임시 뷰로 등록합니다.
     df.createOrReplaceTempView("people")
 
     sqlDF = spark.sql("SELECT * FROM people")
@@ -114,10 +114,10 @@ def basic_df_example(spark):
     # $example off:run_sql$
 
     # $example on:global_temp_view$
-    # Register the DataFrame as a global temporary view
+    # DataFrame을 전역 임시 뷰에 등록합니다.
     df.createGlobalTempView("people")
 
-    # Global temporary view is tied to a system preserved database `global_temp`
+    # 전역 임시 뷰는 시스템 데이터베이스에 `global_temp` 라는 이름으로 등록됩니다.
     spark.sql("SELECT * FROM global_temp.people").show()
     # +----+-------+
     # | age|   name|
@@ -127,7 +127,7 @@ def basic_df_example(spark):
     # |  19| Justin|
     # +----+-------+
 
-    # Global temporary view is cross-session
+    # 전역 임시 뷰는 다른 SparkSession에서도 사용할 수 있습니다.
     spark.newSession().sql("SELECT * FROM global_temp.people").show()
     # +----+-------+
     # | age|   name|
@@ -143,20 +143,20 @@ def schema_inference_example(spark):
     # $example on:schema_inferring$
     sc = spark.sparkContext
 
-    # Load a text file and convert each line to a Row.
+    # 텍스트 파일을 불러와 각 라인을 로우(row)로 변환합니다.
     lines = sc.textFile("examples/src/main/resources/people.txt")
     parts = lines.map(lambda l: l.split(","))
     people = parts.map(lambda p: Row(name=p[0], age=int(p[1])))
 
-    # Infer the schema, and register the DataFrame as a table.
+    # 스키마를 추론하고, DataFrame을 테이블로 등록합니다.
     schemaPeople = spark.createDataFrame(people)
     schemaPeople.createOrReplaceTempView("people")
 
-    # SQL can be run over DataFrames that have been registered as a table.
+    # 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.
     teenagers = spark.sql("SELECT name FROM people WHERE age >= 13 AND age <= 19")
 
-    # The results of SQL queries are Dataframe objects.
-    # rdd returns the content as an :class:`pyspark.RDD` of :class:`Row`.
+    # SQL 쿼리의 결과는 DataFrame 객체가 됩니다.
+    # rdd는 :class:`Row`의 :class:`pyspark.RDD` 타입으로 내용을 반환합니다.
     teenNames = teenagers.rdd.map(lambda p: "Name: " + p.name).collect()
     for name in teenNames:
         print(name)
@@ -168,25 +168,25 @@ def programmatic_schema_example(spark):
     # $example on:programmatic_schema$
     sc = spark.sparkContext
 
-    # Load a text file and convert each line to a Row.
+    # 텍스트 파일을 불러와 각 라인을 로우(row)로 변환합니다.
     lines = sc.textFile("examples/src/main/resources/people.txt")
     parts = lines.map(lambda l: l.split(","))
-    # Each line is converted to a tuple.
+    # 각 라인을 튜플로 변환합니다.
     people = parts.map(lambda p: (p[0], p[1].strip()))
 
-    # The schema is encoded in a string.
+    # 스키마는 문자열로 인코딩됩니다.
     schemaString = "name age"
 
     fields = [StructField(field_name, StringType(), True) for field_name in schemaString.split()]
     schema = StructType(fields)
 
-    # Apply the schema to the RDD.
+    # RDD에 스키마를 적용합니다.
     schemaPeople = spark.createDataFrame(people, schema)
 
-    # Creates a temporary view using the DataFrame
+    # DataFrame을 사용하여 임시 뷰를 생성합니다.
     schemaPeople.createOrReplaceTempView("people")
 
-    # SQL can be run over DataFrames that have been registered as a table.
+    # 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.
     results = spark.sql("SELECT name FROM people")
 
     results.show()
