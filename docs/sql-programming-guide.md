@@ -1,7 +1,7 @@
 ---
 layout: global
-displayTitle: 스파크 SQL, DataFrame, Dataset 가이드
-title: 스파크 SQL, DataFrame, Dataset 가이드
+displayTitle: 스파크 SQL, DataFrame, Dataset
+title: 스파크 SQL, DataFrame, Dataset
 ---
 
 스파크 SQL은 구조화된 데이터 처리를 위한 스파크 모듈입니다. 기본 스파크 RDD API와는 다르게, 스파크 SQL이 제공하는 인터페이스는 데이터의 구조와 계산 과정의 구조에 대한 정보를 더 많이 포함하고 있습니다. 내부적으로, 스파크 SQL은 내부에서 별도의 정보를 이용해 최적화를 수행합니다. Dataset API와 SQL을 포함하고 있는 스파크 SQL의 사용법은 다양합니다. 동일한 실행 엔진을 사용한다면 계산되는 결과는 어떤 API나 프로그래밍 언어를 사용하는지에 상관 없이 동일합니다. 이것이 의미하는 것은 개발자가 필요한 변환을 가장 자연스럽게 표현하기 위해서 적절한 API를 유연하게 사용할 수 있다는 것입니다.

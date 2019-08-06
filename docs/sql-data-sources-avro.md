@@ -130,7 +130,7 @@ Avro의 데이터 소스 옵션은 `DataFrameReader` 이나 `DataFrameWriter` �
 ## 설정
 Avro의 설정은 SparkSession의 `setConf` 메소드를 이용하거나 SQL로  `SET key=value `명령을 실행해 구성할 수 있습니다.
 <table class="table">
-  <tr><th><b>속성 이름</b></th><th><b>기본값</b></th><th><b>의미</b></th><th><b>적용 범위</b></th></tr>
+  <tr><th><b>속성 이름</b></th><th><b>기본값</b></th><th><b>의미</b></th></tr>
   <tr>
     <td>spark.sql.legacy.replaceDatabricksSparkAvro.enabled</td>
     <td>true</td>
