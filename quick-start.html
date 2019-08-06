@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>빠른 시작 - Spark 2.4.3 Documentation</title>
+        
+          <meta name="description" content="Quick start tutorial for Spark 2.4.3">
+        
+
+        
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/pygments-default.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="https://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="navbar navbar-fixed-top" id="topbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand"><a href="index.html">
+                      <img src="img/spark-logo-hd.png" style="height:50px;"/></a><span class="version">2.4.3</span>
+                    </div>
+                    <ul class="nav">
+                        <!--TODO(andyk): Add class="active" attribute to li some how.-->
+                        <li><a href="index.html">개요</a></li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">프로그래밍 가이드<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quick-start.html">빠른 시작</a></li>
+                                <li><a href="sql-programming-guide.html">스파크 SQL, DataFrame, Dataset</a></li>
+                                <li><a href="structured-streaming-programming-guide.html">구조적 스트리밍</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">API 문서<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package">Scala</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/java/index.html">Java</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/python/index.html">Python</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark SQL 함수</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!--<p class="navbar-text pull-right"><span class="version-text">v2.4.3</span></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="container-wrapper">
+
+            
+                <div class="content" id="content">
+                    
+                        <h1 class="title">빠른 시작</h1>
+                    
+
+                    <ul id="markdown-toc">
+  <li><a href="#보안" id="markdown-toc-보안">보안</a></li>
+  <li><a href="#스파크-셸shell을-이용한-대화형-분석" id="markdown-toc-스파크-셸shell을-이용한-대화형-분석">스파크 셸(Shell)을 이용한 대화형 분석</a>    <ul>
+      <li><a href="#기초" id="markdown-toc-기초">기초</a></li>
+      <li><a href="#dataset-활용에-대해-더-알아보기" id="markdown-toc-dataset-활용에-대해-더-알아보기">Dataset 활용에 대해 더 알아보기</a></li>
+      <li><a href="#캐싱" id="markdown-toc-캐싱">캐싱</a></li>
+    </ul>
+  </li>
+  <li><a href="#독립형-애플리케이션" id="markdown-toc-독립형-애플리케이션">독립형 애플리케이션</a></li>
+  <li><a href="#더-자세한-내용이-알고-싶다면" id="markdown-toc-더-자세한-내용이-알고-싶다면">더 자세한 내용이 알고 싶다면</a></li>
+</ul>
+
+<p>이 튜토리얼에서는 스파크의 사용법을 간단히 소개합니다. 먼저 스파크의 대화형 셸(Scala, Python 지원)에서 사용하는 API를 먼저 소개한 후에 애플리케이션을 만드는 법(Scala, Python 지원)을 알아보겠습니다.</p>
+
+<p>따라서 해보시기 전에, 먼저 <a href="https://spark.apache.org/downloads.html">스파크 웹사이트</a>에서 스파크 패키지를 다운로드하셔야 합니다. 다운로드 메뉴를 보면 Hadoop 버전을 선택하도록 되어 있는데, 여기서 HDFS를 사용하지 않을 것이기 때문에 아무 것이나 선택해도 상관 없습니다.</p>
+
+<p>스파크 2.0 이전까지는 RDD(Resilient Distributed Dataset)가 주 프로그래밍 인터페이스로 사용되었습니다. 스파크 2.0 이후부터 주 프로그래밍 인터페이스가 RDD에서 Dataset으로 교체되었는데, 이 Dataset은 RDD와 비슷하지만 강한 타입체크(strongly-typed)를 지원하고 훨씬 최적화되어 있습니다. RDD 인터페이스는 여전히 사용 가능하며 <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html">RDD 프로그래밍 가이드(영문)</a>에서 자세한 내용을 확인하실 수 있습니다. 하지만 여기에서는 RDD보다 훨씬 좋은 성능을 보여주는 Dataset을 사용할 것을 강력히 권장합니다. <a href="sql-programming-guide.html">SQL 프로그래밍 가이드</a>에서 Dataset에 대한 자세한 정보를 얻을 수 있습니다.</p>
+
+<h1 id="보안">보안</h1>
+
+<p>스파크의 보안 기능은 기본적으로 꺼져 있습니다. 즉, 외부 침입에 취약할 수밖에 없다는 얘기죠. 테스트 삼아 로컬에서 돌려 보는 것은 상관이 없습니다만, 실제 운영 환경에 설정하시기 전에는 반드시 <a href="security.html">스파크 보안</a> 문서를 확인하세요.</p>
+
+<h1 id="스파크-셸shell을-이용한-대화형-분석">스파크 셸(Shell)을 이용한 대화형 분석</h1>
+
+<h2 id="기초">기초</h2>
+
+<p>스파크 셸은 스파크 API를 쉽게 익히는 용도 뿐만 아니라, 데이터를 대화형으로 분석할 때 강력한 도구로 사용할 수 있습니다. Scala(Java VM에서 실행되므로 Java 라이브러리 또한 사용할 수 있습니다) 또는 Python 에서 사용할 수 있습니다. 스파크를 다운로드 받은 디렉토리 내에서 아래와 같이 실행하여 시작할 수 있습니다.</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+
+    <pre><code>./bin/spark-shell
+</code></pre>
+
+    <p>스파크에서 가장 기본적인 개념은 Dataset이라고 불리는 분산 컬렉션(distributed collection)입니다. Dataset은 Hadoop InputFormat(HDFS 파일)으로부터 만들어지거나 다른 Dataset을 변환하여 만들어집니다. 이제 스파크 소스 디렉토리 내의 README 파일의 텍스트를 가지고 새로운 Dataset을 만들어보겠습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">textFile</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">textFile</span><span class="o">(</span><span class="s">&quot;README.md&quot;</span><span class="o">)</span>
+<span class="n">textFile</span><span class="k">:</span> <span class="kt">org.apache.spark.sql.Dataset</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">[</span><span class="kt">value:</span> <span class="kt">string</span><span class="o">]</span></code></pre></figure>
+
+    <p>이 Dataset에서 특정한 액션(action)을 호출해서 어떠한 값을 얻을 수도 있고, 트랜스포메이션(transformation)을 호출해서 새로운 Dataset으로 변환할 수도 있습니다. 자세한 내용은 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">API 문서</a>에서 확인할 수 있습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">count</span><span class="o">()</span> <span class="c1">// Number of items in this Dataset</span>
+<span class="n">res0</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="mi">126</span> <span class="c1">// May be different from yours as README.md will change over time, similar to other outputs</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">first</span><span class="o">()</span> <span class="c1">// First item in this Dataset</span>
+<span class="n">res1</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="k">#</span> <span class="nc">Apache</span> <span class="nc">Spark</span></code></pre></figure>
+
+    <p>이제 이 Dataset을 새로운 DataSet으로 변환해보겠습니다. <code>filter</code>를 호출하여 파일 내용의 일부만을 가지는 새로운 Dataset을 생성합니다.</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">linesWithSpark</span> <span class="k">=</span> <span class="n">textFile</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">contains</span><span class="o">(</span><span class="s">&quot;Spark&quot;</span><span class="o">))</span>
+<span class="n">linesWithSpark</span><span class="k">:</span> <span class="kt">org.apache.spark.sql.Dataset</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">[</span><span class="kt">value:</span> <span class="kt">string</span><span class="o">]</span></code></pre></figure>
+
+    <p>액션(action)과 트랜스포메이션(transformation)을 연결해서 호출할 수도 있습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">contains</span><span class="o">(</span><span class="s">&quot;Spark&quot;</span><span class="o">)).</span><span class="n">count</span><span class="o">()</span> <span class="c1">// &quot;Spark&quot;를 포함하는 라인의 개수</span>
+<span class="n">res3</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="mi">15</span></code></pre></figure>
+
+  </div>
+<div data-lang="python">
+
+    <pre><code>./bin/pyspark
+</code></pre>
+
+    <p>만약 pip로 PySpark를 설치했다면 아래와 같이 실행합니다:</p>
+
+    <pre><code>pyspark
+</code></pre>
+
+    <p>스파크에서 가장 기본적인 개념은 Dataset이라고 불리는 분산 컬렉션(distributed collection)입니다. Dataset은 Hadoop InputFormat(HDFS 파일)으로부터 만들어지거나 다른 Dataset을 변형하여 만들어집니다. 동적으로 타입 검사를 수행하는 Python의 특성 때문에 Python에서는 Dataset에서 강한 타입 체크가 필요하지 않습니다. 따라서 Python에서 사용하는 모든 Dataset은 DataSet[Row]의 형태입니다. 이것을 <code>DataFrame</code>이라고 부르는데 Pandas와 R에서 사용하는 DataFrame과 같은 개념입니다. 이제 스파크 소스 디렉토리 내의 README 파일의 텍스트를 이용하여 새로운 Dataset을 만들어보겠습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">textFile</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s2">&quot;README.md&quot;</span><span class="p">)</span></code></pre></figure>
+
+    <p>이 Dataset에서 특정한 명령어로 어떠한 값을 얻을 수도 있고, 새로운 Dataset으로 변환할 수도 있습니다. 자세한 내용은 _<a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">API 문서</a>_에서 확인할 수 있습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>  <span class="c1"># DataFrame포함된 열(row)의 개수</span>
+<span class="mi">126</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>  <span class="c1"># DataFrame의 첫 번째 열(row)</span>
+<span class="n">Row</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;# Apache Spark&#39;</span><span class="p">)</span></code></pre></figure>
+
+    <p>이제 이 DataFrame을 새로운 DataFrame으로 변환해보겠습니다. <code>filter</code>를 호출하여 파일 내용의 일부만을 가지는 새로운 Dataset을 생성합니다.</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">linesWithSpark</span> <span class="o">=</span> <span class="n">textFile</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">textFile</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Spark&quot;</span><span class="p">))</span></code></pre></figure>
+
+    <p>특정 동작과 변환을 연속해서 사용할 수도 있습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">textFile</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Spark&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>  <span class="c1"># How many lines contain &quot;Spark&quot;?</span>
+<span class="mi">15</span></code></pre></figure>
+
+  </div>
+</div>
+
+<h2 id="dataset-활용에-대해-더-알아보기">Dataset 활용에 대해 더 알아보기</h2>
+<p>Dataset 액션(action)과 트랜스포메이션(transformation)을 사용해서 더 복잡한 연산을 수행할 수도 있습니다. 여기에서는 가장 많은 단어를 포함한 라인을 찾아보겠습니다:</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot; &quot;</span><span class="o">).</span><span class="n">size</span><span class="o">).</span><span class="n">reduce</span><span class="o">((</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="k">if</span> <span class="o">(</span><span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="o">)</span> <span class="n">a</span> <span class="k">else</span> <span class="n">b</span><span class="o">)</span>
+<span class="n">res4</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="mi">15</span></code></pre></figure>
+
+    <p>먼저 각 라인을 각 정수값에 대응시켜 새로운 Dataset을 생성합니다. <code>reduce</code>는 이 Dataset에서 가장 큰 단어 수를 찾기 위해 호출됩니다. <code>map</code>과 <code>reduce</code>의 인수는 Scala 함수 리터럴(클로져)이며, Scala 언어의 기능뿐만 아니라 Scala/Java 라이브러리 역시 사용할 수 있습니다. 예를 들어, 다른 곳에 선언된 함수도 호출할 수 있습니다. 이 코드를 더 쉽게 이해할 수 있도록 하기 위해 <code>Math.max()</code> 함수를 사용해보겠습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">import</span> <span class="nn">java.lang.Math</span>
+<span class="k">import</span> <span class="nn">java.lang.Math</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot; &quot;</span><span class="o">).</span><span class="n">size</span><span class="o">).</span><span class="n">reduce</span><span class="o">((</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Math</span><span class="o">.</span><span class="n">max</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">))</span>
+<span class="n">res5</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">15</span></code></pre></figure>
+
+    <p>가장 흔한 데이터 처리 패턴 중 하나는 Hadoop 덕분에 유명해진 MapReduce 패턴입니다. 스파크에서는 이 MapReduce 패턴 데이터 처리를 쉽게 구현할 수 있습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">wordCounts</span> <span class="k">=</span> <span class="n">textFile</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot; &quot;</span><span class="o">)).</span><span class="n">groupByKey</span><span class="o">(</span><span class="n">identity</span><span class="o">).</span><span class="n">count</span><span class="o">()</span>
+<span class="n">wordCounts</span><span class="k">:</span> <span class="kt">org.apache.spark.sql.Dataset</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">Long</span><span class="o">)]</span> <span class="k">=</span> <span class="o">[</span><span class="kt">value:</span> <span class="kt">string</span>, <span class="kt">count</span><span class="o">(</span><span class="err">1</span><span class="o">)</span><span class="kt">:</span> <span class="kt">bigint</span><span class="o">]</span></code></pre></figure>
+
+    <p>여기에서 <code>flatMap</code> 을 호출하여 각 라인로 이루어진 Dataset을 각 단어로 이루어진 Dataset으로 변환합니다. 그리고 <code>groupByKey</code> 와 <code>count</code>를 차례로 호출하여 이 파일에 포함된 각 단어별 개수를 (String, Long) 페어(pair)로 이루어진 Dataset으로 만듭니다. 셸에서 각 단어의 개수를 구하기 위해서 <code>collect</code>를 호출합니다:</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="n">wordCounts</span><span class="o">.</span><span class="n">collect</span><span class="o">()</span>
+<span class="n">res6</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[(</span><span class="kt">String</span>, <span class="kt">Int</span><span class="o">)]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">((</span><span class="n">means</span><span class="o">,</span><span class="mi">1</span><span class="o">),</span> <span class="o">(</span><span class="n">under</span><span class="o">,</span><span class="mi">2</span><span class="o">),</span> <span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="mi">3</span><span class="o">),</span> <span class="o">(</span><span class="nc">Because</span><span class="o">,</span><span class="mi">1</span><span class="o">),</span> <span class="o">(</span><span class="nc">Python</span><span class="o">,</span><span class="mi">2</span><span class="o">),</span> <span class="o">(</span><span class="n">agree</span><span class="o">,</span><span class="mi">1</span><span class="o">),</span> <span class="o">(</span><span class="n">cluster</span><span class="o">.,</span><span class="mi">1</span><span class="o">),</span> <span class="o">...)</span></code></pre></figure>
+
+  </div>
+<div data-lang="python">
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">textFile</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">textFile</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;\s+&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;numWords&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;numWords&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="p">[</span><span class="n">Row</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">numWords</span><span class="p">)</span><span class="o">=</span><span class="mi">15</span><span class="p">)]</span></code></pre></figure>
+
+    <p>먼저 각 라인을 각 정수값에 대응시켜서 이것을 “numWords”라고 이름 붙여 새로운 DataFrame을 생성합니다. <code>agg</code>를 호출하면 DataFrame에서 가장 큰 단어의 개수를 찾을 수 있습니다. select와 agg의 인수는 <a href="https://spark.apache.org/docs/latest/api/python/index.html#pyspark.sql.Column"><em>컬럼</em></a>으로 이루어지는데, df.colName을 사용하면 DataFrame으로부터 각 로우(row)를 얻을 수 있습니다. pyspark.sql.functions 을 임포트하면 한 Column으로 부터 새로운 Column을 만들 수 있는 편리한 함수들을 사용할 수 있습니다.</p>
+
+    <p>이 MapReduce는 Hadoop에서 자주 사용되는 흔한 데이터 플로우 패턴 중 하나입니다. 스파크에서는 MapReduce 플로우를 쉽게 구현할 수 있습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">wordCounts</span> <span class="o">=</span> <span class="n">textFile</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">explode</span><span class="p">(</span><span class="n">split</span><span class="p">(</span><span class="n">textFile</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;\s+&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;word&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">&quot;word&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></code></pre></figure>
+
+    <p>여기서는 select 내부에서 explode를 사용하여 각 라인로 이루어진 Dataset을 각 단어로 이루어진 Dataset으로 변환합니다. 그리고 <code>groupByKey</code> 와 <code>count</code>를 함께 사용하여 이 파일에 포함된 각 단어의 개수를 2개의 컬럼(각 단어와 개수)으로 이루어진 DataFrame으로 만듭니다. 셸에서 각 단어의 개수를 구하기 위해서 <code>collect</code>를 호출합니다:</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">wordCounts</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="p">[</span><span class="n">Row</span><span class="p">(</span><span class="n">word</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;online&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">Row</span><span class="p">(</span><span class="n">word</span><span class="o">=</span><span class="sa">u</span><span class="s1">&#39;graphs&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span></code></pre></figure>
+
+  </div>
+</div>
+
+<h2 id="캐싱">캐싱</h2>
+<p>스파크는 클러스터 단위 인-메모리 캐시(in-memory cache)에서 데이터셋을 가져올 수 있는 기능을 지원합니다. 이 기능은 PageRank 알고리즘과 같은 반복적인 알고리즘을 실행하거나 크기는 작지만 자주 변하는 데이터셋을 쿼리할 때와 같이 특정 데이터에 반복적으로 접근하고자 할 때 매우 유용합니다. 간단한 예로, linesWithSpark Dataset을 캐시해보겠습니다.</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">scala</span><span class="o">&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">cache</span><span class="o">()</span>
+<span class="n">res7</span><span class="k">:</span> <span class="kt">linesWithSpark.</span><span class="k">type</span> <span class="o">=</span> <span class="o">[</span><span class="kt">value:</span> <span class="kt">string</span><span class="o">]</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">count</span><span class="o">()</span>
+<span class="n">res8</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="mi">15</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">count</span><span class="o">()</span>
+<span class="n">res9</span><span class="k">:</span> <span class="kt">Long</span> <span class="o">=</span> <span class="mi">15</span></code></pre></figure>
+
+    <p>100라인짜리 텍스트 파일을 탐색하고 캐시하기 위해 스파크를 사용하는 것이 불필요해 보일 수 있습니다. 여기서 주목해야 할 점은 매우 큰 데이터셋에서도 이 작은 크기의 데이터셋에 사용된 것과 동일한 함수를 사용할 수 있다는 것입니다. 수십, 수백 개의 노드로 이루어져 있을 때에도 사용할 수 있습니다. 또한 <code>bin/spark-shell</code>을 클러스터에 연결해서 대화형으로 사용할 수도 있습니다. 이것에 대한 내용은 <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#using-the-shell">RDD 프로그래밍 가이드(영문)</a>에 설명되어 있습니다.</p>
+
+  </div>
+<div data-lang="python">
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="mi">15</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">linesWithSpark</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="mi">15</span></code></pre></figure>
+
+    <p>100라인짜리 텍스트 파일을 탐색하고 캐시하기 위해 스파크를 사용하는 것이 불필요해 보일 수 있습니다. 여기서 흥미로운 점은 매우 큰 데이터셋에서도 똑같은 함수를 사용할 수 있다는 것입니다. 수십, 수백 개의 노드로 이루어져 있을 때에도 사용할 수 있습니다. 또한 <code>bin/spark-shell</code>을 클러스터에 연결해서 대화형으로 사용할 수도 있습니다. 이것에 대한 내용은 <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#using-the-shell">RDD 프로그래밍 가이드(영문)</a>에 설명되어 있습니다.</p>
+
+  </div>
+</div>
+
+<h1 id="독립형-애플리케이션">독립형 애플리케이션</h1>
+<p>스파크 API를 사용해서 독립형 애플리케이션을 만드는 상황이라고 가정하고, Scala(sbt), Python(pip)으로 간단한 애플리케이션을 만들어보겠습니다.</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+
+    <p>예제로 <code>SimpleApp.scala</code>라는 이름의 매우 간단한 Scala 스파크 애플리케이션을 만들어 보겠습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="cm">/* SimpleApp.scala */</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.SparkSession</span>
+
+<span class="k">object</span> <span class="nc">SimpleApp</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">logFile</span> <span class="k">=</span> <span class="s">&quot;YOUR_SPARK_HOME/README.md&quot;</span> <span class="c1">// 여러분의 시스템 내에 존재하는 파일이어야 합니다</span>
+    <span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="o">(</span><span class="s">&quot;Simple Application&quot;</span><span class="o">).</span><span class="n">getOrCreate</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">logData</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">textFile</span><span class="o">(</span><span class="n">logFile</span><span class="o">).</span><span class="n">cache</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">numAs</span> <span class="k">=</span> <span class="n">logData</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">contains</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">)).</span><span class="n">count</span><span class="o">()</span>
+    <span class="k">val</span> <span class="n">numBs</span> <span class="k">=</span> <span class="n">logData</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">line</span> <span class="k">=&gt;</span> <span class="n">line</span><span class="o">.</span><span class="n">contains</span><span class="o">(</span><span class="s">&quot;b&quot;</span><span class="o">)).</span><span class="n">count</span><span class="o">()</span>
+    <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Lines with a: </span><span class="si">$numAs</span><span class="s">, Lines with b: </span><span class="si">$numBs</span><span class="s">&quot;</span><span class="o">)</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">stop</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+    <p>Scala에서는 실행 가능한 애플리케이션을 만드는 방법이 두 가지가 있습니다: scala.App 을 확장한 object를 정의하는 방법과 <code>main</code> 메소드가 정의된 object를 정의하는 방법. 여기에서는 전자가 아니라 후자를 택해야 합니다. 전자는 제대로 동작하지 않을 수 있습니다.</p>
+
+    <p>이 프로그램은 스파크 README 파일에서 ‘a’ 를 포함하는 라인의 개수와 ‘b’를 포함하는 라인의 개수를 세는 프로그램입니다. 여기에서 YOUR_SPARK_HOME을 여러분의 스파크가 설치된 경로로 바꾸어 줍니다. 이전 예제에서는 스파크 셸에서 SparkSession을 초기화했지만, 여기에서는 프로그램 내에서 SparkSession을 초기화합니다.</p>
+
+    <p>[[SparkSession]]을 생성하기 위해서 <code>SparkSession.builder</code>를 호출합니다. 그리고 애플리케이션의 이름을 정하고 마지막으로 <code>getOrCreate</code>를 호출하여 [[SparkSession]] 인스턴스를 얻습니다.</p>
+
+    <p>이 애플리케이션은 스파크 API를 기반으로 하기 때문에, 스파크에 대한 의존성을 정의하는 sbt 설정 파일인 build.sbt를 포함시킬 수 있습니다. 스파크가 배포되는 라이브러리 저장소에 대한 정보 역시 이 파일에 설정합니다.</p>
+
+    <figure class="highlight"><pre><code class="language-scala" data-lang="scala"><span></span><span class="n">name</span> <span class="o">:=</span> <span class="s">&quot;Simple Project&quot;</span>
+
+<span class="n">version</span> <span class="o">:=</span> <span class="s">&quot;1.0&quot;</span>
+
+<span class="n">scalaVersion</span> <span class="o">:=</span> <span class="s">&quot;2.12.8&quot;</span>
+
+<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;org.apache.spark&quot;</span> <span class="o">%%</span> <span class="s">&quot;spark-sql&quot;</span> <span class="o">%</span> <span class="s">&quot;2.4.3&quot;</span></code></pre></figure>
+
+    <p>sbt가 제대로 동작하게 하기 위해서는 <code>SimpleApp.scala</code>와 <code>build.sbt</code> 파일이 올바른 디렉토리 구조에 저장되도록 해야 합니다. 파일이 포함된 디렉토리 구조에 문제가 없어야 애플리케이션 코드를 포함하는 JAR 패키지를 생성하고, <code>spark-submit</code> 스크립트를 사용하여 프로그램을 실행할 수 있습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="c1"># 프로젝트가 아래와 같이 메이븐 표준 디렉토리 구조(Apache maven standard directory layout)를 가져야 합니다</span>
+$ find .
+.
+./build.sbt
+./src
+./src/main
+./src/main/scala
+./src/main/scala/SimpleApp.scala
+
+<span class="c1"># 애플리케이션을 포함하는 jar 패키지를 생성합니다</span>
+$ sbt package
+...
+<span class="o">[</span>info<span class="o">]</span> Packaging <span class="o">{</span>..<span class="o">}</span>/<span class="o">{</span>..<span class="o">}</span>/target/scala-2.12/simple-project_2.12-1.0.jar
+
+<span class="c1"># spark-submit을 사용하여 애플리케이션을 실행합니다</span>
+$ YOUR_SPARK_HOME/bin/spark-submit <span class="se">\</span>
+  --class <span class="s2">&quot;SimpleApp&quot;</span> <span class="se">\</span>
+  --master local<span class="o">[</span><span class="m">4</span><span class="o">]</span> <span class="se">\</span>
+  target/scala-2.12/simple-project_2.12-1.0.jar
+...
+Lines with a: <span class="m">46</span>, Lines with b: <span class="m">23</span></code></pre></figure>
+
+  </div>
+<div data-lang="python">
+
+    <p>이제 Python API(PySpark)를 이용하여 애플리케이션을 작성하는 방법을 알아보겠습니다.</p>
+
+    <p>PySpark 패키지 애플리케이션 또는 라이브러리를 만들고자 한다면 setup.py 파일에 아래의 내용을 추가합니다.</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span>    <span class="n">install_requires</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;pyspark=={site.SPARK_VERSION}&#39;</span>
+    <span class="p">]</span></code></pre></figure>
+
+    <p>예제로 <code>SimpleApp.py</code>라는 간단한 스파크 애플리케이션을 만들어보겠습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="sd">&quot;&quot;&quot;SimpleApp.py&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">logFile</span> <span class="o">=</span> <span class="s2">&quot;YOUR_SPARK_HOME/README.md&quot;</span>  <span class="c1"># 여러분의 시스템 내에 존재하는 파일이어야 합니다</span>
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;SimpleApp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">logData</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">logFile</span><span class="p">)</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+
+<span class="n">numAs</span> <span class="o">=</span> <span class="n">logData</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">logData</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">numBs</span> <span class="o">=</span> <span class="n">logData</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">logData</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Lines with a: </span><span class="si">%i</span><span class="s2">, lines with b: </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">numAs</span><span class="p">,</span> <span class="n">numBs</span><span class="p">))</span>
+
+<span class="n">spark</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></code></pre></figure>
+
+    <p>이 프로그램은 스파크 README 파일에서 ‘a’ 을 포함하는 라인의 개수와 ‘b’를 포함하는 라인의 개수를 세는 프로그램입니다. 여기에서 YOUR_SPARK_HOME을 여러분의 스파크가 설치된 경로로 바꿔 주어야 합니다. Scala 예제에서와 같이, SparkSession을 사용하여 Dataset을 생성합니다. custom class 또는 써드파티 라이브러리를 사용하는 애플리케이션에서는 <code>spark-submit</code>에 의존성을 추가할 수 있습니다. 여기에서는 <code>--py--files</code> 인자를 사용하여 .zip 파일로 패키징하게 됩니다.(자세한 내용은 <code>spark-submint --help</code>를 실행하면 볼 수 있습니다). 이 <code>SimpleApp</code>에서는 간단하기 때문에 다른 코드 의존성을 명시할 필요가 없습니다.</p>
+
+    <p><code>bin/saprk-submint</code> 스크립트를 사용하여 이 애플리케이션을 실행할 수 있습니다:</p>
+
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="c1"># spark-submit을 사용하여 애플리케이션을 실행합니다</span>
+$ YOUR_SPARK_HOME/bin/spark-submit <span class="se">\</span>
+  --master local<span class="o">[</span><span class="m">4</span><span class="o">]</span> <span class="se">\</span>
+  SimpleApp.py
+...
+Lines with a: <span class="m">46</span>, Lines with b: <span class="m">23</span></code></pre></figure>
+
+    <p>만약 여러분의 개발 환경에 PySpark를 pip로 설치했다면(e.g., <code>pip install pyspark</code>), Python 인터프리터를 사용하거나 <code>spark-submit</code>를 사용하는 방법 중 하나를 선택하여 애플리케이션을 실행할 수 있습니다.</p>
+
+    <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="c1"># Python 인터프리터를 사용하여 애플리케이션을 실행합니다</span>
+$ python SimpleApp.py
+...
+Lines with a: <span class="m">46</span>, Lines with b: <span class="m">23</span></code></pre></figure>
+
+  </div>
+</div>
+
+<h1 id="더-자세한-내용이-알고-싶다면">더 자세한 내용이 알고 싶다면</h1>
+<p>첫 번째 스파크 애플리케이션을 성공적으로 실행하신 것을 축하드립니다!</p>
+
+<ul>
+  <li>API에 대한 상세한 내용은  <a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html">RDD 프로그래밍 가이드</a>와 <a href="https://spark.apache.org/docs/latest/sql-programming-guide.html">SQL 프로그래밍 가이드</a>에서 볼 수 있습니다. 또는 “프로그래밍 가이드” 메뉴의 다른 장에서 볼 수 있습니다.</li>
+  <li>클러스터에서 애플리케이션을 실행하는 것은 <a href="https://spark.apache.org/docs/latest/cluster-overview.html">클러스터 모드 개요</a>를 참고하세요.</li>
+  <li>마지막으로, 스파크는 examples 디렉토리에 다양한 예제를 포함하고 있습니다. (<a href="https://github.com/apache/spark/tree/master/examples/src/main/scala/org/apache/spark/examples">Scala</a>, <a href="https://github.com/apache/spark/tree/master/examples/src/main/java/org/apache/spark/examples">Java</a>, <a href="https://github.com/apache/spark/tree/master/examples/src/main/python">Python</a>, <a href="https://github.com/apache/spark/tree/master/examples/src/main/r">R</a>). 아래와 같이 실행할 수 있습니다:</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="c1"># Scala 예제의 경우 run-example을 사용합니다:</span>
+./bin/run-example SparkPi
+
+<span class="c1"># Python 예제의 경우 spark-submit를 사용합니다:</span>
+./bin/spark-submit examples/src/main/python/pi.py
+
+<span class="c1"># R 예제의 경우 spark-submit를 사용합니다:</span>
+./bin/spark-submit examples/src/main/r/dataframe.R</code></pre></figure>
+
+
+
+                </div>
+            
+             <!-- /container -->
+        </div>
+
+        <script src="js/vendor/jquery-1.12.4.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/anchor.min.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- MathJax Section -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                TeX: { equationNumbers: { autoNumber: "AMS" } }
+            });
+        </script>
+        <script>
+            // Note that we load MathJax this way to work with local file (file://), HTTP and HTTPS.
+            // We could use "//cdn.mathjax...", but that won't support "file://".
+            (function(d, script) {
+                script = d.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.onload = function(){
+                    MathJax.Hub.Config({
+                        tex2jax: {
+                            inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ],
+                            displayMath: [ ["$$","$$"], ["\\[", "\\]"] ],
+                            processEscapes: true,
+                            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    });
+                };
+                script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
+                    'cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js' +
+                    '?config=TeX-AMS-MML_HTMLorMML';
+                d.getElementsByTagName('head')[0].appendChild(script);
+            }(document));
+        </script>
+    </body>
+</html>

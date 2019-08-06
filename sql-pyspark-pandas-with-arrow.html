@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드 - Spark 2.4.3 Documentation</title>
+        
+
+        
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/pygments-default.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="https://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="navbar navbar-fixed-top" id="topbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand"><a href="index.html">
+                      <img src="img/spark-logo-hd.png" style="height:50px;"/></a><span class="version">2.4.3</span>
+                    </div>
+                    <ul class="nav">
+                        <!--TODO(andyk): Add class="active" attribute to li some how.-->
+                        <li><a href="index.html">개요</a></li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">프로그래밍 가이드<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quick-start.html">빠른 시작</a></li>
+                                <li><a href="sql-programming-guide.html">스파크 SQL, DataFrame, Dataset</a></li>
+                                <li><a href="structured-streaming-programming-guide.html">구조적 스트리밍</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">API 문서<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package">Scala</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/java/index.html">Java</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/python/index.html">Python</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark SQL 함수</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!--<p class="navbar-text pull-right"><span class="version-text">v2.4.3</span></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="container-wrapper">
+
+            
+                
+                    <div class="left-menu-wrapper">
+    <div class="left-menu">
+        <h3><a href="sql-programming-guide.html">Spark SQL Guide</a></h3>
+        
+<ul>
+
+    <li>
+        <a href="sql-getting-started.html">
+            
+                시작하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources.html">
+            
+                데이터 소스
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-performance-tuning.html">
+            
+                성능 튜닝
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-distributed-sql-engine.html">
+            
+                분산 SQL 엔진
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html">
+            
+                <b>아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드</b>
+            
+        </a>
+    </li>
+    
+    
+        
+<ul>
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html#apache-arrow-in-spark">
+            
+                스파크에서의 아파치 애로우
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html#enabling-for-conversion-tofrom-pandas">
+            
+                Pandas와의 변환 활성화하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html#pandas-udfs-aka-vectorized-udfs">
+            
+                Pandas UDF (일명 ‘벡터화된 UDF’)
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html#usage-notes">
+            
+                유의 사항
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    
+
+    <li>
+        <a href="sql-reference.html">
+            
+                참조
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    </div>
+</div>
+                
+                <input id="nav-trigger" class="nav-trigger" checked type="checkbox">
+                <label for="nav-trigger"></label>
+                <div class="content-with-sidebar" id="content">
+                    
+                        <h1 class="title">아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드</h1>
+                    
+
+                    <ul id="markdown-toc">
+  <li><a href="#스파크에서의-아파치-애로우" id="markdown-toc-스파크에서의-아파치-애로우">스파크에서의 아파치 애로우</a>    <ul>
+      <li><a href="#pyarrow-설치-확인" id="markdown-toc-pyarrow-설치-확인">PyArrow 설치 확인</a></li>
+    </ul>
+  </li>
+  <li><a href="#pandas와의-변환-활성화하기" id="markdown-toc-pandas와의-변환-활성화하기">Pandas와의 변환 활성화하기</a></li>
+  <li><a href="#pandas-udf-일명-벡터화된-udf" id="markdown-toc-pandas-udf-일명-벡터화된-udf">Pandas UDF (일명 &#8216;벡터화된 UDF&#8217;)</a>    <ul>
+      <li><a href="#scalar" id="markdown-toc-scalar">Scalar</a></li>
+      <li><a href="#그룹화된-맵" id="markdown-toc-그룹화된-맵">그룹화된 맵</a></li>
+      <li><a href="#그룹별-집계-aggregate" id="markdown-toc-그룹별-집계-aggregate">그룹별 집계 (Aggregate)</a></li>
+    </ul>
+  </li>
+  <li><a href="#유의-사항" id="markdown-toc-유의-사항">유의 사항</a>    <ul>
+      <li><a href="#지원되는-sql-타입" id="markdown-toc-지원되는-sql-타입">지원되는 SQL 타입</a></li>
+      <li><a href="#애로우-배치-크기-설정" id="markdown-toc-애로우-배치-크기-설정">애로우 배치 크기 설정</a></li>
+      <li><a href="#타임존time-zone-의미와-timestamp" id="markdown-toc-타임존time-zone-의미와-timestamp">타임존(Time Zone) 의미와 timestamp</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="스파크에서의-아파치-애로우">스파크에서의 아파치 애로우</h2>
+
+<p>아파치 애로우는 인메모리(In-Memory) 컬럼기반 데이터 포맷으로 스파크에서 JVM과 Python 프로세스 간에 데이터를 효율적으로 전송하기 위해 사용됩니다. 현재 Pandas/NumPy 데이터로 작업하는 Python 사용자에게 가장 유용할 것입니다. 바로 사용할 수는 없으며 장점을 최대한 살리고 호환성을 높이기 위해서 설정이나 코드를 조금 수정해야 할 수 있습니다. 이 가이드는 스파크에서 애로우를 사용하는 방법에 대해 상위레벨에서 설명하고, 애로우를 사용할 수 있는 데이터로 작업할 때의 차이를 강조하여 알려줍니다.</p>
+
+<h3 id="pyarrow-설치-확인">PyArrow 설치 확인</h3>
+
+<p>pip을 사용하여 PySpark를 설치한다면 <code>pip install pyspark[sql]</code> 명령을 사용하여 PyArrow를 SQL 모듈의 추가 의존성으로 가져올 수 있습니다. 그렇지 않다면 모든 클러스터 노드에서 PyArrow가 설치되어 있고 사용 가능한지 확인해야 합니다. 현재 지원되는 버전은 0.8.0입니다. pip 또는 conda-forge 채널의 conda를 사용하여 설치할 수 있습니다. 자세한 내용은 PyArrow <a href="https://arrow.apache.org/docs/python/install.html">설치</a>를 참조하세요.</p>
+
+<h2 id="pandas와의-변환-활성화하기">Pandas와의 변환 활성화하기</h2>
+
+<p>애로우는 <code>toPandas()</code>호출을 사용하여 스파크 DataFrame을 Pandas DataFrame으로 변환할 때와 <code>createDataFrame(pandas_df)</code>로 Pandas DataFrame에서 Spark DataFrame을 생성할 때 최적화를 위해 사용할 수 있습니다. 이러한 호출을 실행할 때 Arrow를 사용하려면 먼저 스파크 설정 &#8216;spark.sql.execution.arrow.enabled&#8217;를 &#8216;true&#8217;로 설정해야 합니다. 기본 설정은 사용하지 않음으로 되어 있습니다.</p>
+
+<p>또한, 실제 연산 전에 스파크에서 에러가 발생한다면  &#8216;spark.sql.execution.arrow.enabled&#8217;로 활성화된 최적화는 자동으로 non-Arrow 최적화로 대체 될 수 있습니다. 이는 &#8216;spark.sql.execution.arrow.fallback.enabled&#8217;로 제어할 수 있습니다.</p>
+
+<div class="codetabs">
+<div data-lang="python">
+    <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="c1"># Arrow 기반 컬럼 데이터 전송을 활성화합니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.execution.arrow.enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+
+<span class="c1"># Pandas DataFrame 생성합니다.</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Arrow를 사용하여 Pandas DataFrame에서 스파크 DataFrame을 생성합니다.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span>
+
+<span class="c1"># Arrow를 사용하여 스파크 DataFrame을 Pandas DataFrame으로 다시 변환합니다.</span>
+<span class="n">result_pdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/arrow.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<p>Arrow를 사용하여 위와 같이 최적화를 하면 Arrow가 활성화되지 않은 경우와 같은 결과가 나옵니다. Arrow를 사용하는 경우에도 <code>toPandas()</code>는 DataFrame의 모든 레코드 콜렉션을 드라이버 프로그램으로 변환하므로 데이터의 작은 서브셋에서 실행해야 합니다. 현재 모든 스파크 데이터 타입이 지원되는 것은 아니며 지원하지 않는 타입의 컬럼이 있는 경우 오류가 발생할 수 있으니 <a href="sql-pyspark-pandas-with-arrow.html#supported-sql-types">지원 SQL 타입</a>을 참조하세요. <code>createDataFrame()</code>에서 오류가 발생하면 스파크는 Arrow를 사용하지 않고 DataFrame을 생성합니다.</p>
+
+<h2 id="pandas-udf-일명-벡터화된-udf">Pandas UDF (일명 &#8216;벡터화된 UDF&#8217;)</h2>
+
+<p>Pandas UDF는 Arrow를 사용하여 데이터를 전송하고 Pandas를 이용하여 데이터를 다루기 위해 스파크에서 실행되는 사용자 정의 함수입니다. Pandas UDF는 <code>pandas_udf </code>키워드를 사용해서 정의할 수 있으며, 데코레이터로 또는 함수를 감싸기(wrap) 위해 사용합니다. 추가 설정은 필요하지 않습니다. 현재 두 종류의 Pandas UDF: Scalar와 그룹화된 맵이 있습니다.</p>
+
+<h3 id="scalar">Scalar</h3>
+
+<p>Scalar Pandas UDF는 scalar 연산을 벡터화하는 데 사용됩니다. <code>select</code> 와 <code>withColumn</code> 같은 함수와 함께 사용할 수 있습니다. Python 함수는 <code>pandas.Series</code>를 입력으로 받아 같은 길이의 <code>pandas.Series</code>를 반환 해야 합니다. 스파크는 컬럼을 배치(batch)로 분할하고, 각 배치에서 함수를 호출하여 생성된 데이터 결과값들을 연결하여 Pandas UDF를 실행합니다.</p>
+
+<p>다음 예제는 2개의 컬럼을 곱하는 scalar Pandas UDF를 만드는 방법을 보여줍니다.</p>
+
+<div class="codetabs">
+<div data-lang="python">
+    <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">pandas_udf</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">LongType</span>
+
+<span class="c1"># 함수를 정의하고 UDF를 생성합니다.</span>
+<span class="k">def</span> <span class="nf">multiply_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+
+<span class="n">multiply</span> <span class="o">=</span> <span class="n">pandas_udf</span><span class="p">(</span><span class="n">multiply_func</span><span class="p">,</span> <span class="n">returnType</span><span class="o">=</span><span class="n">LongType</span><span class="p">())</span>
+
+<span class="c1"># pandas_udf에 주어지는 함수는 로컬 Pandas 데이터와 실행될 수 있어야 합니다.</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">multiply_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+<span class="c1"># 0    1</span>
+<span class="c1"># 1    4</span>
+<span class="c1"># 2    9</span>
+<span class="c1"># dtype: int64</span>
+
+<span class="c1"># 스파크 DataFrame을 생성합니다. (&#39;spark&#39;는 이전에 생성한 SparkSession입니다.)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]))</span>
+
+<span class="c1"># 스파크 벡터화된 UDF로 함수를 실행합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">multiply</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +-------------------+</span>
+<span class="c1"># |multiply_func(x, x)|</span>
+<span class="c1"># +-------------------+</span>
+<span class="c1"># |                  1|</span>
+<span class="c1"># |                  4|</span>
+<span class="c1"># |                  9|</span>
+<span class="c1"># +-------------------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/arrow.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<h3 id="그룹화된-맵">그룹화된 맵</h3>
+<p>그룹화된 맵 Pandas UDF는 “분할-적용-결합” 패턴을 구현하는 <code>groupBy().apply()</code>와 함께 사용됩니다. 분할-적용-결합은 세 단계로 구성됩니다:</p>
+<ul>
+  <li><code>DataFrame.groupBy</code>를 이용하여 데이터를 그룹으로 분할합니다.</li>
+  <li>각 그룹에 함수를 적용합니다. 함수의 입력과 출력값은 모두 <code>pandas.DataFrame</code>입니다. 입력 데이터는 각 그룹의 모든 로우와 컬럼을 포함합니다.</li>
+  <li>결과값을 새로운 <code>DataFrame</code>으로 결합합니다.</li>
+</ul>
+
+<p><code>groupBy().apply()</code>를 사용하려면 사용자는 다음 내용을 정의해야 합니다:</p>
+<ul>
+  <li>각 그룹에서의 연산을 정의할 Python 함수.</li>
+  <li><code>DataFrame</code> 출력의 스키마를 정의할 <code>StructType</code> 객체나 문자열.</li>
+</ul>
+
+<p>반환된 <code>pandas.DataFrame</code>의 컬럼 레이블이 문자열인 경우에는 정의된 출력 스키마의 필드 이름과 일치해야하며, 문자열이 아닌 경우에는 위치의 필드 데이터 타입과 일치해야 합니다 (예 : 정수 인덱스). <code>pandas.DataFrame</code>을 작성할 때 컬럼 레이블을 작성하는 방법은 <a href="https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html#pandas.DataFrame">pandas.DataFrame</a>을 참조하세요.</p>
+
+<p>함수가 적용되기 전에 그룹의 모든 데이터가 메모리에 로드됩니다. 그룹 크기가 비대칭이면 메모리 부족 예외가 발생할 수 있습니다. <a href="sql-pyspark-pandas-with-arrow.html#setting-arrow-batch-size">maxRecordsPerBatch</a>의 설정은 그룹에는 적용되지 않으며, 사용자는 직접 그룹화된 데이터 크기가 사용 가능한 메모리 크기 적절한지 확인해야 합니다.</p>
+
+<p>다음 예제는 <code>groupby().apply()</code>를 사용하여 그룹의 각 값에서 평균을 빼는 것을 보여줍니다.</p>
+
+<div class="codetabs">
+<div data-lang="python">
+    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">pandas_udf</span><span class="p">,</span> <span class="n">PandasUDFType</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)],</span>
+    <span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">))</span>
+
+<span class="nd">@pandas_udf</span><span class="p">(</span><span class="s2">&quot;id long, v double&quot;</span><span class="p">,</span> <span class="n">PandasUDFType</span><span class="o">.</span><span class="n">GROUPED_MAP</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">subtract_mean</span><span class="p">(</span><span class="n">pdf</span><span class="p">):</span>
+    <span class="c1"># pdf의 타입은 pandas.DataFrame 입니다.</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">v</span>
+    <span class="k">return</span> <span class="n">pdf</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">v</span> <span class="o">-</span> <span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subtract_mean</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+----+</span>
+<span class="c1"># | id|   v|</span>
+<span class="c1"># +---+----+</span>
+<span class="c1"># |  1|-0.5|</span>
+<span class="c1"># |  1| 0.5|</span>
+<span class="c1"># |  2|-3.0|</span>
+<span class="c1"># |  2|-1.0|</span>
+<span class="c1"># |  2| 4.0|</span>
+<span class="c1"># +---+----+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/arrow.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<p>자세한 사용법은 <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.functions.pandas_udf"><code>pyspark.sql.functions.pandas_udf</code></a>와 <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.GroupedData.apply"><code>pyspark.sql.GroupedData.apply</code></a>를 참조하세요.</p>
+
+<h3 id="그룹별-집계-aggregate">그룹별 집계 (Aggregate)</h3>
+
+<p>그룹별 집계 Pandas UDF는 스파크 집계 함수와 비슷합니다. 그룹별 집계  Pandas UDF는 <code>groupBy().agg()</code>및 <code>[pyspark.sql.Window](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.Window)</code>와 함께 사용됩니다. 각 <code>pandas.Series</code>가 그룹 또는 윈도우 내의 컬럼을 의미할 때, 그룹별 집계 Pandas UDF는 하나 이상의 <code>pandas.Series</code>에서 scalar 값까지의 집계를 정의합니다.</p>
+
+<p>이런 타입의 UDF는 부분 집계를 지원하지 않으며 그룹 또는 윈도우의 모든 데이터는 메모리로 로드됩니다. 또한 현재 그룹화된 집계 Pandas UDF는 언바운드(unbounded) 윈도우만 지원합니다.</p>
+
+<p>다음 예제는 이 타입의 UDF를 사용하여 groupBy로 평균값을 계산하는 방법과 윈도우 동작들을 보여줍니다:</p>
+
+<div class="codetabs">
+<div data-lang="python">
+    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">pandas_udf</span><span class="p">,</span> <span class="n">PandasUDFType</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">Window</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)],</span>
+    <span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">))</span>
+
+<span class="nd">@pandas_udf</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">PandasUDFType</span><span class="o">.</span><span class="n">GROUPED_AGG</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">mean_udf</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">mean_udf</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+-----------+</span>
+<span class="c1"># | id|mean_udf(v)|</span>
+<span class="c1"># +---+-----------+</span>
+<span class="c1"># |  1|        1.5|</span>
+<span class="c1"># |  2|        6.0|</span>
+<span class="c1"># +---+-----------+</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">Window</span> \
+    <span class="o">.</span><span class="n">partitionBy</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">rowsBetween</span><span class="p">(</span><span class="n">Window</span><span class="o">.</span><span class="n">unboundedPreceding</span><span class="p">,</span> <span class="n">Window</span><span class="o">.</span><span class="n">unboundedFollowing</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s1">&#39;mean_v&#39;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">over</span><span class="p">(</span><span class="n">w</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+----+------+</span>
+<span class="c1"># | id|   v|mean_v|</span>
+<span class="c1"># +---+----+------+</span>
+<span class="c1"># |  1| 1.0|   1.5|</span>
+<span class="c1"># |  1| 2.0|   1.5|</span>
+<span class="c1"># |  2| 3.0|   6.0|</span>
+<span class="c1"># |  2| 5.0|   6.0|</span>
+<span class="c1"># |  2|10.0|   6.0|</span>
+<span class="c1"># +---+----+------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/arrow.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<p>자세한 사용법은 <a href="api/python/pyspark.sql.html#pyspark.sql.functions.pandas_udf"><code>pyspark.sql.functions.pandas_udf</code></a>를 참조하세요.</p>
+
+<h2 id="유의-사항">유의 사항</h2>
+
+<h3 id="지원되는-sql-타입">지원되는 SQL 타입</h3>
+
+<p>현재 <code>MapType</code>, <code>TimestampType</code>의 <code>ArrayType, 중첩 StructType</code>을 제외한 모든 스파크 SQL 데이터 타입은 Arrow 기반 변환을 지원합니다. <code>BinaryType</code>은 설치된 PyArrow 버전 0.10.0 이상에서만 지원됩니다.</p>
+
+<h3 id="애로우-배치-크기-설정">애로우 배치 크기 설정</h3>
+
+<p>Spark의 데이터 파티션은 Arrow 레코드 배치로 변환되어 JVM에서 메모리 사용량을 일시적으로 높일 수 있습니다. 메모리 부족 문제를 방지하기 위해, &#8220;spark.sql.execution.arrow.maxRecordsPerBatch&#8221;를 각 배치의 최대 로우 수를 결정하는 정수로 설정하여 Arrow 레코드 배치의 크기를 조정할 수 있습니다. 기본값은 배치 당 10,000 레코드입니다. 컬럼 수가 많으면 적절하게 값을 조정해야 합니다. 이 방법을 통해, 각 데이터 파티션은 프로세싱을 위한 하나 이상의 레코드 배치로 만들어집니다.</p>
+
+<h3 id="타임존time-zone-의미와-timestamp">타임존(Time Zone) 의미와 timestamp</h3>
+
+<p>스파크는 내부적으로 timestamp를 UTC 값으로 저장하며, 지정된 시간대가 없는 timestamp 데이터는 로컬 타임에서 마이크로초 단위의 UTC로 변환됩니다. timestamp 데이터를 내보내거나 스파크에서 표시할 때, 세션 시간대는 timestamp값을 지역화하는 데 사용됩니다. 세션 시간대는 &#8216;spark.sql.session.timeZone&#8217;으로 설정되며, 설정되지 않은 경우 기본값은 JVM 시스템 로컬 시간대가 기본값이 됩니다. Pandas 는 나노초(nanosecond) 단위의 <code>datetime64</code> 인 <code>datetime64[ns]</code>를 사용하며, 각 컬럼 단위 시간대는 선택 사항입니다.</p>
+
+<p>timestamp 데이터가 스파크에서 Pandas로 전송될 때 나노초로 변환되고, 각 컬럼은 스파크 세션 시간대로 변환된 후 해당 시간대로 지역화되어 기존 시간대를 제거하고 로컬 타임으로 값을 표시합니다. 이 변환은 timestamp 컬럼에서 <code>toPandas()</code> 또는 <code>pandas_udf</code>를 호출할 때 발생합니다.</p>
+
+<p>timestamp 데이터가 Pandas에서 스파크로 전송될 때는 UTC 마이크로초(microsecond)로 변환됩니다. 이는 pandas DataFrame으로 <code>createDataFrame</code>을 호출하거나 <code>pandas_udf</code>에서 timestamp를 반환할 때 발생합니다. 이 변환은 스파크가 예상할 수 있는 형식의 데이터를 받을 수 있도록 자동으로 실행되기 때문에 우리가 직접 변환할 필요가 없습니다. 이 때 나노 이하 단위는 삭제됩니다.</p>
+
+<p>(Pandas가 아닌) 표준 UDF는 timestamp 데이터를 Pandas timestamp가 아닌 Python datetime 오브젝트로 불러옵니다. <code>pandas_udf</code>의 timestamp로 작업할 때 최상의 성능을 얻으려면 Pandas 타임 시리즈 기능을 사용하는 것이 좋습니다. 자세한 내용은 <a href="https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html">여기</a>를 참조하세요.</p>
+
+
+                </div>
+            
+             <!-- /container -->
+        </div>
+
+        <script src="js/vendor/jquery-1.12.4.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/anchor.min.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- MathJax Section -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                TeX: { equationNumbers: { autoNumber: "AMS" } }
+            });
+        </script>
+        <script>
+            // Note that we load MathJax this way to work with local file (file://), HTTP and HTTPS.
+            // We could use "//cdn.mathjax...", but that won't support "file://".
+            (function(d, script) {
+                script = d.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.onload = function(){
+                    MathJax.Hub.Config({
+                        tex2jax: {
+                            inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ],
+                            displayMath: [ ["$$","$$"], ["\\[", "\\]"] ],
+                            processEscapes: true,
+                            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    });
+                };
+                script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
+                    'cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js' +
+                    '?config=TeX-AMS-MML_HTMLorMML';
+                d.getElementsByTagName('head')[0].appendChild(script);
+            }(document));
+        </script>
+    </body>
+</html>

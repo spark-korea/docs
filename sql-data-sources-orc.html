@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>ORC 파일 - Spark 2.4.3 Documentation</title>
+        
+
+        
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/pygments-default.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="https://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="navbar navbar-fixed-top" id="topbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand"><a href="index.html">
+                      <img src="img/spark-logo-hd.png" style="height:50px;"/></a><span class="version">2.4.3</span>
+                    </div>
+                    <ul class="nav">
+                        <!--TODO(andyk): Add class="active" attribute to li some how.-->
+                        <li><a href="index.html">개요</a></li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">프로그래밍 가이드<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quick-start.html">빠른 시작</a></li>
+                                <li><a href="sql-programming-guide.html">스파크 SQL, DataFrame, Dataset</a></li>
+                                <li><a href="structured-streaming-programming-guide.html">구조적 스트리밍</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">API 문서<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package">Scala</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/java/index.html">Java</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/python/index.html">Python</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark SQL 함수</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!--<p class="navbar-text pull-right"><span class="version-text">v2.4.3</span></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="container-wrapper">
+
+            
+                
+                    <div class="left-menu-wrapper">
+    <div class="left-menu">
+        <h3><a href="sql-programming-guide.html">Spark SQL Guide</a></h3>
+        
+<ul>
+
+    <li>
+        <a href="sql-getting-started.html">
+            
+                시작하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources.html">
+            
+                데이터 소스
+            
+        </a>
+    </li>
+    
+    
+        
+<ul>
+
+    <li>
+        <a href="sql-data-sources-load-save-functions.html">
+            
+                일반 불러오기/저장하기 함수
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-parquet.html">
+            
+                Parquet 파일
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-orc.html">
+            
+                <b>ORC 파일</b>
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-json.html">
+            
+                JSON 파일
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-hive-tables.html">
+            
+                Hive 테이블
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-jdbc.html">
+            
+                JDBC를 통한 다른 데이터베이스 사용하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-avro.html">
+            
+                Avro 파일
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources-troubleshooting.html">
+            
+                문제 해결
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    
+
+    <li>
+        <a href="sql-performance-tuning.html">
+            
+                성능 튜닝
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-distributed-sql-engine.html">
+            
+                분산 SQL 엔진
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html">
+            
+                아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-reference.html">
+            
+                참조
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    </div>
+</div>
+                
+                <input id="nav-trigger" class="nav-trigger" checked type="checkbox">
+                <label for="nav-trigger"></label>
+                <div class="content-with-sidebar" id="content">
+                    
+                        <h1 class="title">ORC 파일</h1>
+                    
+
+                    <p>스파크 2.3 버전부터 스파크는 새로운 ORC 파일 포맷과 함께 벡터화된 ORC 읽기 기능을 지원합니다. 이 기능을 위해 아래의 설정이 새로 추가되었습니다. <code>spark.sql.orc.impl</code>이 <code>native</code> 로 설정되어 있고 <code>spark.sql.orc.enableVectorizedReader</code>이 <code>true로</code> 설정된 경우, 네이티브 ORC 테이블(즉, 사용자가 <code>USING ORC</code>를 사용하여 생성한 테이블)에서 벡터화된 리더를 사용할 수 있습니다. Hive ORC SerDe 테이블(즉, 사용자가 <code>USING HIVE OPTIONS (fileFormat 'ORC')</code>를 사용하여 생성한 테이블)에서는  <code>spark.sql.hive.convertMetastoreOrc</code>을 <code>true</code>로 설정하였을 때 벡터화된 리더를 사용할 수 있습니다.</p>
+
+<table class="table">
+  <tr><th><b>속성 이름</b></th><th><b>기본값</b></th><th><b>의미</b></th></tr>
+  <tr>
+    <td><code>spark.sql.orc.impl</code></td>
+    <td><code>native</code></td>
+    <td>사용할 ORC 구현체 이름. <code>native</code> 또는 <code>hive</code>를 사용할 수 있습니다.  <code>native</code>는 아파치 ORC 1.4에 내장된 네이티브 ORC를 의미하며 <code>hive</code>는 Hive 1.2.1의 ORC 라이브러리를 의미합니다.</td>
+  </tr>
+  <tr>
+    <td><code>spark.sql.orc.enableVectorizedReader</code></td>
+    <td><code>true</code></td>
+    <td><code>native</code> 구현체에서 벡터화된 ORC 읽기 기능을 활성화합니다.  <code>false</code>인 경우, 벡터화되지 않은 ORC 리더를 사용합니다. <code>hive </code>구현체에는 적용되지 않습니다.</td>
+  </tr>
+</table>
+
+
+                </div>
+            
+             <!-- /container -->
+        </div>
+
+        <script src="js/vendor/jquery-1.12.4.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/anchor.min.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- MathJax Section -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                TeX: { equationNumbers: { autoNumber: "AMS" } }
+            });
+        </script>
+        <script>
+            // Note that we load MathJax this way to work with local file (file://), HTTP and HTTPS.
+            // We could use "//cdn.mathjax...", but that won't support "file://".
+            (function(d, script) {
+                script = d.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.onload = function(){
+                    MathJax.Hub.Config({
+                        tex2jax: {
+                            inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ],
+                            displayMath: [ ["$$","$$"], ["\\[", "\\]"] ],
+                            processEscapes: true,
+                            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    });
+                };
+                script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
+                    'cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js' +
+                    '?config=TeX-AMS-MML_HTMLorMML';
+                d.getElementsByTagName('head')[0].appendChild(script);
+            }(document));
+        </script>
+    </body>
+</html>

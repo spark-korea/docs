@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>스파크 SQL, DataFrame, Dataset - Spark 2.4.3 Documentation</title>
+        
+
+        
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/pygments-default.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="https://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="navbar navbar-fixed-top" id="topbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand"><a href="index.html">
+                      <img src="img/spark-logo-hd.png" style="height:50px;"/></a><span class="version">2.4.3</span>
+                    </div>
+                    <ul class="nav">
+                        <!--TODO(andyk): Add class="active" attribute to li some how.-->
+                        <li><a href="index.html">개요</a></li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">프로그래밍 가이드<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quick-start.html">빠른 시작</a></li>
+                                <li><a href="sql-programming-guide.html">스파크 SQL, DataFrame, Dataset</a></li>
+                                <li><a href="structured-streaming-programming-guide.html">구조적 스트리밍</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">API 문서<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package">Scala</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/java/index.html">Java</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/python/index.html">Python</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark SQL 함수</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!--<p class="navbar-text pull-right"><span class="version-text">v2.4.3</span></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="container-wrapper">
+
+            
+                
+                    <div class="left-menu-wrapper">
+    <div class="left-menu">
+        <h3><a href="sql-programming-guide.html">Spark SQL Guide</a></h3>
+        
+<ul>
+
+    <li>
+        <a href="sql-getting-started.html">
+            
+                시작하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-data-sources.html">
+            
+                데이터 소스
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-performance-tuning.html">
+            
+                성능 튜닝
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-distributed-sql-engine.html">
+            
+                분산 SQL 엔진
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html">
+            
+                아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-reference.html">
+            
+                참조
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    </div>
+</div>
+                
+                <input id="nav-trigger" class="nav-trigger" checked type="checkbox">
+                <label for="nav-trigger"></label>
+                <div class="content-with-sidebar" id="content">
+                    
+                        <h1 class="title">스파크 SQL, DataFrame, Dataset</h1>
+                    
+
+                    <p>스파크 SQL은 구조화된 데이터 처리를 위한 스파크 모듈입니다. 기본 스파크 RDD API와는 다르게, 스파크 SQL이 제공하는 인터페이스는 데이터의 구조와 계산 과정의 구조에 대한 정보를 더 많이 포함하고 있습니다. 내부적으로, 스파크 SQL은 내부에서 별도의 정보를 이용해 최적화를 수행합니다. Dataset API와 SQL을 포함하고 있는 스파크 SQL의 사용법은 다양합니다. 동일한 실행 엔진을 사용한다면 계산되는 결과는 어떤 API나 프로그래밍 언어를 사용하는지에 상관 없이 동일합니다. 이것이 의미하는 것은 개발자가 필요한 변환을 가장 자연스럽게 표현하기 위해서 적절한 API를 유연하게 사용할 수 있다는 것입니다.</p>
+
+<p>여기에서 소개할 예제들은 스파크가 제공하는 예제 데이터를 사용합니다. 이 예제들은 <code>spark-shell</code>, <code>pyspark</code> 셸, <code>sparkR</code> 셸에서 실행할 수 있습니다.</p>
+
+<h2 id="sql">SQL</h2>
+
+<p>스파크 SQL을 사용하는 방법 중 하나는 SQL 쿼리를 실행하는 것입니다. 스파크 SQL을 사용하여 이미 설치되어 있는 Hive에서 데이터를 읽어올 수도 있습니다. 이 기능에 대해 더 자세히 알고 싶다면 <a href="sql-data-sources-hive-tables.html">Hive Tables</a>에서 자세한 내용을 볼 수 있습니다. 이와 다른 프로그래밍 언어에서 SQL을 실행하면 <a href="sql-programming-guide.html#datasets-and-dataframes">Dataset/DataFrame</a>으로 된 결과를 얻게 됩니다. <a href="sql-distributed-sql-engine.html#running-the-spark-sql-cli">명령어</a>를 사용하거나 <a href="sql-distributed-sql-engine.html#running-the-thrift-jdbcodbc-server">JDBC/ODBC</a>를 통해 SQL 인터페이스를 활용할 수도 있습니다.</p>
+
+<h2 id="dataset과-dataframe">Dataset과 DataFrame</h2>
+
+<p>Dataset은 1개 이상의 컴퓨팅 장치에 분산되어 저장된 데이터의 집합입니다. Dataset은 스파크 1.6에서 새롭게 추가된 인터페이스이며, RDD의 장점(강한 타입 체크, 람다 함수의 사용)과 스파크 SQL의 최적화된 실행 엔진의 장점을 갖고 있습니다. JVM 객체를 이용해 Dataset을 <a href="sql-getting-started.html#creating-datasets">생성</a>하고 함수형 변환(<code>map</code>, <code>flatMap</code>, <code>filter</code>)으로 조작할 수 있습니다. Dataset API는 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">Scala</a> 와 <a href="https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/Dataset.html">Java</a>에서 사용가능합니다. Python은 Dataset API를 지원되지 않습니다. 하지만 Python에서는 Python의 동적 특성때문에 Dataset API의 많은 장점들을 이미 사용할 수 있습니다(예: <code>row.columnName</code>를 사용해서 각 컬럼의 특정 필드에 접근할 수 있습니다). R의 경우에도 Python과 비슷합니다.</p>
+
+<p>DataFrame은 Dataset에서 각 컬럼에 이름을 붙여 만들어진 형태입니다. DataFrame은 관계형 데이터 베이스의 테이블, 또는 R이나 Python의 데이터 프레임과 같은 개념이지만 이들보다 더 최적화되어 있습니다. DataFrame은 다음과 같은 다양한 <a href="sql-data-sources.html">데이터 소스</a>로부터 만들어 낼 수 있습니다: 구조화된 데이터 파일, Hive 테이블, 외부 데이터베이스, 기존의 RDD. DataFrame API는 Scala, Java, <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame">Python</a>, <a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a>에서 사용할 수 있습니다. Scala와 Java에서는 DataFrame을 Row 객체로 이루어진 Dataset으로 표현합니다. <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">Scala API</a>에서는 DataFrame의 타입을 Dataset[Row]으로 지정하여 사용할 수 있습니다. <a href="https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/Dataset.html">Java API</a>에서는 DataFrame을 표현하려면 Dataset<Row>의 형태를 사용해야 합니다.</Row></p>
+
+<p>이 문서에서는 Row객체로 이루어진 Scala/Java의 Dataset을 DataFrame으로 간주하도록 하겠습니다.</p>
+
+
+                </div>
+            
+             <!-- /container -->
+        </div>
+
+        <script src="js/vendor/jquery-1.12.4.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/anchor.min.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- MathJax Section -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                TeX: { equationNumbers: { autoNumber: "AMS" } }
+            });
+        </script>
+        <script>
+            // Note that we load MathJax this way to work with local file (file://), HTTP and HTTPS.
+            // We could use "//cdn.mathjax...", but that won't support "file://".
+            (function(d, script) {
+                script = d.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.onload = function(){
+                    MathJax.Hub.Config({
+                        tex2jax: {
+                            inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ],
+                            displayMath: [ ["$$","$$"], ["\\[", "\\]"] ],
+                            processEscapes: true,
+                            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    });
+                };
+                script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
+                    'cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js' +
+                    '?config=TeX-AMS-MML_HTMLorMML';
+                d.getElementsByTagName('head')[0].appendChild(script);
+            }(document));
+        </script>
+    </body>
+</html>

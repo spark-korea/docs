@@ -1,0 +1,988 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>시작하기 - Spark 2.4.3 Documentation</title>
+        
+
+        
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+        </style>
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+        <link rel="stylesheet" href="css/main.css">
+
+        <script src="js/vendor/modernizr-2.6.1-respond-1.1.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/pygments-default.css">
+
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="https://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+        <div class="navbar navbar-fixed-top" id="topbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <div class="brand"><a href="index.html">
+                      <img src="img/spark-logo-hd.png" style="height:50px;"/></a><span class="version">2.4.3</span>
+                    </div>
+                    <ul class="nav">
+                        <!--TODO(andyk): Add class="active" attribute to li some how.-->
+                        <li><a href="index.html">개요</a></li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">프로그래밍 가이드<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="quick-start.html">빠른 시작</a></li>
+                                <li><a href="sql-programming-guide.html">스파크 SQL, DataFrame, Dataset</a></li>
+                                <li><a href="structured-streaming-programming-guide.html">구조적 스트리밍</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">API 문서<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package">Scala</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/java/index.html">Java</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/python/index.html">Python</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/R/index.html">R</a></li>
+                                <li><a href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark SQL 함수</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <!--<p class="navbar-text pull-right"><span class="version-text">v2.4.3</span></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="container-wrapper">
+
+            
+                
+                    <div class="left-menu-wrapper">
+    <div class="left-menu">
+        <h3><a href="sql-programming-guide.html">Spark SQL Guide</a></h3>
+        
+<ul>
+
+    <li>
+        <a href="sql-getting-started.html">
+            
+                <b>시작하기</b>
+            
+        </a>
+    </li>
+    
+    
+        
+<ul>
+
+    <li>
+        <a href="sql-getting-started.html#starting-point-sparksession">
+            
+                시작점: SparkSession
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#creating-dataframes">
+            
+                DataFrame 생성하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#untyped-dataset-operations-aka-dataframe-operations">
+            
+                타입이 없는 Dataset 동작 (DataFrame 동작)
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#running-sql-queries-programmatically">
+            
+                응용 프로그램 안에서 SQL 쿼리 실행하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#global-temporary-view">
+            
+                전역 임시 뷰
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#creating-datasets">
+            
+                Dataset 생성하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#interoperating-with-rdds">
+            
+                RDD 연동하기
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-getting-started.html#aggregations">
+            
+                집계(Aggregations)
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    
+
+    <li>
+        <a href="sql-data-sources.html">
+            
+                데이터 소스
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-performance-tuning.html">
+            
+                성능 튜닝
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-distributed-sql-engine.html">
+            
+                분산 SQL 엔진
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-pyspark-pandas-with-arrow.html">
+            
+                아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가이드
+            
+        </a>
+    </li>
+    
+    
+
+    <li>
+        <a href="sql-reference.html">
+            
+                참조
+            
+        </a>
+    </li>
+    
+    
+
+</ul>
+
+    </div>
+</div>
+                
+                <input id="nav-trigger" class="nav-trigger" checked type="checkbox">
+                <label for="nav-trigger"></label>
+                <div class="content-with-sidebar" id="content">
+                    
+                        <h1 class="title">시작하기</h1>
+                    
+
+                    <ul id="markdown-toc">
+  <li><a href="#시작점-sparksession" id="markdown-toc-시작점-sparksession">시작점: SparkSession</a></li>
+  <li><a href="#dataframe-생성하기" id="markdown-toc-dataframe-생성하기">DataFrame 생성하기</a></li>
+  <li><a href="#타입이-없는-dataset-동작-dataframe-동작" id="markdown-toc-타입이-없는-dataset-동작-dataframe-동작">타입이 없는 Dataset 동작 (DataFrame 동작)</a></li>
+  <li><a href="#응용-프로그램-안에서-sql-쿼리-실행하기" id="markdown-toc-응용-프로그램-안에서-sql-쿼리-실행하기">응용 프로그램 안에서 SQL 쿼리 실행하기</a></li>
+  <li><a href="#전역-임시-뷰" id="markdown-toc-전역-임시-뷰">전역 임시 뷰</a></li>
+  <li><a href="#dataset-생성하기" id="markdown-toc-dataset-생성하기">Dataset 생성하기</a></li>
+  <li><a href="#rdd-연동하기" id="markdown-toc-rdd-연동하기">RDD 연동하기</a>    <ul>
+      <li><a href="#리플렉션reflection을-사용한-스키마-유추" id="markdown-toc-리플렉션reflection을-사용한-스키마-유추">리플렉션(Reflection)을 사용한 스키마 유추</a></li>
+      <li><a href="#프로그램적으로-스키마-명시하기" id="markdown-toc-프로그램적으로-스키마-명시하기">프로그램적으로 스키마 명시하기</a></li>
+    </ul>
+  </li>
+  <li><a href="#집계aggregations" id="markdown-toc-집계aggregations">집계(Aggregations)</a>    <ul>
+      <li><a href="#타입이-없는-사용자-정의-집계-함수" id="markdown-toc-타입이-없는-사용자-정의-집계-함수">타입이 없는 사용자 정의 집계 함수</a></li>
+      <li><a href="#타입-안전type-safe-사용자-정의-집계-함수" id="markdown-toc-타입-안전type-safe-사용자-정의-집계-함수">타입 안전(Type-safe) 사용자 정의 집계 함수</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="시작점-sparksession">시작점: SparkSession</h2>
+
+<div class="codetabs">
+<div data-lang="scala">
+
+    <p>스파크의 모든 기능은 <a href="api/scala/index.html#org.apache.spark.sql.SparkSession"><code>SparkSession</code></a> 클래스에서 시작합니다. <code>SparkSession.builder()</code>를 사용해서 가장 기본적인 설정의 <code>SparkSession</code>을 생성합니다:</p>
+
+    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.SparkSession</span>
+
+<span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span>
+  <span class="o">.</span><span class="n">builder</span><span class="o">()</span>
+  <span class="o">.</span><span class="n">appName</span><span class="o">(</span><span class="s">&quot;Spark SQL basic example&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">config</span><span class="o">(</span><span class="s">&quot;spark.some.config.option&quot;</span><span class="o">,</span> <span class="s">&quot;some-value&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">getOrCreate</span><span class="o">()</span>
+
+<span class="c1">// RDD를 DataFrame으로 바꾸는 것과 같은 암시적 변환(implicit conversion)을 처리하기 위해</span>
+<span class="c1">// 아래와 같이 import를 해 줍니다.</span>
+<span class="k">import</span> <span class="nn">spark.implicits._</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+
+    <p>스파크의 모든 기능은 <a href="api/python/pyspark.sql.html#pyspark.sql.SparkSession"><code>SparkSession</code></a> 클래스에서 시작합니다. <code>SparkSession.builder</code>를 사용해서 가장 기본적인 설정의 <code>SparkSession</code>을 생성합니다:</p>
+
+    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span> \
+    <span class="o">.</span><span class="n">builder</span> \
+    <span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;Python Spark SQL basic example&quot;</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.some.config.option&quot;</span><span class="p">,</span> <span class="s2">&quot;some-value&quot;</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<p>스파크 2.0의 <code>SparkSession</code>에는 HiveQL을 사용한 쓰기 쿼리, Hive UDF 접근, Hive 테이블에서 데이터 읽기와 같은 Hive 기능이 내장되어 있습니다. 따라서 이 기능을 사용하기 위해서 Hive를 따로 설정하지 않아도 됩니다.</p>
+
+<h2 id="dataframe-생성하기">DataFrame 생성하기</h2>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <p><code>SparkSession</code>을 사용하면 <a href="#interoperating-with-rdds">이미 생성된 <code>RDD</code></a>, Hive Table 또는 <a href="https://spark.apache.org/docs/latest/sql-data-sources.html">스파크 데이터 소스</a>로부터 DataFrame을 생성할 수 있습니다.</p>
+
+    <p>아래 예제에서는 JSON 파일의 내용을 읽어와서 DataFrame을 생성합니다:</p>
+
+    <div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">df</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="o">(</span><span class="s">&quot;examples/src/main/resources/people.json&quot;</span><span class="o">)</span>
+
+<span class="c1">// 표준출력(stdout)에 DataFrame의 내용을 보여줍니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// | age|   name|</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// |null|Michael|</span>
+<span class="c1">// |  30|   Andy|</span>
+<span class="c1">// |  19| Justin|</span>
+<span class="c1">// +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+    <p><code>SparkSession</code>을 사용하면 <a href="#interoperating-with-rdds">이미 생성된 <code>RDD</code></a>, Hive Table 또는 <a href="sql-data-sources.html">스파크 데이터 소스</a>로부터 DataFrame을 생성할 수 있습니다.</p>
+
+    <p>아래 예제에서는 JSON 파일의 내용을 읽어와서 DataFrame을 생성합니다:</p>
+
+    <div class="highlight"><pre><span></span><span class="c1"># 여기에서 spark는 이미 생성된 SparkSession입니다.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="s2">&quot;examples/src/main/resources/people.json&quot;</span><span class="p">)</span>
+<span class="c1"># 표준출력(stdout)에 DataFrame의 내용을 보여줍니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># | age|   name|</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># |null|Michael|</span>
+<span class="c1"># |  30|   Andy|</span>
+<span class="c1"># |  19| Justin|</span>
+<span class="c1"># +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<h2 id="타입이-없는-dataset-동작-dataframe-동작">타입이 없는 Dataset 동작 (DataFrame 동작)</h2>
+
+<p>DataFrame을 사용하면 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">Scala</a>, <a href="https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/Dataset.html">Java</a>, <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame">Python</a>, <a href="https://spark.apache.org/docs/latest/api/R/SparkDataFrame.html">R</a>에서 각 언어 특성에 맞게 데이터를 조작할 수 있습니다</p>
+
+<p>위에서 언급했듯이 스파크 2.0의 DataFrame은 Scala와 Java API에서 <code>Row</code>들로 이루어진 Dataset을 말합니다. 이와 관련된 동작을 Scala/Java Dataset의 강한 타입체크 특성에서 말하는 &#8220;타입 변환&#8221;의 반대 의미로 &#8220;타입이 없는 변환&#8221;이라고 부르기도 합니다.</p>
+
+<p>다음은 Dataset을 사용하여 구조화된 데이터를 처리하는 기본 예제입니다:</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <div class="highlight"><pre><span></span><span class="c1">// $-notation을 사용하기 위해 임포트합니다.</span>
+<span class="k">import</span> <span class="nn">spark.implicits._</span>
+<span class="c1">// 트리 형태로 스키마를 출력합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="o">()</span>
+<span class="c1">// root</span>
+<span class="c1">// |-- age: long (nullable = true)</span>
+<span class="c1">// |-- name: string (nullable = true)</span>
+
+<span class="c1">// &quot;name&quot; 컬럼을 선택합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;name&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +-------+</span>
+<span class="c1">// |   name|</span>
+<span class="c1">// +-------+</span>
+<span class="c1">// |Michael|</span>
+<span class="c1">// |   Andy|</span>
+<span class="c1">// | Justin|</span>
+<span class="c1">// +-------+</span>
+
+<span class="c1">// 모든 사람을 선택하고, 나이를 1씩 증가시킵니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;name&quot;</span><span class="o">,</span> <span class="n">$</span><span class="s">&quot;age&quot;</span> <span class="o">+</span> <span class="mi">1</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +-------+---------+</span>
+<span class="c1">// |   name|(age + 1)|</span>
+<span class="c1">// +-------+---------+</span>
+<span class="c1">// |Michael|     null|</span>
+<span class="c1">// |   Andy|       31|</span>
+<span class="c1">// | Justin|       20|</span>
+<span class="c1">// +-------+---------+</span>
+
+<span class="c1">// 나이가 21살보다 많은 사람을 선택합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">$</span><span class="s">&quot;age&quot;</span> <span class="o">&gt;</span> <span class="mi">21</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +---+----+</span>
+<span class="c1">// |age|name|</span>
+<span class="c1">// +---+----+</span>
+<span class="c1">// | 30|Andy|</span>
+<span class="c1">// +---+----+</span>
+
+<span class="c1">// 각 나이별로 사람의 수를 셉니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">groupBy</span><span class="o">(</span><span class="s">&quot;age&quot;</span><span class="o">).</span><span class="n">count</span><span class="o">().</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-----+</span>
+<span class="c1">// | age|count|</span>
+<span class="c1">// +----+-----+</span>
+<span class="c1">// |  19|    1|</span>
+<span class="c1">// |null|    1|</span>
+<span class="c1">// |  30|    1|</span>
+<span class="c1">// +----+-----+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+
+    <p>Dataset에서 사용할 수 있는 명령어의 전체 목록은 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset">API 문서</a>에서 볼 수 있습니다.</p>
+
+    <p>Dataset에는 컬럼에 대한 간단한 참조 또는 표현뿐만 아니라 문자열 처리, 날짜 연산, 일반적인 수학 연산 등의 다양한 함수를 포함하는 라이브러리가 있습니다. 라이브러리의 전체 목록은 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$">DataFrame 함수 레퍼런스</a>에서 볼 수 있습니다.</p>
+  </div>
+
+<div data-lang="python">
+    <p>Python에서는 속성(<code>df.age</code>) 또는 인덱스(<code>df['age']</code>)로 DataFrame의 각 컬럼에 접근할 수 있습니다. 비록 속성을 사용하는 방법이 대화형 데이터 탐색에 편리하긴 하지만, 인덱스를 이용한 접근을 이용할 것을 적극 권장합니다. 속성을 사용하는 방법은 컬럼 이름이 DataFrame 클래스의 속성 이름과 겹치는 경우 문제를 일으킬 수 있는데, 추후 스파크 버전에서 DataFrame 클래스에 어떠한 새로운 속성이 추가될지 모르기 때문입니다. (이 경우, 멀쩡하게 동작하던 코드가 스파크 버전을 올린 이유 하나만으로 오동작할 수 있습니다.) 즉, 인덱스를 사용하는 방법이 좀 더 미래 지향적이고 안정적인 방법입니다.</p>
+
+    <div class="highlight"><pre><span></span><span class="c1"># spark와 df는 이전 예제와 동일합니다.</span>
+<span class="c1"># 트리 형태로 스키마를 출력합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+<span class="c1"># root</span>
+<span class="c1"># |-- age: long (nullable = true)</span>
+<span class="c1"># |-- name: string (nullable = true)</span>
+
+<span class="c1"># &quot;name&quot; 컬럼을 선택합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +-------+</span>
+<span class="c1"># |   name|</span>
+<span class="c1"># +-------+</span>
+<span class="c1"># |Michael|</span>
+<span class="c1"># |   Andy|</span>
+<span class="c1"># | Justin|</span>
+<span class="c1"># +-------+</span>
+
+<span class="c1"># 모든 사람을 선택하고, 나이를 1씩 증가시킵니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +-------+---------+</span>
+<span class="c1"># |   name|(age + 1)|</span>
+<span class="c1"># +-------+---------+</span>
+<span class="c1"># |Michael|     null|</span>
+<span class="c1"># |   Andy|       31|</span>
+<span class="c1"># | Justin|       20|</span>
+<span class="c1"># +-------+---------+</span>
+
+<span class="c1"># 나이가 21살보다 많은 사람을 선택합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+----+</span>
+<span class="c1"># |age|name|</span>
+<span class="c1"># +---+----+</span>
+<span class="c1"># | 30|Andy|</span>
+<span class="c1"># +---+----+</span>
+
+<span class="c1"># 각 나이별로 사람의 수를 셉니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----+-----+</span>
+<span class="c1"># | age|count|</span>
+<span class="c1"># +----+-----+</span>
+<span class="c1"># |  19|    1|</span>
+<span class="c1"># |null|    1|</span>
+<span class="c1"># |  30|    1|</span>
+<span class="c1"># +----+-----+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+    <p>Dataset에서 사용할 수 있는 명령어의 전체 목록은 <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame">API 문서</a>에서 볼 수 있습니다.</p>
+
+    <p>Dataset에는 컬럼에 대한 간단한 참조 또는 표현뿐만 아니라 문자열 처리, 날짜 연산, 일반적인 수학 연산 등의 다양한 함수를 포함하는 라이브러리가 있습니다. 라이브러리의 전체 목록은 <a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#module-pyspark.sql.functions">DataFrame 함수 레퍼런스</a>에서 볼 수 있습니다.</p>
+
+  </div>
+
+</div>
+
+<h2 id="응용-프로그램-안에서-sql-쿼리-실행하기">응용 프로그램 안에서 SQL 쿼리 실행하기</h2>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <p>SparkSession의 <code>sql</code> 함수를 사용하면 애플리케이션 안에서 SQL 쿼리를 실행하고 <code>DataFrame</code> 형태로 결과를 반환받을 수 있습니다.</p>
+
+    <div class="highlight"><pre><span></span><span class="c1">// DataFrame을 SQL 임시 뷰로 등록합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="o">(</span><span class="s">&quot;people&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">sqlDF</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT * FROM people&quot;</span><span class="o">)</span>
+<span class="n">sqlDF</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// | age|   name|</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// |null|Michael|</span>
+<span class="c1">// |  30|   Andy|</span>
+<span class="c1">// |  19| Justin|</span>
+<span class="c1">// +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+    <p>SparkSession의 <code>sql</code> 함수를 사용하면 애플리케이션 안에서 SQL 쿼리를 실행하고 <code>DataFrame</code> 형태로 결과를 반환받을 수 있습니다.</p>
+
+    <div class="highlight"><pre><span></span><span class="c1"># DataFrame을 SQL 임시 뷰로 등록합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;people&quot;</span><span class="p">)</span>
+
+<span class="n">sqlDF</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM people&quot;</span><span class="p">)</span>
+<span class="n">sqlDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># | age|   name|</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># |null|Michael|</span>
+<span class="c1"># |  30|   Andy|</span>
+<span class="c1"># |  19| Justin|</span>
+<span class="c1"># +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<h2 id="전역-임시-뷰">전역 임시 뷰</h2>
+
+<p>스파크 SQL의 임시 뷰는 기본적으로 세션 내에서만 유효합니다. 즉, 임시 뷰를 생성한 세션이 종료되면 사라집니다. 모든 세션에서 공유할 수 있는 임시 뷰를 만들고 스파크 애플리케이션을 종료하기 전까지 이것을 유지하려면, 전역 임시 뷰를 생성하여 사용해야 합니다. 전역 임시 뷰는 시스템 데이터베이스에서 <code>global_temp</code>로 저장되므로, 이를 참조하기 위해서는 여기에 맞춰서 전체 이름을 지정해 주어야 합니다. (예: <code>SELECT * FROM global_temp.view1</code>.)</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <div class="highlight"><pre><span></span><span class="c1">// DataFrame을 전역 임시 뷰에 등록합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">createGlobalTempView</span><span class="o">(</span><span class="s">&quot;people&quot;</span><span class="o">)</span>
+
+<span class="c1">// 전역 임시 뷰는 시스템 데이터베이스에 `global_temp` 라는 이름으로 등록됩니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT * FROM global_temp.people&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// | age|   name|</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// |null|Michael|</span>
+<span class="c1">// |  30|   Andy|</span>
+<span class="c1">// |  19| Justin|</span>
+<span class="c1">// +----+-------+</span>
+
+<span class="c1">// 전역 임시 뷰는 다른 SparkSession에서도 사용할 수 있습니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">newSession</span><span class="o">().</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT * FROM global_temp.people&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// | age|   name|</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// |null|Michael|</span>
+<span class="c1">// |  30|   Andy|</span>
+<span class="c1">// |  19| Justin|</span>
+<span class="c1">// +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+    <div class="highlight"><pre><span></span><span class="c1"># DataFrame을 전역 임시 뷰에 등록합니다.</span>
+<span class="n">df</span><span class="o">.</span><span class="n">createGlobalTempView</span><span class="p">(</span><span class="s2">&quot;people&quot;</span><span class="p">)</span>
+
+<span class="c1"># 전역 임시 뷰는 시스템 데이터베이스에 `global_temp` 라는 이름으로 등록됩니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM global_temp.people&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># | age|   name|</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># |null|Michael|</span>
+<span class="c1"># |  30|   Andy|</span>
+<span class="c1"># |  19| Justin|</span>
+<span class="c1"># +----+-------+</span>
+
+<span class="c1"># 전역 임시 뷰는 다른 SparkSession에서도 사용할 수 있습니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">newSession</span><span class="p">()</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM global_temp.people&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># | age|   name|</span>
+<span class="c1"># +----+-------+</span>
+<span class="c1"># |null|Michael|</span>
+<span class="c1"># |  30|   Andy|</span>
+<span class="c1"># |  19| Justin|</span>
+<span class="c1"># +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="sql">
+
+    <figure class="highlight"><pre><code class="language-sql" data-lang="sql"><span></span><span class="k">CREATE</span> <span class="k">GLOBAL</span> <span class="k">TEMPORARY</span> <span class="k">VIEW</span> <span class="n">temp_view</span> <span class="k">AS</span> <span class="k">SELECT</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">FROM</span> <span class="n">tbl</span>
+
+<span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="n">global_temp</span><span class="p">.</span><span class="n">temp_view</span></code></pre></figure>
+
+  </div>
+</div>
+
+<h2 id="dataset-생성하기">Dataset 생성하기</h2>
+
+<p>Dataset은 RDD와 비슷하지만, 네트워크 상에서의 전달 및 처리에 필요한 객체 직렬화를 위해 Java 직렬화 또는 Kryo를 사용하는 대신 특수한 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Encoder">인코더(Encoder)</a>를 사용합니다. 이 인코더와 표준 직렬화는 모두 객체를 바이트 뭉치로 변환한다는 점에서는 같지만, 인코더는 동적으로 생성될 뿐만 아니라 바이트 뭉치 전체를 객체로 역직렬화 시킬 필요 없이 (즉, 필요한 필드에 대해서만 객체로 역직렬화함으로써 불필요한 자원 낭비를 하지 않고) 필터링, 정렬, 해싱과 같은 다양한 동작을 수행할 수 있도록 해 주는 특수한 형식을 사용합니다.</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <div class="highlight"><pre><span></span><span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Long</span><span class="o">)</span>
+
+<span class="c1">// Encoder는 케이스 클래스별로 생성됩니다.</span>
+<span class="k">val</span> <span class="n">caseClassDS</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="nc">Person</span><span class="o">(</span><span class="s">&quot;Andy&quot;</span><span class="o">,</span> <span class="mi">32</span><span class="o">)).</span><span class="n">toDS</span><span class="o">()</span>
+<span class="n">caseClassDS</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+---+</span>
+<span class="c1">// |name|age|</span>
+<span class="c1">// +----+---+</span>
+<span class="c1">// |Andy| 32|</span>
+<span class="c1">// +----+---+</span>
+
+<span class="c1">// 일반적으로 사용되는 대부분의 타입에 대한 인코더는 spark.implicits._를 임포트하면 자동으로 포함됩니다.</span>
+<span class="k">val</span> <span class="n">primitiveDS</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">toDS</span><span class="o">()</span>
+<span class="n">primitiveDS</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">).</span><span class="n">collect</span><span class="o">()</span> <span class="c1">// Array(2, 3, 4) 반환.</span>
+
+<span class="c1">// 클래스를 지정함으로써 DataFrame을 Dataset으로 변환할 수 있습니다. 값들은 클래스의 속성 변수 이름에 따라 자동으로 할당됩니다.</span>
+<span class="k">val</span> <span class="n">path</span> <span class="k">=</span> <span class="s">&quot;examples/src/main/resources/people.json&quot;</span>
+<span class="k">val</span> <span class="n">peopleDS</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="o">(</span><span class="n">path</span><span class="o">).</span><span class="n">as</span><span class="o">[</span><span class="kt">Person</span><span class="o">]</span>
+<span class="n">peopleDS</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// | age|   name|</span>
+<span class="c1">// +----+-------+</span>
+<span class="c1">// |null|Michael|</span>
+<span class="c1">// |  30|   Andy|</span>
+<span class="c1">// |  19| Justin|</span>
+<span class="c1">// +----+-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<h2 id="rdd-연동하기">RDD 연동하기</h2>
+
+<p>Spark SQL은 RDD를 Dataset으로 변환하기 위해 두 가지 방법을 지원합니다. 첫 번째 방법은 리플렉션을 사용하여 특정 타입 객체를 담고 있는 RDD에 해당하는 스키마를 자동으로 추론하는 것입니다. 이 리플렉션 기반의 방법을 사용하면 훨씬 간결한 코드를 쓸 수 있으며, 스파크 애플리케이션 개발시 스키마를 이미 알고 있는 경우라면 매우 잘 동작할 것입니다.</p>
+
+<p>Dataset을 생성하는 두 번째 방법은 프로그래밍 가능한 인터페이스를 사용하여 스키마를 명시적으로 생성한 뒤 이를 RDD에 적용하는 방법입니다. 이 방법을 사용하면 코드는 길어지겠지만, 코드가 실행되기 전 각 컬럼과 그 타입을 모르는 경우에도 Dataset을 구성할 수 있습니다.</p>
+
+<h3 id="리플렉션reflection을-사용한-스키마-유추">리플렉션(Reflection)을 사용한 스키마 유추</h3>
+<div class="codetabs">
+
+<div data-lang="scala">
+
+    <p>Spark SQL의 Scala 인터페이스는 자동으로 케이스 클래스가 포함된 RDD를 DataFrame으로 변환합니다. 이 때 스키마는 케이스 클래스에 따라 정의됩니다. 즉, 리플렉션을 이용하여 케이스 클래스의 파라미터 이름을 컬럼 이름으로 사용합니다. 케이스 클래스는 <code>Seq</code>나 <code>Array</code>와 같은 복합 타입 혹은 중첩된 형태의 타입도 사용할 수 있습니다. 이렇게 RDD를 DataFrame으로 변환하여 테이블에 등록할 수 있습니다. 이렇게 만들어진 테이블은 이후 SQL문에서도 사용할 수 있습니다.</p>
+
+    <div class="highlight"><pre><span></span><span class="c1">// RDD를 DataFrame으로 암시적으로 변환(implicit conversion)하기 위해 임포트합니다.</span>
+<span class="k">import</span> <span class="nn">spark.implicits._</span>
+
+<span class="c1">// Create an RDD of Person objects from a text file, convert it to a Dataframe</span>
+<span class="c1">// 텍스트 파일을 읽어 Person 객체의 RDD를 생성하고, 이를 DataFrame으로 변환합니다.</span>
+<span class="k">val</span> <span class="n">peopleDF</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
+  <span class="o">.</span><span class="n">textFile</span><span class="o">(</span><span class="s">&quot;examples/src/main/resources/people.txt&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot;,&quot;</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">attributes</span> <span class="k">=&gt;</span> <span class="nc">Person</span><span class="o">(</span><span class="n">attributes</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">attributes</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="n">trim</span><span class="o">.</span><span class="n">toInt</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">toDF</span><span class="o">()</span>
+<span class="c1">// DataFrame을 임시 뷰로 등록합니다.</span>
+<span class="n">peopleDF</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="o">(</span><span class="s">&quot;people&quot;</span><span class="o">)</span>
+
+<span class="c1">// 스파크에서 제공하는 sql 메소드를 이용해서 SQL문을 실행할 수 있습니다.</span>
+<span class="k">val</span> <span class="n">teenagersDF</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT name, age FROM people WHERE age BETWEEN 13 AND 19&quot;</span><span class="o">)</span>
+
+<span class="c1">// 결과에서 각 로우의 컬럼은 필드의 인덱스로 접근할 수 있습니다.</span>
+<span class="n">teenagersDF</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">teenager</span> <span class="k">=&gt;</span> <span class="s">&quot;Name: &quot;</span> <span class="o">+</span> <span class="n">teenager</span><span class="o">(</span><span class="mi">0</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +------------+</span>
+<span class="c1">// |       value|</span>
+<span class="c1">// +------------+</span>
+<span class="c1">// |Name: Justin|</span>
+<span class="c1">// +------------+</span>
+
+<span class="c1">// 필드의 이름으로 접근할 수도 있습니다.</span>
+<span class="n">teenagersDF</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">teenager</span> <span class="k">=&gt;</span> <span class="s">&quot;Name: &quot;</span> <span class="o">+</span> <span class="n">teenager</span><span class="o">.</span><span class="n">getAs</span><span class="o">[</span><span class="kt">String</span><span class="o">](</span><span class="s">&quot;name&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +------------+</span>
+<span class="c1">// |       value|</span>
+<span class="c1">// +------------+</span>
+<span class="c1">// |Name: Justin|</span>
+<span class="c1">// +------------+</span>
+
+<span class="c1">// Dataset[Map[K,V]]에 대한 인코더가 선언되어 있지 않으므로, 여기서 명시적으로 선언해줍니다.</span>
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">mapEncoder</span> <span class="k">=</span> <span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">.</span><span class="nc">Encoders</span><span class="o">.</span><span class="n">kryo</span><span class="o">[</span><span class="kt">Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Any</span><span class="o">]]</span>
+<span class="c1">// 기본 타입과 케이스 클래스는 아래와 같이 정의할 수 있습니다:</span>
+<span class="c1">// implicit val stringIntMapEncoder: Encoder[Map[String, Any]] = ExpressionEncoder()</span>
+
+<span class="c1">// row.getValuesMap[T]는 여러 개의 컬럼을 한번에 Map[String, T] 형태로 가져옵니다.</span>
+<span class="n">teenagersDF</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">teenager</span> <span class="k">=&gt;</span> <span class="n">teenager</span><span class="o">.</span><span class="n">getValuesMap</span><span class="o">[</span><span class="kt">Any</span><span class="o">](</span><span class="nc">List</span><span class="o">(</span><span class="s">&quot;name&quot;</span><span class="o">,</span> <span class="s">&quot;age&quot;</span><span class="o">))).</span><span class="n">collect</span><span class="o">()</span>
+<span class="c1">// Array(Map(&quot;name&quot; -&gt; &quot;Justin&quot;, &quot;age&quot; -&gt; 19))</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+
+    <p>스파크 SQL은 Row 객체를 담고 있는 RDD에서 데이터 타입을 추론함으로써 DataFrame으로 변환할 수 있습니다. Row 객체는 키/값 쌍으로 이루어진 kwargs를 Row 클래스로 넘겨받아 생성됩니다. 이 목록에서 키가 테이블 컬럼의 이름이 됩니다. 타입은 전체 데이터셋을 샘플링하여 유추하는데, 이 과정은 JSON 파일에서 수행하는 것과 비슷하게 이루어집니다.</p>
+
+    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">Row</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
+
+<span class="c1"># 텍스트 파일을 불러와 각 라인을 로우(row)로 변환합니다.</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">textFile</span><span class="p">(</span><span class="s2">&quot;examples/src/main/resources/people.txt&quot;</span><span class="p">)</span>
+<span class="n">parts</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+<span class="n">people</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">Row</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">age</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+
+<span class="c1"># 스키마를 추론하고, DataFrame을 테이블로 등록합니다.</span>
+<span class="n">schemaPeople</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">people</span><span class="p">)</span>
+<span class="n">schemaPeople</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;people&quot;</span><span class="p">)</span>
+
+<span class="c1"># 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.</span>
+<span class="n">teenagers</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM people WHERE age &gt;= 13 AND age &lt;= 19&quot;</span><span class="p">)</span>
+
+<span class="c1"># SQL 쿼리의 결과는 DataFrame 객체가 됩니다.</span>
+<span class="c1"># rdd는 :class:`Row`의 :class:`pyspark.RDD` 타입으로 내용을 반환합니다.</span>
+<span class="n">teenNames</span> <span class="o">=</span> <span class="n">teenagers</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="s2">&quot;Name: &quot;</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">teenNames</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<span class="c1"># Name: Justin</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+</div>
+
+<h3 id="프로그램적으로-스키마-명시하기">프로그램적으로 스키마 명시하기</h3>
+
+<div class="codetabs">
+
+<div data-lang="scala">
+
+    <p>케이스 클래스가 미리 정의되지 않았을 때 (예를 들어, 레코드의 구조가 특정 문자열로 인코딩되어 있거나 텍스트 dataset이 사용자에 따라 서로 다르게 파싱되어 각 유저마다 필드값이 다르게 보이는 경우), 프로그램 내에서 세 단계를 거쳐 <code>DataFrame</code>을 생성할 수 있습니다.</p>
+
+    <ol>
+      <li>기존의 RDD에서 <code>RowS</code> 객체의 RDD를 생성합니다;</li>
+      <li>1단계에서 생성한 <code>Row</code>s 객체의 RDD 구조와 일치하는 <code>StructType</code>으로 스키마를 생성합니다.</li>
+      <li><code>SparkSession</code>의 <code>createDataFrame</code> 메소드를 사용하여 <code>RowS</code>객체의 RDD에 이 스키마를 적용합니다.</li>
+    </ol>
+
+    <p>예:</p>
+
+    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.types._</span>
+
+<span class="c1">// RDD를 생성합니다.</span>
+<span class="k">val</span> <span class="n">peopleRDD</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">textFile</span><span class="o">(</span><span class="s">&quot;examples/src/main/resources/people.txt&quot;</span><span class="o">)</span>
+
+<span class="c1">// 스키마는 문자열로 인코딩됩니다.</span>
+<span class="k">val</span> <span class="n">schemaString</span> <span class="k">=</span> <span class="s">&quot;name age&quot;</span>
+
+<span class="c1">// 스키마 문자열을 기반으로 스키마를 생성합니다.</span>
+<span class="k">val</span> <span class="n">fields</span> <span class="k">=</span> <span class="n">schemaString</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot; &quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">fieldName</span> <span class="k">=&gt;</span> <span class="nc">StructField</span><span class="o">(</span><span class="n">fieldName</span><span class="o">,</span> <span class="nc">StringType</span><span class="o">,</span> <span class="n">nullable</span> <span class="k">=</span> <span class="kc">true</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">schema</span> <span class="k">=</span> <span class="nc">StructType</span><span class="o">(</span><span class="n">fields</span><span class="o">)</span>
+
+<span class="c1">// RDD(people)에 들어 있는 레코드를 Row 객체로 변환합니다.</span>
+<span class="k">val</span> <span class="n">rowRDD</span> <span class="k">=</span> <span class="n">peopleRDD</span>
+  <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">split</span><span class="o">(</span><span class="s">&quot;,&quot;</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">attributes</span> <span class="k">=&gt;</span> <span class="nc">Row</span><span class="o">(</span><span class="n">attributes</span><span class="o">(</span><span class="mi">0</span><span class="o">),</span> <span class="n">attributes</span><span class="o">(</span><span class="mi">1</span><span class="o">).</span><span class="n">trim</span><span class="o">))</span>
+
+<span class="c1">// RDD에 스키마를 적용합니다.</span>
+<span class="k">val</span> <span class="n">peopleDF</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="o">(</span><span class="n">rowRDD</span><span class="o">,</span> <span class="n">schema</span><span class="o">)</span>
+
+<span class="c1">// DataFrame을 사용하여 임시 뷰를 생성합니다.</span>
+<span class="n">peopleDF</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="o">(</span><span class="s">&quot;people&quot;</span><span class="o">)</span>
+
+<span class="c1">// 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.</span>
+<span class="k">val</span> <span class="n">results</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT name FROM people&quot;</span><span class="o">)</span>
+
+<span class="c1">// SQL 쿼리의 결과 역시 DataFrame이 되며, 모든 일반적인 RDD 동작을 지원합니다.</span>
+<span class="c1">// 각 컬럼의 로우는 필드의 인덱스 값 또는 이름으로 접근할 수 있습니다.</span>
+<span class="n">results</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">attributes</span> <span class="k">=&gt;</span> <span class="s">&quot;Name: &quot;</span> <span class="o">+</span> <span class="n">attributes</span><span class="o">(</span><span class="mi">0</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +-------------+</span>
+<span class="c1">// |        value|</span>
+<span class="c1">// +-------------+</span>
+<span class="c1">// |Name: Michael|</span>
+<span class="c1">// |   Name: Andy|</span>
+<span class="c1">// | Name: Justin|</span>
+<span class="c1">// +-------------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/SparkSQLExample.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+<div data-lang="python">
+
+    <p>kwargs의 구조를 미리 정의할 수 없을 때 (예를 들어, 레코드의 구조가 특정 문자열로 인코딩되어 있거나 텍스트 Dataset이 사용자에 따라 서로 다르게 파싱되어 각 유저마다 필드값이 다르게 보이는 경우), <code>DataFrame</code>을 프로그램 내에서 세 단계를 거쳐 생성할 수 있습니다.</p>
+
+    <ol>
+      <li>기존의 RDD에서 튜플 또는 리스트로 이루어진 RDD를 생성합니다;</li>
+      <li>1단계에서 생성한 RDD의 튜플 또는 리스트 구조와 일치하는 <code>StructType</code>으로 나타낸 스키마를 생성합니다.</li>
+      <li><code>SparkSession</code>의 <code>createDataFrame</code> 메소드를 사용하여 RDD에 이 스키마를 적용합니다.</li>
+    </ol>
+
+    <p>예:</p>
+
+    <div class="highlight"><pre><span></span><span class="c1"># 데이터 타입을 임포트합니다.</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">sc</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sparkContext</span>
+
+<span class="c1"># 텍스트 파일을 불러와 각 라인을 로우(row)로 변환합니다.</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">textFile</span><span class="p">(</span><span class="s2">&quot;examples/src/main/resources/people.txt&quot;</span><span class="p">)</span>
+<span class="n">parts</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+<span class="c1"># 각 라인을 튜플로 변환합니다.</span>
+<span class="n">people</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+<span class="c1"># 스키마는 문자열로 인코딩됩니다.</span>
+<span class="n">schemaString</span> <span class="o">=</span> <span class="s2">&quot;name age&quot;</span>
+
+<span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">StructField</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">StringType</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">schemaString</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+<span class="c1"># RDD에 스키마를 적용합니다.</span>
+<span class="n">schemaPeople</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">people</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+<span class="c1"># DataFrame을 사용하여 임시 뷰를 생성합니다.</span>
+<span class="n">schemaPeople</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;people&quot;</span><span class="p">)</span>
+
+<span class="c1"># 테이블의 형태로 등록된 Dataframe에서 SQL 문을 실행할 수 있습니다.</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM people&quot;</span><span class="p">)</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +-------+</span>
+<span class="c1"># |   name|</span>
+<span class="c1"># +-------+</span>
+<span class="c1"># |Michael|</span>
+<span class="c1"># |   Andy|</span>
+<span class="c1"># | Justin|</span>
+<span class="c1"># +-------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/python/sql/basic.py"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+
+</div>
+
+<h2 id="집계aggregations">집계(Aggregations)</h2>
+
+<p><a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.functions$">내장 DataFrames 함수</a>는 <code>count()</code>, <code>countDistinct()</code>, <code>avg()</code>, <code>max()</code>, <code>min()</code>와 같은 집계 함수를 제공합니다. 이 함수들은 DataFrame에서 사용할 수 있도록 만들어졌지만, 이들 중 일부는 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.expressions.scalalang.typed$">Scala</a>의 (강한 타입체크를 수행하는) Dataset에서 사용할 수 있는 타입 안전(type-safe) 버전이 있습니다. 또한, 사용자는 내장된 집계 함수 뿐만 아니라 자기만의 집계 함수를 생성할 수도 있습니다.</p>
+
+<h3 id="타입이-없는-사용자-정의-집계-함수">타입이 없는 사용자 정의 집계 함수</h3>
+<p>사용자는 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.expressions.UserDefinedAggregateFunction">UserDefinedAggregateFunction</a> 클래스를 확장하여 타입이 없는 사용자 정의 집계 함수를 구현할 수 있습니다. 예를 들어, 사용자 정의 평균 함수는 아래 예제와 같이 구현할 수 있습니다:</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.</span><span class="o">{</span><span class="nc">Row</span><span class="o">,</span> <span class="nc">SparkSession</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.expressions.MutableAggregationBuffer</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.expressions.UserDefinedAggregateFunction</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.types._</span>
+
+<span class="k">object</span> <span class="nc">MyAverage</span> <span class="k">extends</span> <span class="nc">UserDefinedAggregateFunction</span> <span class="o">{</span>
+  <span class="c1">// 이 집계 함수 입력 인자의 데이터 타입.</span>
+  <span class="k">def</span> <span class="n">inputSchema</span><span class="k">:</span> <span class="kt">StructType</span> <span class="o">=</span> <span class="nc">StructType</span><span class="o">(</span><span class="nc">StructField</span><span class="o">(</span><span class="s">&quot;inputColumn&quot;</span><span class="o">,</span> <span class="nc">LongType</span><span class="o">)</span> <span class="o">::</span> <span class="nc">Nil</span><span class="o">)</span>
+  <span class="c1">// 집계 버퍼 값의 데이터 타입.</span>
+  <span class="k">def</span> <span class="n">bufferSchema</span><span class="k">:</span> <span class="kt">StructType</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="nc">StructType</span><span class="o">(</span><span class="nc">StructField</span><span class="o">(</span><span class="s">&quot;sum&quot;</span><span class="o">,</span> <span class="nc">LongType</span><span class="o">)</span> <span class="o">::</span> <span class="nc">StructField</span><span class="o">(</span><span class="s">&quot;count&quot;</span><span class="o">,</span> <span class="nc">LongType</span><span class="o">)</span> <span class="o">::</span> <span class="nc">Nil</span><span class="o">)</span>
+  <span class="o">}</span>
+  <span class="c1">// 반환 값의 데이터 타입.</span>
+  <span class="k">def</span> <span class="n">dataType</span><span class="k">:</span> <span class="kt">DataType</span> <span class="o">=</span> <span class="nc">DoubleType</span>
+  <span class="c1">// 동일한 입력에 대해 항상 동일한 출력 값을 반환하는지(=결정적 연산(deterministic operation)) 여부.</span>
+  <span class="k">def</span> <span class="n">deterministic</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+  <span class="c1">// Initializes the given aggregation buffer. The buffer itself is a `Row` that in addition to</span>
+  <span class="c1">// standard methods like retrieving a value at an index (e.g., get(), getBoolean()), provides</span>
+  <span class="c1">// the opportunity to update its values. Note that arrays and maps inside the buffer are still</span>
+  <span class="c1">// immutable.</span>
+  <span class="c1">// 주어진 집계 버퍼를 초기화합니다. 버퍼는 `Row` 객체이며 그 자체가 특정 인덱스에 해당하는 값을 반환하거나 값을 바꿀 수 있는 표준 메소드가 됩니다. (예: get(), getBoolean()) 버퍼 내의 배열과 맵은 값을 바꿀 수 없습니다.</span>
+  <span class="k">def</span> <span class="n">initialize</span><span class="o">(</span><span class="n">buffer</span><span class="k">:</span> <span class="kt">MutableAggregationBuffer</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">buffer</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="mi">0L</span>
+    <span class="n">buffer</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">=</span> <span class="mi">0L</span>
+  <span class="o">}</span>
+  <span class="c1">// 새로운 입력 데이터 `input`을 받아 집계 버퍼 `buffer`를 업데이트합니다.</span>
+  <span class="k">def</span> <span class="n">update</span><span class="o">(</span><span class="n">buffer</span><span class="k">:</span> <span class="kt">MutableAggregationBuffer</span><span class="o">,</span> <span class="n">input</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(!</span><span class="n">input</span><span class="o">.</span><span class="n">isNullAt</span><span class="o">(</span><span class="mi">0</span><span class="o">))</span> <span class="o">{</span>
+      <span class="n">buffer</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">+</span> <span class="n">input</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+      <span class="n">buffer</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+  <span class="c1">// 두 집계 버퍼를 병합하고 그 값을 `buffer1`에 저장합니다.</span>
+  <span class="k">def</span> <span class="n">merge</span><span class="o">(</span><span class="n">buffer1</span><span class="k">:</span> <span class="kt">MutableAggregationBuffer</span><span class="o">,</span> <span class="n">buffer2</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">buffer1</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="n">buffer1</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">+</span> <span class="n">buffer2</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+    <span class="n">buffer1</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">=</span> <span class="n">buffer1</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="o">+</span> <span class="n">buffer2</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+  <span class="o">}</span>
+  <span class="c1">// 최종 결과를 계산합니다.</span>
+  <span class="k">def</span> <span class="n">evaluate</span><span class="o">(</span><span class="n">buffer</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">toDouble</span> <span class="o">/</span> <span class="n">buffer</span><span class="o">.</span><span class="n">getLong</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="c1">// 함수를 사용할 수 있도록 등록합니다.</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="o">(</span><span class="s">&quot;myAverage&quot;</span><span class="o">,</span> <span class="nc">MyAverage</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">df</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="o">(</span><span class="s">&quot;examples/src/main/resources/employees.json&quot;</span><span class="o">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="o">(</span><span class="s">&quot;employees&quot;</span><span class="o">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +-------+------+</span>
+<span class="c1">// |   name|salary|</span>
+<span class="c1">// +-------+------+</span>
+<span class="c1">// |Michael|  3000|</span>
+<span class="c1">// |   Andy|  4500|</span>
+<span class="c1">// | Justin|  3500|</span>
+<span class="c1">// |  Berta|  4000|</span>
+<span class="c1">// +-------+------+</span>
+
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">(</span><span class="s">&quot;SELECT myAverage(salary) as average_salary FROM employees&quot;</span><span class="o">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +--------------+</span>
+<span class="c1">// |average_salary|</span>
+<span class="c1">// +--------------+</span>
+<span class="c1">// |        3750.0|</span>
+<span class="c1">// +--------------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/UserDefinedUntypedAggregation.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+<h3 id="타입-안전type-safe-사용자-정의-집계-함수">타입 안전(Type-safe) 사용자 정의 집계 함수</h3>
+
+<p>강한 타입 체크를 사용하는 Dataset에서 사용자 정의 집계 함수는 <a href="https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.expressions.Aggregator">Aggregator</a> 클래스를 이용해야 합니다. 타입 안전 사용자 정의 평균 함수는 아래 예제와 같이 구현합니다:</p>
+
+<div class="codetabs">
+<div data-lang="scala">
+    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.</span><span class="o">{</span><span class="nc">Encoder</span><span class="o">,</span> <span class="nc">Encoders</span><span class="o">,</span> <span class="nc">SparkSession</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.expressions.Aggregator</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Employee</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">salary</span><span class="k">:</span> <span class="kt">Long</span><span class="o">)</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Average</span><span class="o">(</span><span class="k">var</span> <span class="n">sum</span><span class="k">:</span> <span class="kt">Long</span><span class="o">,</span> <span class="k">var</span> <span class="n">count</span><span class="k">:</span> <span class="kt">Long</span><span class="o">)</span>
+
+<span class="k">object</span> <span class="nc">MyAverage</span> <span class="k">extends</span> <span class="nc">Aggregator</span><span class="o">[</span><span class="kt">Employee</span>, <span class="kt">Average</span>, <span class="kt">Double</span><span class="o">]</span> <span class="o">{</span>
+  <span class="c1">// 이 집계 함수의 영값(zero value)입니다. 임의의 b 값에 대해서 b + zero = b를 만족합니다.</span>
+  <span class="k">def</span> <span class="n">zero</span><span class="k">:</span> <span class="kt">Average</span> <span class="o">=</span> <span class="nc">Average</span><span class="o">(</span><span class="mi">0L</span><span class="o">,</span> <span class="mi">0L</span><span class="o">)</span>
+  <span class="c1">// 두 값을 가지고 새로운 값을 생성합니다. 성능을 위해 새로운 객체를 만드는 대신,</span>
+  <span class="c1">// 함수에서 직접 `buffer`를 수정하여 반환할 수도 있습니다.</span>
+  <span class="k">def</span> <span class="n">reduce</span><span class="o">(</span><span class="n">buffer</span><span class="k">:</span> <span class="kt">Average</span><span class="o">,</span> <span class="n">employee</span><span class="k">:</span> <span class="kt">Employee</span><span class="o">)</span><span class="k">:</span> <span class="kt">Average</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">buffer</span><span class="o">.</span><span class="n">sum</span> <span class="o">+=</span> <span class="n">employee</span><span class="o">.</span><span class="n">salary</span>
+    <span class="n">buffer</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">buffer</span>
+  <span class="o">}</span>
+  <span class="c1">// 두 중간값을 병합합니다.</span>
+  <span class="k">def</span> <span class="n">merge</span><span class="o">(</span><span class="n">b1</span><span class="k">:</span> <span class="kt">Average</span><span class="o">,</span> <span class="n">b2</span><span class="k">:</span> <span class="kt">Average</span><span class="o">)</span><span class="k">:</span> <span class="kt">Average</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">b1</span><span class="o">.</span><span class="n">sum</span> <span class="o">+=</span> <span class="n">b2</span><span class="o">.</span><span class="n">sum</span>
+    <span class="n">b1</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="n">b2</span><span class="o">.</span><span class="n">count</span>
+    <span class="n">b1</span>
+  <span class="o">}</span>
+  <span class="c1">// reduce 호출 결과를 최종 리턴값으로 변환합니다.</span>
+  <span class="k">def</span> <span class="n">finish</span><span class="o">(</span><span class="n">reduction</span><span class="k">:</span> <span class="kt">Average</span><span class="o">)</span><span class="k">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="n">reduction</span><span class="o">.</span><span class="n">sum</span><span class="o">.</span><span class="n">toDouble</span> <span class="o">/</span> <span class="n">reduction</span><span class="o">.</span><span class="n">count</span>
+  <span class="c1">// 중간값 타입에 대한 인코더를 명시합니다.</span>
+  <span class="k">def</span> <span class="n">bufferEncoder</span><span class="k">:</span> <span class="kt">Encoder</span><span class="o">[</span><span class="kt">Average</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Encoders</span><span class="o">.</span><span class="n">product</span>
+  <span class="c1">// 최종 출력값 타입에 대한 인코더를 명시합니다.</span>
+  <span class="k">def</span> <span class="n">outputEncoder</span><span class="k">:</span> <span class="kt">Encoder</span><span class="o">[</span><span class="kt">Double</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Encoders</span><span class="o">.</span><span class="n">scalaDouble</span>
+<span class="o">}</span>
+
+<span class="k">val</span> <span class="n">ds</span> <span class="k">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">json</span><span class="o">(</span><span class="s">&quot;examples/src/main/resources/employees.json&quot;</span><span class="o">).</span><span class="n">as</span><span class="o">[</span><span class="kt">Employee</span><span class="o">]</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +-------+------+</span>
+<span class="c1">// |   name|salary|</span>
+<span class="c1">// +-------+------+</span>
+<span class="c1">// |Michael|  3000|</span>
+<span class="c1">// |   Andy|  4500|</span>
+<span class="c1">// | Justin|  3500|</span>
+<span class="c1">// |  Berta|  4000|</span>
+<span class="c1">// +-------+------+</span>
+
+<span class="c1">// 함수를 `TypedColumn`으로 변환하고 이름을 지정합니다.</span>
+<span class="k">val</span> <span class="n">averageSalary</span> <span class="k">=</span> <span class="nc">MyAverage</span><span class="o">.</span><span class="n">toColumn</span><span class="o">.</span><span class="n">name</span><span class="o">(</span><span class="s">&quot;average_salary&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="n">averageSalary</span><span class="o">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">show</span><span class="o">()</span>
+<span class="c1">// +--------------+</span>
+<span class="c1">// |average_salary|</span>
+<span class="c1">// +--------------+</span>
+<span class="c1">// |        3750.0|</span>
+<span class="c1">// +--------------+</span>
+</pre></div>
+    <div><small>스파크 저장소의 "examples/src/main/scala/org/apache/spark/examples/sql/UserDefinedTypedAggregation.scala"에서 전체 예제 코드를 볼 수 있습니다.</small></div>
+  </div>
+</div>
+
+
+                </div>
+            
+             <!-- /container -->
+        </div>
+
+        <script src="js/vendor/jquery-1.12.4.min.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/anchor.min.js"></script>
+        <script src="js/main.js"></script>
+
+        <!-- MathJax Section -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+                TeX: { equationNumbers: { autoNumber: "AMS" } }
+            });
+        </script>
+        <script>
+            // Note that we load MathJax this way to work with local file (file://), HTTP and HTTPS.
+            // We could use "//cdn.mathjax...", but that won't support "file://".
+            (function(d, script) {
+                script = d.createElement('script');
+                script.type = 'text/javascript';
+                script.async = true;
+                script.onload = function(){
+                    MathJax.Hub.Config({
+                        tex2jax: {
+                            inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ],
+                            displayMath: [ ["$$","$$"], ["\\[", "\\]"] ],
+                            processEscapes: true,
+                            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                        }
+                    });
+                };
+                script.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
+                    'cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js' +
+                    '?config=TeX-AMS-MML_HTMLorMML';
+                d.getElementsByTagName('head')[0].appendChild(script);
+            }(document));
+        </script>
+    </body>
+</html>
