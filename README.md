@@ -27,7 +27,7 @@ jekyll에 대해 자세한 내용은 아래 웹사이트를 참고하세요:
 
 ```sh
 cd docs/
-SKIP_API=1 SKIP_SCALADOC=1 jekyll build # 문서 빌드
-SKIP_API=1 SKIP_SCALADOC=1 jekyll serve --watch # localhost:4000에 문서를 띄움
+jekyll build # 문서 빌드
+jekyll serve --watch # localhost:4000에 문서를 띄움
 ```
 
