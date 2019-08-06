@@ -1,36 +1,29 @@
 ---
 layout: global
-displayTitle: Spark Overview
+displayTitle: 개요
 title: Overview
 description: Apache Spark SPARK_VERSION_SHORT documentation homepage
 ---
 
-**Programming Guides:**
+**프로그래밍 가이드:**
 
-* [빠른 시작](quick-start.html): a quick introduction to the Spark API; start here!
-* [RDD Programming Guide](rdd-programming-guide.html): overview of Spark basics - RDDs (core but old API), accumulators, and broadcast variables
-* [스파크 SQL, DataFrame, Dataset 가이드](sql-programming-guide.html): processing structured data with relational queries (newer API than RDDs)
-* [구조화된 스트리밍](structured-streaming-programming-guide.html): processing structured data streams with relation queries (using Datasets and DataFrames, newer API than DStreams)
+* [빠른 시작](quick-start.html): 스파크 API에 대한 초간단 설명입니다. 입문자는 여기부터 읽으세요.
+* [스파크 SQL, DataFrame, Dataset](sql-programming-guide.html): 관계형 쿼리(relational quey)를 사용해서 구조화된 데이터(structured data) 처리하기.
+* [구조적 스트리밍](structured-streaming-programming-guide.html): 관계형 쿼리(relational quey)를 사용해서 구조화된 데이터 스트림(structured data stream) 처리하기.
 
-**API Docs:**
+**API 문서:**
 
-* [Spark Scala API (Scaladoc)](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package)
-* [Spark Java API (Javadoc)](https://spark.apache.org/docs/latest/api/java/index.html)
-* [Spark Python API (Sphinx)](https://spark.apache.org/docs/latest/api/python/index.html)
-* [Spark R API (Roxygen2)](https://spark.apache.org/docs/latest/api/R/index.html)
-* [Spark SQL, Built-in Functions (MkDocs)](https://spark.apache.org/docs/latest/api/sql/index.html)
+* [Scala API 문서 (Scaladoc)](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.package)
+* [Java API 문서 (Javadoc)](https://spark.apache.org/docs/latest/api/java/index.html)
+* [Python API 문서 (Sphinx)](https://spark.apache.org/docs/latest/api/python/index.html)
+* [R API 문서 (Roxygen2)](https://spark.apache.org/docs/latest/api/R/index.html)
+* [스파크 SQL 함수 문서 (MkDocs)](https://spark.apache.org/docs/latest/api/sql/index.html)
 
-**External Resources:**
+**기타 자료:**
 
-* [Spark Homepage](https://spark.apache.org)
-* [Spark Community](https://spark.apache.org/community.html) resources, including local meetups
-* [StackOverflow tag `apache-spark`](http://stackoverflow.com/questions/tagged/apache-spark)
-* [Mailing Lists](https://spark.apache.org/mailing-lists.html): ask questions about Spark here
-* [AMP Camps](http://ampcamp.berkeley.edu/): a series of training camps at UC Berkeley that featured talks and
-  exercises about Spark, Spark Streaming, Mesos, and more. [Videos](http://ampcamp.berkeley.edu/6/),
-  [slides](http://ampcamp.berkeley.edu/6/) and [exercises](http://ampcamp.berkeley.edu/6/exercises/) are
-  available online for free.
-* [Code Examples](https://spark.apache.org/examples.html): more are also available in the `examples` subfolder of Spark ([Scala]({{site.SPARK_GITHUB_URL}}/tree/master/examples/src/main/scala/org/apache/spark/examples),
+* [스파크 공식 웹사이트 (영어)](https://spark.apache.org)
+* [예제 코드 (영어)](https://spark.apache.org/examples.html): 스파크 프로젝트의 `examples` 디렉토리에서 더 많은 예제를 볼 수 있습니다. ([Scala]({{site.SPARK_GITHUB_URL}}/tree/master/examples/src/main/scala/org/apache/spark/examples),
  [Java]({{site.SPARK_GITHUB_URL}}/tree/master/examples/src/main/java/org/apache/spark/examples),
  [Python]({{site.SPARK_GITHUB_URL}}/tree/master/examples/src/main/python),
  [R]({{site.SPARK_GITHUB_URL}}/tree/master/examples/src/main/r))
+* [한국 스파크 사용자 모임 (Facebook)](https://www.facebook.com/groups/sparkkoreauser/)

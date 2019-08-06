@@ -1,7 +1,7 @@
 ---
 layout: global
-displayTitle: Structured Streaming Programming Guide
-title: Structured Streaming Programming Guide
+displayTitle: 구조적 스트리밍
+title: 구조적 스트리밍
 ---
 
 * This will become a table of contents (this text will be scraped).
@@ -1057,7 +1057,6 @@ streamingDf \
       <td style="vertical-align: middle;">
         Update와 Complete 모드는 아직 지원하지 않습니다. 지원되는 조인 종류에 대한 자세한 내용은 <a href="structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries">조인 연산 섹션의 지원 여부 표</a>를 참조하세요.
       </td>
-    </tr>
   </tr>
   <tr>
     <td colspan="2" style="vertical-align: middle;">기타 쿼리</td>

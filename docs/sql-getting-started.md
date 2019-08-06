@@ -48,7 +48,7 @@ displayTitle: 시작하기
 </div>
 
 
-## 타입이 없는 Dataset 동작 (또는 DataFrame 동작)
+## 타입이 없는 Dataset 동작 (DataFrame 동작)
 
 DataFrame을 사용하면 [Scala](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset), [Java](https://spark.apache.org/docs/latest/api/java/index.html?org/apache/spark/sql/Dataset.html), [Python](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame), [R](https://spark.apache.org/docs/latest/api/R/SparkDataFrame.html)에서 각 언어 특성에 맞게 데이터를 조작할 수 있습니다
 

@@ -13,10 +13,9 @@ description: Quick start tutorial for Spark SPARK_VERSION_SHORT
 
 스파크 2.0 이전까지는 RDD(Resilient Distributed Dataset)가 주 프로그래밍 인터페이스로 사용되었습니다. 스파크 2.0 이후부터 주 프로그래밍 인터페이스가 RDD에서 Dataset으로 교체되었는데, 이 Dataset은 RDD와 비슷하지만 강한 타입체크(strongly-typed)를 지원하고 훨씬 최적화되어 있습니다. RDD 인터페이스는 여전히 사용 가능하며 [RDD 프로그래밍 가이드(영문)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)에서 자세한 내용을 확인하실 수 있습니다. 하지만 여기에서는 RDD보다 훨씬 좋은 성능을 보여주는 Dataset을 사용할 것을 강력히 권장합니다. [SQL 프로그래밍 가이드](sql-programming-guide.html)에서 Dataset에 대한 자세한 정보를 얻을 수 있습니다.
 
-# Security
+# 보안
 
-Security in Spark is OFF by default. This could mean you are vulnerable to attack by default.
-Please see [Spark Security](security.html) before running Spark.
+스파크의 보안 기능은 기본적으로 꺼져 있습니다. 즉, 외부 침입에 취약할 수밖에 없다는 얘기죠. 테스트 삼아 로컬에서 돌려 보는 것은 상관이 없습니다만, 실제 운영 환경에 설정하시기 전에는 반드시 [스파크 보안](security.html) 문서를 확인하세요.
 
 # 스파크 셸(Shell)을 이용한 대화형 분석
 
@@ -208,7 +207,7 @@ res9: Long = 15
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 
-먼저 `SimpleApp.scala`라는 이름의 매우 간단한 Scala 스파크 애플리케이션을 만들어 보겠습니다.
+예제로 `SimpleApp.scala`라는 이름의 매우 간단한 Scala 스파크 애플리케이션을 만들어 보겠습니다.
 
 {% highlight scala %}
 /* SimpleApp.scala */

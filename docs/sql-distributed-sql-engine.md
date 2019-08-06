@@ -62,7 +62,7 @@ beeline을 사용해 http 모드에서의 JDBC/ODBC 서버 연결을 테스트�
     beeline> !connect jdbc:hive2://<host>:<port>/<database>?hive.server2.transport.mode=http;hive.server2.thrift.http.path=<http_endpoint>
 
 
-## 스파크 SQL CLI 실행
+## 스파크 SQL CLI 실행하기
 
 스파크 SQL CLI은 로컬 모드에서 Hive metastore 서비스를 실행하고 커맨드 라인에서 쿼리 입력을 실행하는 편리한 도구입니다. 스파크 SQL CLI는 Thrift JDBC 서버와 통신할 수 없습니다.
 

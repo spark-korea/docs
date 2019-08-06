@@ -7,7 +7,7 @@ displayTitle: 아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가�
 * Table of contents
 {:toc}
 
-## 스파크의 아파치 애로우
+## 스파크에서의 아파치 애로우
 
 아파치 애로우는 인메모리(In-Memory) 컬럼기반 데이터 포맷으로 스파크에서 JVM과 Python 프로세스 간에 데이터를 효율적으로 전송하기 위해 사용됩니다. 현재 Pandas/NumPy 데이터로 작업하는 Python 사용자에게 가장 유용할 것입니다. 바로 사용할 수는 없으며 장점을 최대한 살리고 호환성을 높이기 위해서 설정이나 코드를 조금 수정해야 할 수 있습니다. 이 가이드는 스파크에서 애로우를 사용하는 방법에 대해 상위레벨에서 설명하고, 애로우를 사용할 수 있는 데이터로 작업할 때의 차이를 강조하여 알려줍니다.
 
@@ -15,7 +15,7 @@ displayTitle: 아파치 애로우(Arrow)와 Pandas를 위한 PySpark 사용 가�
 
 pip을 사용하여 PySpark를 설치한다면 `pip install pyspark[sql]` 명령을 사용하여 PyArrow를 SQL 모듈의 추가 의존성으로 가져올 수 있습니다. 그렇지 않다면 모든 클러스터 노드에서 PyArrow가 설치되어 있고 사용 가능한지 확인해야 합니다. 현재 지원되는 버전은 0.8.0입니다. pip 또는 conda-forge 채널의 conda를 사용하여 설치할 수 있습니다. 자세한 내용은 PyArrow [설치](https://arrow.apache.org/docs/python/install.html)를 참조하세요.
 
-## Pandas와의 변환 활성화
+## Pandas와의 변환 활성화하기
 
 애로우는 `toPandas()`호출을 사용하여 스파크 DataFrame을 Pandas DataFrame으로 변환할 때와 `createDataFrame(pandas_df)`로 Pandas DataFrame에서 Spark DataFrame을 생성할 때 최적화를 위해 사용할 수 있습니다. 이러한 호출을 실행할 때 Arrow를 사용하려면 먼저 스파크 설정 'spark.sql.execution.arrow.enabled'를 'true'로 설정해야 합니다. 기본 설정은 사용하지 않음으로 되어 있습니다.
 
@@ -68,7 +68,7 @@ Scalar Pandas UDF는 scalar 연산을 벡터화하는 데 사용됩니다. `sele
 </div>
 </div>
 
-자세한 사용법은 <code>[pyspark.sql.functions.pandas_udf](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.functions.pandas_udf)</code> 와 <code>[pyspark.sql.GroupedData.apply](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.GroupedData.apply)</code>를 참조하세요.
+자세한 사용법은 [<code>pyspark.sql.functions.pandas_udf</code>](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.functions.pandas_udf)와 [<code>pyspark.sql.GroupedData.apply</code>](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.GroupedData.apply)를 참조하세요.
 
 
 ### 그룹별 집계 (Aggregate)

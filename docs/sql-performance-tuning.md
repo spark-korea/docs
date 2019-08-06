@@ -67,7 +67,7 @@ displayTitle: 성능 튜닝
     <td><code>spark.sql.autoBroadcastJoinThreshold</code></td>
     <td>10485760 (10 MB)</td>
     <td>
-      조인을 수행 시, 모든 작업 노드에 브로드캐스트될 테이블의  최대 바이트 사이즈를 설정합니다. 이 값을 -1로 설정하면 브로드캐스팅이 비활성화 됩니다. 현재, 통계는 명령어 <code>ANALYZE TABLE <tableName> COMPUTE STATISTICS noscan </code>가 적용된 Hive 메타스토어 테이블에서만 지원됩니다.
+      조인을 수행 시, 모든 작업 노드에 브로드캐스트될 테이블의 최대 바이트 사이즈를 설정합니다. 이 값을 -1로 설정하면 브로드캐스팅이 비활성화 됩니다. 현재, 통계는 명령어 <code>ANALYZE TABLE &lt;tableName&gt; COMPUTE STATISTICS noscan </code>가 적용된 Hive 메타스토어 테이블에서만 지원됩니다.
     </td>
   </tr>
   <tr>
