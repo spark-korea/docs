@@ -2,6 +2,7 @@
 layout: global
 title: Decision trees
 displayTitle: Decision trees
+해당 페이지에서는 MLlib의 결정트리 알고리즘에 대해 설명합니다.
 license: |
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
