@@ -14,7 +14,7 @@ $\lambda$ (default to $1.0$) 를 설정해서 사용합니다. 문서 분류를 
 <div class="codetabs">
 <div data-lang="scala" markdown="1">
 
-[NaiveBayes](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/classification/NaiveBayes$.html)](api/scala/org/apache/spark/mllib/classification/NaiveBayes$.html) 는 multinomial naive Bayes를 구현합니다. 이것은 
+[NaiveBayes](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/classification/NaiveBayes$.html)(api/scala/org/apache/spark/mllib/classification/NaiveBayes$.html) 는 multinomial naive Bayes를 구현합니다. 이것은 
 [[LabeledPoint](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/regression/LabeledPoint.html)](api/scala/org/apache/spark/mllib/regression/LabeledPoint.html) 의 RDD와 선택적 평활 매개변수 `lambda`를 입력으로 사용하고, 선택적 모델 유형 매개변수 (기본값 "다항식")를 사용하며, 평가 및 예측에 사용할 수 있는 [NaiveBayesModel](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/classification/NaiveBayesModel.html)을 출력합니다.
 
 API에 대한 자세한 내용은 [`NaiveBayes`  Scala 문서](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/classification/NaiveBayes$.html) 와 [`NaiveBayesModel`  Scala 문서](https://github.com/apache/spark/blob/master/docs/api/scala/org/apache/spark/mllib/classification/NaiveBayesModel.html)를 참조하세요.
