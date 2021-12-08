@@ -2,7 +2,7 @@
 |--|--|--|
 | global | Basic Statistics |Basic Statistics
 
-해당 페이지에서는 MLlib의 Statistics에 대해 설명합니다. 
+해당 페이지에서는 ML의 Statistics에 대해 설명합니다. 
 
 ## 상관관계
 
